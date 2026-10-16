@@ -7,6 +7,15 @@
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
+        <!-- PWA Configuration -->
+        <link rel="manifest" href="/manifest.webmanifest">
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+        <meta name="theme-color" content="#ff5e36">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="apple-mobile-web-app-title" content="LecturePortal">
+        <link rel="apple-touch-icon" href="/icons/icon-192.svg">
+
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

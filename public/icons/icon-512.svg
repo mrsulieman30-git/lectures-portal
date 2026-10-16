@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="coralGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff7a54" />
+      <stop offset="50%" stop-color="#ff5e36" />
+      <stop offset="100%" stop-color="#e04822" />
+    </linearGradient>
+    <linearGradient id="sheen" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+  <!-- Rounded Base Plate -->
+  <rect width="512" height="512" rx="128" fill="url(#coralGrad)" />
+  <rect width="512" height="256" rx="128" fill="url(#sheen)" />
+  
+  <!-- Folder Kanban Icon in Center -->
+  <g transform="translate(106, 126)">
+    <!-- Back Tab -->
+    <path d="M0 40C0 17.9 17.9 0 40 0H120C132 0 143.5 5.4 151.2 14.6L176 44H260C282.1 44 300 61.9 300 84V220C300 242.1 282.1 260 260 260H40C17.9 260 0 242.1 0 220V40Z" fill="white" opacity="0.95" />
+    
+    <!-- Kanban Columns / Inner Detail -->
+    <rect x="40" y="88" width="56" height="130" rx="12" fill="#ff5e36" opacity="0.9" />
+    <rect x="122" y="88" width="56" height="90" rx="12" fill="#ff5e36" opacity="0.8" />
+    <rect x="204" y="88" width="56" height="110" rx="12" fill="#ff5e36" opacity="0.8" />
+  </g>
+</svg>
