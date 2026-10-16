@@ -442,6 +442,25 @@ export default function AuthenticatedLayout({ header, children }) {
             <main className="flex-1">
                 {children}
             </main>
+
+            {/* Dashboard Footer */}
+            <footer className="border-t border-slate-200/80 dark:border-white/10 bg-white/70 dark:bg-slate-950/70 backdrop-blur-md py-5 text-xs text-slate-500 dark:text-slate-400 mt-auto">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+                    <p>
+                        &copy; {new Date().getFullYear()} <strong className="text-slate-800 dark:text-slate-200">Mohammad Sulieman</strong>. All rights reserved.
+                    </p>
+                    <div>
+                        <a 
+                            href="https://medblog.seeha.tech" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="font-bold text-rose-600 dark:text-rose-400 hover:underline"
+                        >
+                            Dr. Mohammad Sulieman CV &amp; Medical Blog
+                        </a>
+                    </div>
+                </div>
+            </footer>
         </div>
     );
 }

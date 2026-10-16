@@ -56,7 +56,9 @@
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="Dr. Sulieman Portal">
-        <link rel="apple-touch-icon" href="/icons/icon-192.svg">
+        <link rel="apple-touch-icon" href="/icons/icon-192.png">
+        <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192.png">
+        <link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512.png">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">

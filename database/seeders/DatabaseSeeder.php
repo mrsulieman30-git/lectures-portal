@@ -21,245 +21,293 @@ use Illuminate\Support\Facades\Hash;
 class DatabaseSeeder extends Seeder
 {
     /**
-     * Seed the application's database with comprehensive test data.
+     * Seed the application's database with Dr. Mohammad Sulieman's
+     * official Medical Laboratory Sciences universities, semesters, and subjects.
      */
     public function run(): void
     {
-        // ─── 1. Admin & Lecturer Accounts ─────────────────────────
+        // ─── 1. Doctor / Admin Account ─────────────────────────────
         $admin = User::firstOrCreate(
             ['email' => 'admin@portal.com'],
             [
-                'name' => 'Professor Admin',
+                'name' => 'Dr. Mohammad Sulieman',
                 'password' => Hash::make('password'),
                 'role' => 'admin',
                 'status' => 'approved',
-                'bio' => 'Senior Lecturer & Department Chair across partner universities.',
-                'phone' => '+1 (555) 019-2834',
-                'registration_ip_address' => '127.0.0.1',
-                'email_verified_at' => now(),
-            ]
-        );
-
-        $lecturer = User::firstOrCreate(
-            ['email' => 'instructor@portal.com'],
-            [
-                'name' => 'Dr. Marcus Vance',
-                'password' => Hash::make('password'),
-                'role' => 'admin',
-                'status' => 'approved',
-                'bio' => 'Associate Professor of Computer Systems & Cloud Architectures.',
-                'phone' => '+1 (555) 441-9021',
+                'gender' => 'male',
+                'bio' => 'Doctor & Senior Lecturer of Medical Laboratory Sciences & Hematology across Red Sea University, CITYCOT University, and University of Bosaso.',
+                'phone' => '+252 90 0000000',
                 'registration_ip_address' => '127.0.0.1',
                 'email_verified_at' => now(),
             ]
         );
 
         // ─── 2. Universities ──────────────────────────────────────
-        $utas = University::firstOrCreate(
-            ['slug' => 'utas'],
+        // 1) Red Sea University
+        $rsu = University::firstOrCreate(
+            ['slug' => 'rsu'],
             [
-                'name' => 'University of Technology & Applied Sciences',
-                'description' => 'A premier technological research institution specializing in Computer Science, Systems Engineering, and Distributed Cloud Computing.',
-                'website' => 'https://utas.edu',
-                'contact_email' => 'cs-department@utas.edu',
-                'phone' => '+1 (555) 345-6789',
-                'address' => '450 Innovation Parkway, Tech District',
+                'name' => 'Red Sea University',
+                'description' => 'Faculty of Medical Laboratory Sciences & Clinical Medicine. Red Sea State, Sudan.',
+                'website' => 'https://rsu.edu.sd',
+                'contact_email' => 'medlab@rsu.edu.sd',
+                'phone' => '+249 311 822 555',
+                'address' => 'Faculty of Medical Laboratory Sciences, Port Sudan',
                 'is_active' => true,
             ]
         );
 
-        $mgu = University::firstOrCreate(
-            ['slug' => 'mgu'],
+        // 2) CITYCOT University
+        $citycot = University::firstOrCreate(
+            ['slug' => 'citycot'],
             [
-                'name' => 'Metropolitan Global University',
-                'description' => 'Renowned institution fostering modern software engineering, artificial intelligence, and multidisciplinary academic research.',
-                'website' => 'https://mgu.edu',
-                'contact_email' => 'engineering@mgu.edu',
-                'phone' => '+1 (555) 890-1234',
-                'address' => '1200 University Avenue, Metro City',
+                'name' => 'CITYCOT University',
+                'description' => 'College of Health Sciences & Medical Laboratory Technology.',
+                'website' => 'https://citycot.edu.so',
+                'contact_email' => 'health@citycot.edu.so',
+                'phone' => '+252 90 779 1234',
+                'address' => 'Campus of Health Sciences, Bosaso',
                 'is_active' => true,
             ]
         );
 
-        $iac = University::firstOrCreate(
-            ['slug' => 'iac'],
+        // 3) University of Bosaso
+        $uob = University::firstOrCreate(
+            ['slug' => 'uob'],
             [
-                'name' => 'International Academic College',
-                'description' => 'Focused on applied computational sciences, machine learning labs, and industry-partnered technical programs.',
-                'website' => 'https://iac.edu',
-                'contact_email' => 'academic-affairs@iac.edu',
-                'phone' => '+1 (555) 678-9012',
-                'address' => '88 College Blvd, Academic Heights',
+                'name' => 'University of Bosaso',
+                'description' => 'Faculty of Health Sciences & Medical Laboratory Sciences.',
+                'website' => 'https://uob.edu.so',
+                'contact_email' => 'medlab@uob.edu.so',
+                'phone' => '+252 90 779 5678',
+                'address' => 'Main Campus, Bosaso, Puntland',
                 'is_active' => true,
             ]
         );
 
-        // ─── 3. Semesters ──────────────────────────────────────────
-        $utasFall = Semester::firstOrCreate(
-            ['university_id' => $utas->id, 'name' => 'Fall 2026'],
+        // ─── 3. Semesters & Subjects ──────────────────────────────
+
+        // ── A) Red Sea University: Semester 7 ──
+        $rsuSem7 = Semester::firstOrCreate(
+            ['university_id' => $rsu->id, 'name' => 'Semester 7'],
             [
-                'start_date' => now()->subMonths(2)->format('Y-m-d'),
-                'end_date' => now()->addMonths(2)->format('Y-m-d'),
+                'start_date' => now()->subMonths(1)->format('Y-m-d'),
+                'end_date' => now()->addMonths(4)->format('Y-m-d'),
                 'is_active' => true,
-                'sort_order' => 1,
+                'sort_order' => 7,
             ]
         );
 
-        $utasSpring = Semester::firstOrCreate(
-            ['university_id' => $utas->id, 'name' => 'Spring 2027'],
+        // RSU Subject: Blood Banking and Immunohematology
+        $rsuBloodBanking = Subject::firstOrCreate(
+            ['code' => 'MLS-411', 'university_id' => $rsu->id],
             [
-                'start_date' => now()->addMonths(3)->format('Y-m-d'),
-                'end_date' => now()->addMonths(7)->format('Y-m-d'),
-                'is_active' => false,
-                'sort_order' => 2,
-            ]
-        );
-
-        $mguFall = Semester::firstOrCreate(
-            ['university_id' => $mgu->id, 'name' => 'Fall 2026'],
-            [
-                'start_date' => now()->subMonths(2)->format('Y-m-d'),
-                'end_date' => now()->addMonths(2)->format('Y-m-d'),
+                'title' => 'Blood Banking and Immunohematology',
+                'description' => 'Comprehensive study of blood group antigens/antibodies, donor screening, ABO/Rh typing, compatibility testing, blood component preparation, hemolytic disease of the fetus and newborn (HDFN), and transfusion reactions.',
+                'guidelines' => "### Clinical Laboratory Guidelines\n1. Attendance in all hospital blood bank practical sessions is compulsory.\n2. Protective laboratory coat and personal protective equipment (PPE) are strictly required at all times.\n3. Case studies and blood grouping verification reports must be submitted on time.",
+                'semester_id' => $rsuSem7->id,
+                'color' => '#E11D48', // Crimson Rose
                 'is_active' => true,
-                'sort_order' => 1,
             ]
         );
 
-        $iacFall = Semester::firstOrCreate(
-            ['university_id' => $iac->id, 'name' => 'Fall 2026'],
+        // ── B) CITYCOT University: Semester 5 & Semester 7 ──
+        $citycotSem5 = Semester::firstOrCreate(
+            ['university_id' => $citycot->id, 'name' => 'Semester 5'],
             [
-                'start_date' => now()->subMonths(2)->format('Y-m-d'),
-                'end_date' => now()->addMonths(2)->format('Y-m-d'),
+                'start_date' => now()->subMonths(1)->format('Y-m-d'),
+                'end_date' => now()->addMonths(4)->format('Y-m-d'),
                 'is_active' => true,
-                'sort_order' => 1,
+                'sort_order' => 5,
             ]
         );
 
-        // ─── 4. Subjects ───────────────────────────────────────────
-        $osSubject = Subject::firstOrCreate(
-            ['code' => 'CS401', 'university_id' => $utas->id],
+        // CITYCOT Sem 5 - Subject 1: Blood Banking & Immunohematology
+        $citycotBloodBanking = Subject::firstOrCreate(
+            ['code' => 'BBI-301', 'university_id' => $citycot->id],
             [
-                'title' => 'Advanced Operating Systems & Kernel Architecture',
-                'description' => 'In-depth study of multi-core scheduling, virtual memory paging, distributed file systems, concurrency primitives, and Linux kernel internals.',
-                'guidelines' => "### Course Policies\n1. Attendance in weekly lab sessions is mandatory.\n2. All assignments must be submitted via the portal before 23:59 on the due date.\n3. Plagiarism is strictly prohibited and results in immediate disqualification.",
-                'semester_id' => $utasFall->id,
+                'title' => 'Blood Banking & Immunohematology',
+                'description' => 'Serological techniques in blood banking, Coombs testing (Direct and Indirect Antiglobulin tests), donor phlebotomy procedures, antibody identification, and safe blood transfusion protocols.',
+                'guidelines' => "### Course Policies\n- All students must demonstrate hands-on proficiency in crossmatching.\n- Lab manuals and serological logs are evaluated weekly.",
+                'semester_id' => $citycotSem5->id,
+                'color' => '#DC2626', // Red
+                'is_active' => true,
+            ]
+        );
+
+        // CITYCOT Sem 5 - Subject 2: Bacteriology III
+        $citycotBacteriology = Subject::firstOrCreate(
+            ['code' => 'BAC-302', 'university_id' => $citycot->id],
+            [
+                'title' => 'Bacteriology III',
+                'description' => 'Advanced diagnostic bacteriology: identification of fastidious Gram-negative bacilli, anaerobic pathogens, Mycobacterium tuberculosis staining and culture, and antimicrobial susceptibility testing (AST / Kirby-Bauer & MIC).',
+                'guidelines' => "### Biosafety Notice\nLevel 2 biosafety practices must be strictly upheld. Always work under the biosafety cabinet when handling infectious sputum samples.",
+                'semester_id' => $citycotSem5->id,
+                'color' => '#0D9488', // Medical Teal
+                'is_active' => true,
+            ]
+        );
+
+        $citycotSem7 = Semester::firstOrCreate(
+            ['university_id' => $citycot->id, 'name' => 'Semester 7'],
+            [
+                'start_date' => now()->subMonths(1)->format('Y-m-d'),
+                'end_date' => now()->addMonths(4)->format('Y-m-d'),
+                'is_active' => true,
+                'sort_order' => 7,
+            ]
+        );
+
+        // CITYCOT Sem 7 - Subject 1: Laboratory Management & Quality assurance
+        $citycotLabManagement = Subject::firstOrCreate(
+            ['code' => 'LMQ-401', 'university_id' => $citycot->id],
+            [
+                'title' => 'Laboratory Management & Quality assurance',
+                'description' => 'Total quality management in medical laboratories: ISO 15189 accreditation, pre-analytical, analytical, and post-analytical error prevention, Westgard multirules, Levey-Jennings charts, biosafety protocols, and reagent inventory control.',
+                'guidelines' => "### Management Deliverables\nTeams will design a clinical laboratory standard operating procedure (SOP) manual and quality control plan.",
+                'semester_id' => $citycotSem7->id,
                 'color' => '#4F46E5', // Indigo
                 'is_active' => true,
             ]
         );
 
-        $cloudSubject = Subject::firstOrCreate(
-            ['code' => 'CS412', 'university_id' => $utas->id],
+        // CITYCOT Sem 7 - Subject 2: Hematology II
+        $citycotHematology2 = Subject::firstOrCreate(
+            ['code' => 'HEM-402', 'university_id' => $citycot->id],
             [
-                'title' => 'Cloud Infrastructure & Distributed Systems',
-                'description' => 'Architecting resilient cloud native applications, microservices orchestration, consensus algorithms (Raft, Paxos), and infrastructure as code.',
-                'guidelines' => "### Lab Guidelines\n- AWS / Docker lab accounts are provisioned in Week 2.\n- Submit all architectural diagrams in PDF format.",
-                'semester_id' => $utasFall->id,
-                'color' => '#06B6D4', // Cyan
+                'title' => 'Hematology II',
+                'description' => 'Pathology of white blood cells and hemostasis: Acute and chronic leukemias (AML, ALL, CML, CLL), myelodysplastic syndromes, coagulation cascade disorders, hemophilia, thrombocytopenia, and bone marrow aspirate interpretation.',
+                'guidelines' => "### Slide Microscopy Requirement\nDiagnostic blood film morphology exams take place every fortnight in the hematology lab.",
+                'semester_id' => $citycotSem7->id,
+                'color' => '#9333EA', // Purple
                 'is_active' => true,
             ]
         );
 
-        $seSubject = Subject::firstOrCreate(
-            ['code' => 'SE201', 'university_id' => $mgu->id],
+        // ── C) University of Bosaso: Semester 5 & Semester 3 ──
+        $uobSem5 = Semester::firstOrCreate(
+            ['university_id' => $uob->id, 'name' => 'Semester 5'],
             [
-                'title' => 'Software Engineering & Agile Architectures',
-                'description' => 'Modern software engineering principles: Domain-Driven Design, Test-Driven Development, CI/CD pipelines, and Scrum/Kanban frameworks.',
-                'guidelines' => "### Team Project Requirements\nTeams of 4 students will build and deploy a production-grade fullstack application.",
-                'semester_id' => $mguFall->id,
-                'color' => '#8B5CF6', // Purple
+                'start_date' => now()->subMonths(1)->format('Y-m-d'),
+                'end_date' => now()->addMonths(4)->format('Y-m-d'),
+                'is_active' => true,
+                'sort_order' => 5,
+            ]
+        );
+
+        // UOB Sem 5 - Subject 1: Advanced RBCs Disorders
+        $uobRbcDisorders = Subject::firstOrCreate(
+            ['code' => 'RBC-305', 'university_id' => $uob->id],
+            [
+                'title' => 'Advanced RBCs Disorders',
+                'description' => 'Pathophysiology and laboratory investigation of red blood cell pathologies: Hemoglobinopathies (Sickle Cell Anemia, Thalassemia syndromes), autoimmune hemolytic anemia, G6PD deficiency, hereditary spherocytosis, and bone marrow aplasia.',
+                'guidelines' => "### Clinical Correlation\nStudents will analyze hemoglobin electrophoresis patterns and blood smear indices for clinical cases.",
+                'semester_id' => $uobSem5->id,
+                'color' => '#EA580C', // Amber Orange
                 'is_active' => true,
             ]
         );
 
-        $aiSubject = Subject::firstOrCreate(
-            ['code' => 'AI301', 'university_id' => $iac->id],
+        $uobSem3 = Semester::firstOrCreate(
+            ['university_id' => $uob->id, 'name' => 'Semester 3'],
             [
-                'title' => 'Applied Machine Learning & Neural Networks',
-                'description' => 'Supervised and unsupervised learning algorithms, backpropagation, deep convolutional networks, and transformer attention mechanisms.',
-                'guidelines' => "### Computational Resources\nGPU lab clusters are available 24/7 via SSH keys distributed in lecture 1.",
-                'semester_id' => $iacFall->id,
-                'color' => '#EC4899', // Pink
+                'start_date' => now()->subMonths(1)->format('Y-m-d'),
+                'end_date' => now()->addMonths(4)->format('Y-m-d'),
+                'is_active' => true,
+                'sort_order' => 3,
+            ]
+        );
+
+        // UOB Sem 3 - Subject 1: Histopathology I
+        $uobHistopathology = Subject::firstOrCreate(
+            ['code' => 'HIS-201', 'university_id' => $uob->id],
+            [
+                'title' => 'Histopathology I',
+                'description' => 'Histological laboratory techniques: surgical specimen grossing, tissue fixation principles (formalin chemistry), dehydration, clearing, paraffin embedding, microtomy ribbon sectioning, and routine Hematoxylin & Eosin (H&E) staining.',
+                'guidelines' => "### Lab Safety\nFormalin and xylene must be handled strictly inside chemical fume hoods with nitrile gloves.",
+                'semester_id' => $uobSem3->id,
+                'color' => '#DB2777', // Rose Pink
                 'is_active' => true,
             ]
         );
 
-        // ─── 5. Students ───────────────────────────────────────────
+        // ─── 4. Sample Medical Lab Students ────────────────────────
         $studentsData = [
             [
-                'name' => 'Alexander Hayes',
-                'email' => 'alex.hayes@utas.edu',
-                'university_id' => $utas->id,
-                'student_id_no' => 'UTAS-2024-8841',
-                'semester' => 'Fall 2026',
+                'name' => 'Ahmed Hassan Duale',
+                'email' => 'ahmed.duale@rsu.edu.sd',
+                'university_id' => $rsu->id,
+                'student_id_no' => 'RSU-2024-8841',
+                'semester' => 'Semester 7',
                 'year' => 'Year 4',
+                'gender' => 'male',
                 'status' => 'approved',
                 'ip' => '192.168.1.101',
+                'subject_id' => $rsuBloodBanking->id,
             ],
             [
-                'name' => 'Sophia Martinez',
-                'email' => 'sophia.m@utas.edu',
-                'university_id' => $utas->id,
-                'student_id_no' => 'UTAS-2024-8892',
-                'semester' => 'Fall 2026',
-                'year' => 'Year 4',
-                'status' => 'approved',
-                'ip' => '192.168.1.102',
-            ],
-            [
-                'name' => 'Liam Chen',
-                'email' => 'liam.chen@mgu.edu',
-                'university_id' => $mgu->id,
-                'student_id_no' => 'MGU-2025-1044',
-                'semester' => 'Fall 2026',
+                'name' => 'Fatima Mohamed Ali',
+                'email' => 'fatima.ali@citycot.edu.so',
+                'university_id' => $citycot->id,
+                'student_id_no' => 'CCU-2025-1044',
+                'semester' => 'Semester 5',
                 'year' => 'Year 3',
+                'gender' => 'female',
                 'status' => 'approved',
                 'ip' => '10.0.0.45',
+                'subject_id' => $citycotBloodBanking->id,
             ],
             [
-                'name' => 'Emma Watson',
-                'email' => 'emma.w@iac.edu',
-                'university_id' => $iac->id,
-                'student_id_no' => 'IAC-2025-3310',
-                'semester' => 'Fall 2026',
-                'year' => 'Year 3',
+                'name' => 'Hodan Abdirahman Shire',
+                'email' => 'hodan.shire@citycot.edu.so',
+                'university_id' => $citycot->id,
+                'student_id_no' => 'CCU-2024-3310',
+                'semester' => 'Semester 7',
+                'year' => 'Year 4',
+                'gender' => 'female',
                 'status' => 'approved',
                 'ip' => '172.16.0.12',
+                'subject_id' => $citycotHematology2->id,
             ],
-            // Pending students (to test Admin approval workflow!)
             [
-                'name' => 'Lucas Vance',
-                'email' => 'lucas.v@utas.edu',
-                'university_id' => $utas->id,
-                'student_id_no' => 'UTAS-2026-9912',
-                'semester' => 'Fall 2026',
+                'name' => 'Khadija Omar Barre',
+                'email' => 'khadija.omar@uob.edu.so',
+                'university_id' => $uob->id,
+                'student_id_no' => 'UOB-2025-4402',
+                'semester' => 'Semester 5',
+                'year' => 'Year 3',
+                'gender' => 'female',
+                'status' => 'approved',
+                'ip' => '203.0.113.88',
+                'subject_id' => $uobRbcDisorders->id,
+            ],
+            [
+                'name' => 'Yusuf Aden Warsame',
+                'email' => 'yusuf.aden@uob.edu.so',
+                'university_id' => $uob->id,
+                'student_id_no' => 'UOB-2026-7781',
+                'semester' => 'Semester 3',
                 'year' => 'Year 2',
+                'gender' => 'male',
+                'status' => 'approved',
+                'ip' => '198.51.100.19',
+                'subject_id' => $uobHistopathology->id,
+            ],
+            // Pending student (for admin approval workflow demonstration)
+            [
+                'name' => 'Mustafa Khalid Nuur',
+                'email' => 'mustafa.k@rsu.edu.sd',
+                'university_id' => $rsu->id,
+                'student_id_no' => 'RSU-2026-9912',
+                'semester' => 'Semester 7',
+                'year' => 'Year 4',
+                'gender' => 'male',
                 'status' => 'pending',
                 'ip' => '198.51.100.24',
-            ],
-            [
-                'name' => 'Nora Al-Mansoor',
-                'email' => 'nora.m@mgu.edu',
-                'university_id' => $mgu->id,
-                'student_id_no' => 'MGU-2026-4402',
-                'semester' => 'Fall 2026',
-                'year' => 'Year 2',
-                'status' => 'pending',
-                'ip' => '203.0.113.88',
-            ],
-            [
-                'name' => 'Dmitri Volkov',
-                'email' => 'dmitri.v@iac.edu',
-                'university_id' => $iac->id,
-                'student_id_no' => 'IAC-2026-7781',
-                'semester' => 'Fall 2026',
-                'year' => 'Year 1',
-                'status' => 'pending',
-                'ip' => '198.51.100.19',
+                'subject_id' => $rsuBloodBanking->id,
             ],
         ];
 
-        $createdStudents = [];
         foreach ($studentsData as $s) {
             $user = User::firstOrCreate(
                 ['email' => $s['email']],
@@ -268,6 +316,7 @@ class DatabaseSeeder extends Seeder
                     'password' => Hash::make('password'),
                     'role' => 'student',
                     'status' => $s['status'],
+                    'gender' => $s['gender'],
                     'university_id' => $s['university_id'],
                     'student_id_no' => $s['student_id_no'],
                     'semester' => $s['semester'],
@@ -276,273 +325,91 @@ class DatabaseSeeder extends Seeder
                     'email_verified_at' => $s['status'] === 'approved' ? now() : null,
                 ]
             );
-            $createdStudents[] = $user;
-        }
 
-        // ─── 6. Enrollments ────────────────────────────────────────
-        Enrollment::firstOrCreate(['user_id' => $createdStudents[0]->id, 'subject_id' => $osSubject->id], ['status' => 'active']);
-        Enrollment::firstOrCreate(['user_id' => $createdStudents[0]->id, 'subject_id' => $cloudSubject->id], ['status' => 'active']);
-        Enrollment::firstOrCreate(['user_id' => $createdStudents[1]->id, 'subject_id' => $osSubject->id], ['status' => 'active']);
-        Enrollment::firstOrCreate(['user_id' => $createdStudents[1]->id, 'subject_id' => $cloudSubject->id], ['status' => 'active']);
-        Enrollment::firstOrCreate(['user_id' => $createdStudents[2]->id, 'subject_id' => $seSubject->id], ['status' => 'active']);
-        Enrollment::firstOrCreate(['user_id' => $createdStudents[3]->id, 'subject_id' => $aiSubject->id], ['status' => 'active']);
-
-        // ─── 7. Documents (File Cabinet) ───────────────────────────
-        $documents = [
-            [
-                'title' => 'Lecture 01: Modern OS Architecture & Microkernel vs Monolithic',
-                'description' => 'Comprehensive slides covering kernel space, system calls, interrupt handling, and Mach microkernel design.',
-                'file_path' => 'documents/cs401_lecture_01.pdf',
-                'file_name' => 'CS401_Lec01_Architecture.pdf',
-                'file_type' => 'pdf',
-                'mime_type' => 'application/pdf',
-                'file_size' => 4520000,
-                'subject_id' => $osSubject->id,
-                'uploaded_by' => $admin->id,
-                'is_downloadable' => true,
-                'is_view_only' => false,
-                'download_count' => 38,
-                'view_count' => 92,
-                'sort_order' => 1,
-            ],
-            [
-                'title' => 'Operating Systems Concepts — Reference Textbook',
-                'description' => 'Official textbook reading assignments for Chapters 4, 7, and 9. Protected view-only reading material.',
-                'file_path' => 'documents/os_concepts_textbook.pdf',
-                'file_name' => 'OS_Concepts_Official_Textbook.pdf',
-                'file_type' => 'pdf',
-                'mime_type' => 'application/pdf',
-                'file_size' => 18400000,
-                'subject_id' => $osSubject->id,
-                'uploaded_by' => $admin->id,
-                'is_downloadable' => false,
-                'is_view_only' => true,
-                'download_count' => 0,
-                'view_count' => 147,
-                'sort_order' => 2,
-            ],
-            [
-                'title' => 'Lecture 02: POSIX Multithreading & Synchronization Primitives',
-                'description' => 'Mutexes, semaphores, condition variables, and deadlock avoidance algorithms (Banker’s algorithm).',
-                'file_path' => 'documents/cs401_lecture_02.pptx',
-                'file_name' => 'CS401_Lec02_Concurrency.pptx',
-                'file_type' => 'pptx',
-                'mime_type' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-                'file_size' => 8900000,
-                'subject_id' => $osSubject->id,
-                'uploaded_by' => $admin->id,
-                'is_downloadable' => true,
-                'is_view_only' => false,
-                'download_count' => 29,
-                'view_count' => 64,
-                'sort_order' => 3,
-            ],
-            [
-                'title' => 'Lecture 01: Cloud Computing Foundations & Virtualization',
-                'description' => 'Hypervisors, containers vs VMs, and AWS infrastructure fundamentals.',
-                'file_path' => 'documents/cs412_lecture_01.pdf',
-                'file_name' => 'CS412_Lec01_Cloud_Intro.pdf',
-                'file_type' => 'pdf',
-                'mime_type' => 'application/pdf',
-                'file_size' => 3200000,
-                'subject_id' => $cloudSubject->id,
-                'uploaded_by' => $admin->id,
-                'is_downloadable' => true,
-                'is_view_only' => false,
-                'download_count' => 45,
-                'view_count' => 110,
-                'sort_order' => 1,
-            ],
-            [
-                'title' => 'Clean Architecture & Domain-Driven Design Handbook',
-                'description' => 'Design patterns, entity boundaries, and repository abstractions for scalable software.',
-                'file_path' => 'documents/se201_ddd_handbook.pdf',
-                'file_name' => 'DDD_Architectural_Handbook.pdf',
-                'file_type' => 'pdf',
-                'mime_type' => 'application/pdf',
-                'file_size' => 6700000,
-                'subject_id' => $seSubject->id,
-                'uploaded_by' => $admin->id,
-                'is_downloadable' => true,
-                'is_view_only' => false,
-                'download_count' => 22,
-                'view_count' => 58,
-                'sort_order' => 1,
-            ],
-            [
-                'title' => 'Deep Learning Fundamentals: Neural Networks & Backprop',
-                'description' => 'Mathematical foundations of gradient descent, matrix calculus, and activation functions.',
-                'file_path' => 'documents/ai301_deep_learning_math.pdf',
-                'file_name' => 'AI301_Lec01_Math_Foundations.pdf',
-                'file_type' => 'pdf',
-                'mime_type' => 'application/pdf',
-                'file_size' => 5400000,
-                'subject_id' => $aiSubject->id,
-                'uploaded_by' => $admin->id,
-                'is_downloadable' => true,
-                'is_view_only' => false,
-                'download_count' => 31,
-                'view_count' => 84,
-                'sort_order' => 1,
-            ],
-        ];
-
-        foreach ($documents as $doc) {
-            Document::firstOrCreate(
-                ['title' => $doc['title'], 'subject_id' => $doc['subject_id']],
-                $doc
+            Enrollment::firstOrCreate(
+                ['user_id' => $user->id, 'subject_id' => $s['subject_id']],
+                ['status' => 'active']
             );
         }
 
-        // ─── 8. Assignments ────────────────────────────────────────
-        $osAssignment1 = Assignment::firstOrCreate(
-            ['title' => 'Project 1: Multithreaded Web Server & Cache in C/Rust', 'subject_id' => $osSubject->id],
-            [
-                'description' => 'Implement a concurrent HTTP/1.1 server using socket API with thread pooling, epoll I/O multiplexing, and an LRU cache with thread-safe locking.',
-                'deadline' => now()->addDays(7),
-                'max_grade' => 100,
-                'allow_late' => true,
-                'allow_resubmit' => true,
-                'is_published' => true,
-                'rubric' => "- Correctness & Protocol compliance (40%)\n- Concurrency & Thread safety (30%)\n- LRU Cache Implementation (20%)\n- Code style, memory leak check with Valgrind (10%)",
-            ]
-        );
+        // Additional enrollment for CITYCOT Semester 5 student to Bacteriology III
+        $fatima = User::where('email', 'fatima.ali@citycot.edu.so')->first();
+        if ($fatima) {
+            Enrollment::firstOrCreate(
+                ['user_id' => $fatima->id, 'subject_id' => $citycotBacteriology->id],
+                ['status' => 'active']
+            );
+        }
 
-        $osAssignment2 = Assignment::firstOrCreate(
-            ['title' => 'Lab 2: Virtual Memory Page Replacement Simulator', 'subject_id' => $osSubject->id],
-            [
-                'description' => 'Simulate FIFO, LRU, and Optimal page replacement algorithms given memory reference traces.',
-                'deadline' => now()->subDays(3),
-                'max_grade' => 50,
-                'allow_late' => false,
-                'allow_resubmit' => false,
-                'is_published' => true,
-                'rubric' => "- Algorithm Accuracy (30 pts)\n- Performance Benchmarks & Graphs (20 pts)",
-            ]
-        );
+        // Additional enrollment for CITYCOT Semester 7 student to Lab Management
+        $hodan = User::where('email', 'hodan.shire@citycot.edu.so')->first();
+        if ($hodan) {
+            Enrollment::firstOrCreate(
+                ['user_id' => $hodan->id, 'subject_id' => $citycotLabManagement->id],
+                ['status' => 'active']
+            );
+        }
 
-        $cloudAssignment1 = Assignment::firstOrCreate(
-            ['title' => 'Cloud Lab 1: Kubernetes Cluster Deployment & Helm Charts', 'subject_id' => $cloudSubject->id],
-            [
-                'description' => 'Deploy a microservices stack on a Minikube/EKS cluster with ingress routing, TLS certificates, and horizontal pod autoscaling.',
-                'deadline' => now()->addDays(12),
-                'max_grade' => 100,
-                'allow_late' => true,
-                'allow_resubmit' => true,
-                'is_published' => true,
-                'rubric' => "- Infrastructure manifest validity (50%)\n- Auto-healing & Scaling verification (30%)\n- Documentation (20%)",
-            ]
-        );
-
-        // ─── 9. Submissions & Grades ───────────────────────────────
-        Submission::firstOrCreate(
-            ['assignment_id' => $osAssignment2->id, 'user_id' => $createdStudents[0]->id],
-            [
-                'text_content' => 'Completed all simulator benchmarks using C++20 with trace analysis graphs attached in the repository.',
-                'grade' => 48,
-                'feedback' => 'Exceptional implementation. Your LRU benchmark graph was clean and accurately reflected locality of reference.',
-                'status' => 'graded',
-                'is_late' => false,
-                'submitted_at' => now()->subDays(4),
-                'graded_at' => now()->subDays(2),
-            ]
-        );
-
-        Submission::firstOrCreate(
-            ['assignment_id' => $osAssignment2->id, 'user_id' => $createdStudents[1]->id],
-            [
-                'text_content' => 'Attached Python simulator source code with PyPlot visual comparisons for FIFO vs LRU.',
-                'grade' => 45,
-                'feedback' => 'Good work! Minor off-by-one edge case in Belady anomaly simulation, but overall great analysis.',
-                'status' => 'graded',
-                'is_late' => false,
-                'submitted_at' => now()->subDays(4),
-                'graded_at' => now()->subDays(1),
-            ]
-        );
-
-        Submission::firstOrCreate(
-            ['assignment_id' => $osAssignment1->id, 'user_id' => $createdStudents[0]->id],
-            [
-                'text_content' => 'Repo submission: Implemented epoll thread pool with lock-free ring buffer for task queues.',
-                'grade' => null,
-                'feedback' => null,
-                'status' => 'pending',
-                'is_late' => false,
-                'submitted_at' => now()->subHours(6),
-            ]
-        );
-
-        // ─── 10. Lecture Schedules ─────────────────────────────────
+        // ─── 5. Clinical Lecture Schedules ─────────────────────────
         LectureSchedule::firstOrCreate(
-            ['subject_id' => $osSubject->id, 'title' => 'Lecture 03: Virtual Memory Management & Page Tables'],
+            ['subject_id' => $rsuBloodBanking->id, 'title' => 'Blood Banking Practical: ABO & Rh(D) Discrepancies'],
             [
-                'description' => 'Multi-level page tables, TLB shootdowns, and inverted page tables.',
-                'start_time' => now()->startOfDay()->addHours(10),
-                'end_time' => now()->startOfDay()->addHours(12),
-                'location' => 'Science Hall B, Room 302',
-                'color' => '#4F46E5',
+                'description' => 'Resolving front and reverse grouping discrepancies, weak D (Du) variant testing, and cell washing techniques.',
+                'start_time' => now()->startOfDay()->addHours(9),
+                'end_time' => now()->startOfDay()->addHours(11),
+                'location' => 'RSU Central Blood Bank Lab, Room 104',
+                'color' => '#E11D48',
             ]
         );
 
         LectureSchedule::firstOrCreate(
-            ['subject_id' => $cloudSubject->id, 'title' => 'Hands-on Lab: Distributed Consensus & Raft Cluster'],
+            ['subject_id' => $citycotHematology2->id, 'title' => 'Lecture: Acute Myeloid Leukemia (AML) Cytochemistry & FAB Classification'],
             [
-                'description' => 'Live debugging of leader election and log replication scenarios.',
-                'start_time' => now()->startOfDay()->addHours(14),
-                'end_time' => now()->startOfDay()->addHours(16),
-                'location' => 'Virtual Lab / Zoom Room 1',
-                'color' => '#06B6D4',
+                'description' => 'Myeloperoxidase (MPO), Sudan Black B (SBB), and esterase staining protocols.',
+                'start_time' => now()->startOfDay()->addHours(13),
+                'end_time' => now()->startOfDay()->addHours(15),
+                'location' => 'CITYCOT Health Auditorium 2',
+                'color' => '#9333EA',
             ]
         );
 
         LectureSchedule::firstOrCreate(
-            ['subject_id' => $seSubject->id, 'title' => 'Sprint Review & Architecture Defense'],
+            ['subject_id' => $uobRbcDisorders->id, 'title' => 'Clinical Case Seminar: Thalassemia Intermedia vs Minor'],
             [
-                'description' => 'Team architecture presentations and live feedback session.',
-                'start_time' => now()->addDays(2)->startOfDay()->addHours(11),
-                'end_time' => now()->addDays(2)->startOfDay()->addHours(13),
-                'location' => 'Engineering Hall, Auditorium 1',
-                'color' => '#8B5CF6',
+                'description' => 'Complete blood count (CBC) indices, Mentzer index calculation, and HbA2 quantification.',
+                'start_time' => now()->addDays(2)->startOfDay()->addHours(10),
+                'end_time' => now()->addDays(2)->startOfDay()->addHours(12),
+                'location' => 'University of Bosaso, Medical Lab Hall 1',
+                'color' => '#EA580C',
             ]
         );
 
-        // ─── 11. Subject Updates & Bulletins ───────────────────────
+        // ─── 6. Subject Updates / Announcements ───────────────────
         SubjectUpdate::firstOrCreate(
-            ['subject_id' => $osSubject->id, 'title' => 'Midterm Exam Schedule & Practice Questions Released'],
+            ['subject_id' => $rsuBloodBanking->id, 'title' => 'Mid-Semester Immunohematology Practical Protocols'],
             [
                 'user_id' => $admin->id,
-                'content' => 'The midterm exam will take place on November 10th in Science Hall B. Practice exam sets with detailed solutions have been uploaded to the file cabinet.',
+                'content' => 'Dear Semester 7 students: The guidelines for the upcoming Coombs test and antibody screening lab exam have been uploaded. Please review the standard operating procedures.',
                 'is_pinned' => true,
             ]
         );
 
         SubjectUpdate::firstOrCreate(
-            ['subject_id' => $cloudSubject->id, 'title' => 'AWS Educate Credits Voucher Available'],
+            ['subject_id' => $citycotBloodBanking->id, 'title' => 'Welcome to Semester 5 Blood Banking'],
             [
                 'user_id' => $admin->id,
-                'content' => 'Each student has received $100 in AWS cloud credits for the Kubernetes lab assignments. Check your registered university inbox.',
+                'content' => 'Welcome students to Blood Banking & Immunohematology. Please make sure you have your white lab coats and laboratory notebooks ready for the first practical session.',
                 'is_pinned' => true,
             ]
         );
 
-        // ─── 12. Messages & Discussions ────────────────────────────
+        // ─── 7. Academic Discussion Messages ───────────────────────
         Message::firstOrCreate(
-            ['subject_id' => $osSubject->id, 'content' => 'Welcome to CS401! Please review the syllabus and ensure you have an active Linux development environment with GCC and GDB installed.'],
+            ['subject_id' => $rsuBloodBanking->id, 'content' => 'Welcome to Blood Banking and Immunohematology. This cabinet will contain all lecture slides, textbook reference chapters, and clinical practical protocols.'],
             [
                 'user_id' => $admin->id,
                 'is_announcement' => true,
                 'is_pinned' => true,
-            ]
-        );
-
-        // ─── 13. Notifications ─────────────────────────────────────
-        Notification::firstOrCreate(
-            ['user_id' => $createdStudents[0]->id, 'title' => 'Lab 2 Graded'],
-            [
-                'type' => 'grade_published',
-                'message' => 'Your submission for Lab 2: Virtual Memory Page Replacement Simulator received a score of 48/50.',
-                'data' => ['grade' => 48, 'assignment_id' => $osAssignment2->id],
             ]
         );
     }

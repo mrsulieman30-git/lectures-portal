@@ -1,4 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
+import { useState } from 'react';
 import { 
     BookOpen, 
     FileText, 
@@ -14,275 +15,424 @@ import {
     Layers,
     Globe,
     Smartphone,
-    Award
+    Award,
+    Menu,
+    X,
+    Microscope,
+    FlaskConical,
+    Activity,
+    HeartPulse,
+    Dna,
+    Droplet
 } from 'lucide-react';
 import { useTranslation, LanguageSwitcher } from '@/Context/LanguageContext';
+import { ThemeToggle } from '@/Context/ThemeContext';
 import TiltCard3D from '@/Components/TiltCard3D';
 import Interactive3DScene from '@/Components/Interactive3DScene';
+import ApplicationLogo from '@/Components/ApplicationLogo';
 
 export default function Welcome({ auth }) {
     const { t } = useTranslation();
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    const medicalCourses = [
+        {
+            code: 'MLS-411',
+            title: 'Blood Banking & Immunohematology',
+            campus: 'Red Sea University',
+            semester: 'Semester 7',
+            color: '#E11D48',
+            topics: 'ABO/Rh Discrepancies, Crossmatching & HDFN',
+        },
+        {
+            code: 'HEM-402',
+            title: 'Hematology II',
+            campus: 'CITYCOT University',
+            semester: 'Semester 7',
+            color: '#9333EA',
+            topics: 'Leukemia Cytochemistry, Hemostasis & Marrow',
+        },
+        {
+            code: 'RBC-305',
+            title: 'Advanced RBCs Disorders',
+            campus: 'University of Bosaso',
+            semester: 'Semester 5',
+            color: '#EA580C',
+            topics: 'Hemoglobinopathies, Thalassemia & Anemias',
+        },
+        {
+            code: 'BAC-302',
+            title: 'Bacteriology III',
+            campus: 'CITYCOT University',
+            semester: 'Semester 5',
+            color: '#0D9488',
+            topics: 'Diagnostic Culture, AST & Mycobacteriology',
+        },
+        {
+            code: 'HIS-201',
+            title: 'Histopathology I',
+            campus: 'University of Bosaso',
+            semester: 'Semester 3',
+            color: '#DB2777',
+            topics: 'Tissue Grossing, Fixation & H&E Staining',
+        },
+    ];
 
     return (
-        <div className="min-h-screen bg-[#070b19] text-slate-100 selection:bg-indigo-500 selection:text-white relative overflow-hidden flex flex-col justify-between">
-            <Head title="Professor's Academic Cabinet OS - 3D Interactive Portal" />
+        <div className="min-h-screen bg-[#f8fafc] dark:bg-[#070b19] text-slate-800 dark:text-slate-100 selection:bg-rose-500 selection:text-white relative overflow-x-hidden flex flex-col justify-between transition-colors duration-200">
+            <Head title="Dr. Mohammad Sulieman — Medical Laboratory & Hematology Academic Portal" />
 
-            {/* Aurora Ambient Liquid Mesh Backdrops */}
-            <div className="absolute top-0 left-1/4 -translate-x-1/2 w-[700px] h-[700px] bg-indigo-600/20 rounded-full blur-[160px] pointer-events-none animate-morph" />
-            <div className="absolute top-1/3 -right-20 w-[600px] h-[600px] bg-cyan-500/15 rounded-full blur-[160px] pointer-events-none" />
-            <div className="absolute -bottom-40 left-1/3 w-[700px] h-[700px] bg-purple-600/20 rounded-full blur-[180px] pointer-events-none" />
+            {/* Nimbuzzy Soft Ambient Background Glows */}
+            <div className="fixed top-0 -left-32 w-96 h-96 bg-rose-500/12 dark:bg-rose-600/10 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse" />
+            <div className="fixed top-1/3 -right-32 w-96 h-96 bg-amber-500/10 dark:bg-amber-600/10 rounded-full blur-3xl pointer-events-none -z-10" />
+            <div className="fixed -bottom-32 left-1/3 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-900/10 rounded-full blur-3xl pointer-events-none -z-10" />
 
             {/* Interactive 3D Background Canvas Layer */}
-            <div className="absolute inset-0 z-0 opacity-70">
+            <div className="fixed inset-0 z-0 opacity-25 dark:opacity-40 pointer-events-none">
                 <Interactive3DScene height="100%" interactive={true} />
             </div>
 
-            {/* Navigation Header with Liquid Glass Bar */}
-            <header className="relative z-20 mx-auto max-w-7xl w-full px-4 sm:px-6 py-6">
-                <div className="liquid-glass-dark rounded-2xl px-5 py-3.5 flex items-center justify-between border border-white/10 shadow-2xl">
-                    <div className="flex items-center gap-3 group cursor-pointer">
-                        <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-cyan-400 p-[1px] shadow-lg shadow-indigo-500/25">
-                            <div className="w-full h-full bg-slate-950 rounded-2xl flex items-center justify-center text-white group-hover:scale-105 transition-transform">
-                                <FolderKanban className="w-5 h-5 text-indigo-400" />
+            {/* Top Navigation Bar — Organized and 100% Mobile Responsive */}
+            <header className="sticky top-0 z-40 w-full border-b border-slate-200/80 dark:border-white/10 backdrop-blur-2xl bg-white/80 dark:bg-[#0b0f19]/80 shadow-xs transition-colors duration-200">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div className="flex h-16 sm:h-20 items-center justify-between">
+                        
+                        {/* Brand Logo & Title */}
+                        <Link href="/" className="flex items-center gap-3 group min-w-0">
+                            <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-rose-500 via-rose-600 to-amber-600 p-0.5 shadow-md shadow-rose-500/25 group-hover:scale-105 transition-transform duration-200 shrink-0">
+                                <ApplicationLogo className="w-full h-full" />
                             </div>
-                        </div>
-                        <div>
-                            <span className="font-extrabold text-white text-base sm:text-lg tracking-tight block leading-none font-display">
-                                {t('appName')}
-                            </span>
-                            <span className="text-[10px] font-mono tracking-widest text-indigo-400 font-bold uppercase mt-0.5 block">
-                                {t('appTagline')}
-                            </span>
-                        </div>
-                    </div>
+                            <div className="min-w-0">
+                                <span className="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base tracking-tight block leading-tight font-heading truncate">
+                                    Dr. Mohammad Sulieman
+                                </span>
+                                <span className="text-[10px] sm:text-[11px] font-semibold text-rose-600 dark:text-rose-400 block tracking-wide truncate">
+                                    Medical Laboratory &amp; Hematology
+                                </span>
+                            </div>
+                        </Link>
 
-                    <div className="flex items-center gap-3 sm:gap-4">
-                        <LanguageSwitcher className="bg-slate-900/80 border-white/10 text-white" />
+                        {/* Desktop Actions */}
+                        <div className="hidden md:flex items-center gap-3">
+                            <div className="flex items-center gap-2 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-slate-50/80 dark:bg-white/5 p-1 backdrop-blur-md">
+                                <ThemeToggle />
+                                <LanguageSwitcher />
+                            </div>
 
-                        <nav className="flex items-center gap-2 sm:gap-3">
-                            {auth?.user ? (
-                                <Link
-                                    href={route('dashboard')}
-                                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 transition-all active:scale-95 border border-indigo-400/30"
-                                >
-                                    <span>{t('goToDashboard')}</span>
-                                    <span>&rarr;</span>
-                                </Link>
-                            ) : (
-                                <>
+                            <nav className="flex items-center gap-2">
+                                {auth?.user ? (
                                     <Link
-                                        href={route('login')}
-                                        className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/5 transition-all"
+                                        href={route('dashboard')}
+                                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white text-xs font-bold shadow-lg shadow-rose-600/25 transition-all active:scale-95"
                                     >
-                                        {t('signIn')}
+                                        <span>{t('goToDashboard', 'Go to My Dashboard')}</span>
+                                        <ArrowRight className="w-4 h-4" />
                                     </Link>
-                                    <Link
-                                        href={route('register')}
-                                        className="inline-flex items-center gap-1.5 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-white text-slate-950 hover:bg-slate-100 text-xs font-extrabold transition-all shadow-lg shadow-white/10 active:scale-95"
-                                    >
-                                        <span>{t('studentAccess')}</span>
-                                    </Link>
-                                </>
-                            )}
-                        </nav>
+                                ) : (
+                                    <>
+                                        <Link
+                                            href={route('login')}
+                                            className="px-4 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-rose-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-all"
+                                        >
+                                            {t('signIn', 'Sign In')}
+                                        </Link>
+                                        <Link
+                                            href={route('register')}
+                                            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-amber-600 text-white hover:brightness-110 text-xs font-extrabold shadow-md shadow-rose-600/25 transition-all active:scale-95"
+                                        >
+                                            <span>{t('studentAccess', 'Student Access')}</span>
+                                        </Link>
+                                    </>
+                                )}
+                            </nav>
+                        </div>
+
+                        {/* Mobile Hamburger Toggle Button */}
+                        <div className="flex md:hidden items-center gap-2">
+                            <ThemeToggle />
+                            <button
+                                type="button"
+                                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                                className="p-2 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-200 hover:text-rose-600 transition"
+                                aria-label="Toggle Navigation Menu"
+                            >
+                                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </header>
 
-            {/* Main Interactive Hero Section */}
-            <main className="relative z-10 mx-auto max-w-7xl w-full px-4 sm:px-6 py-8 lg:py-16 flex-1 flex flex-col justify-center">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-                    
-                    {/* Left Column: Hero Text */}
-                    <div className="lg:col-span-7 space-y-6">
-                        
-                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full liquid-glass-dark border border-indigo-500/30 text-xs font-semibold text-indigo-300 shadow-lg">
-                            <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-                            <span>{t('welcomeBadge')}</span>
+                {/* Mobile Dropdown Panel — Clean, Organized, Zero Text Overlap */}
+                {mobileMenuOpen && (
+                    <div className="md:hidden border-t border-slate-200 dark:border-white/10 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl px-4 py-4 space-y-3 animate-in fade-in slide-in-from-top-3 duration-200">
+                        <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-white/10">
+                            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                                Language
+                            </span>
+                            <LanguageSwitcher />
                         </div>
 
-                        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white leading-[1.08] font-display">
-                            {t('welcomeTitle')}{' '}
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-300 to-fuchsia-400">
-                                {t('welcomeTitleAccent')}
-                            </span>
-                        </h1>
-
-                        <p className="text-base sm:text-lg text-slate-300/90 leading-relaxed max-w-xl font-normal">
-                            {t('welcomeDescription')}
-                        </p>
-
-                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
+                        <div className="flex flex-col gap-2 pt-1">
                             {auth?.user ? (
                                 <Link
                                     href={route('dashboard')}
-                                    className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-cyan-500 hover:opacity-95 text-white font-extrabold text-sm shadow-xl shadow-indigo-600/35 transition-all active:scale-95 border border-white/20"
+                                    className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-gradient-to-r from-rose-600 to-amber-600 text-white font-bold text-xs shadow-md"
                                 >
-                                    <span>{t('goToDashboard')}</span>
+                                    <span>{t('goToDashboard', 'Go to Dashboard')}</span>
                                     <ArrowRight className="w-4 h-4" />
                                 </Link>
                             ) : (
                                 <>
                                     <Link
                                         href={route('login')}
-                                        className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold text-sm shadow-xl shadow-indigo-600/35 transition-all active:scale-95 border border-indigo-400/30"
+                                        className="flex items-center justify-center w-full py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-800 dark:text-white font-bold text-xs"
                                     >
-                                        <span>{t('instructorStudentSignIn')}</span>
-                                        <ArrowRight className="w-4 h-4" />
+                                        {t('signIn', 'Sign In to Portal')}
                                     </Link>
                                     <Link
                                         href={route('register')}
-                                        className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl liquid-glass-dark hover:bg-slate-800/80 text-slate-200 border border-white/10 font-bold text-sm transition-all active:scale-95"
+                                        className="flex items-center justify-center gap-1.5 w-full py-3 rounded-xl bg-gradient-to-r from-rose-600 to-amber-600 text-white font-bold text-xs shadow-md"
                                     >
-                                        <span>{t('registerAsStudent')}</span>
+                                        <span>{t('studentAccess', 'Student Registration')}</span>
+                                        <ArrowRight className="w-4 h-4" />
                                     </Link>
                                 </>
                             )}
                         </div>
                     </div>
+                )}
+            </header>
 
-                    {/* Right Column: 3D Floating Interactive Cabinet Showcase */}
-                    <div className="lg:col-span-5 perspective-1500 flex justify-center">
-                        <TiltCard3D
-                            maxTilt={18}
-                            perspective={1500}
-                            scale={1.04}
-                            glowColor="#6366f1"
-                            className="w-full max-w-md liquid-glass-dark rounded-3xl p-6 sm:p-7 border border-white/15 shadow-2xl relative"
-                        >
-                            {/* 3D Floating Tag */}
-                            <div className="flex items-center justify-between mb-5 translate-z-30">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-3 h-3 rounded-full bg-emerald-400 shadow-lg shadow-emerald-400/50 animate-pulse" />
-                                    <span className="text-xs font-mono font-bold text-slate-300 uppercase tracking-wider">
-                                        Professor's Cabinet OS
-                                    </span>
-                                </div>
-                                <span className="text-[10px] px-2.5 py-0.5 rounded-full font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                                    v2.5 Live
-                                </span>
-                            </div>
+            {/* Main Hero Section */}
+            <main className="relative z-10 mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-14 flex-1 flex flex-col justify-center">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+                    
+                    {/* Left Column: Hero Text */}
+                    <div className="lg:col-span-7 space-y-5 sm:space-y-6">
+                        
+                        {/* Medical Science Pill Badge */}
+                        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-rose-500/20 bg-rose-50 dark:bg-rose-950/40 text-xs font-bold text-rose-600 dark:text-rose-300 shadow-xs backdrop-blur-md">
+                            <Droplet className="w-3.5 h-3.5 text-rose-500 animate-pulse" />
+                            <span>Dr. Mohammad Sulieman • Medical Laboratory Academic OS</span>
+                        </div>
 
-                            {/* 3D Stacked Mini Cabinets */}
-                            <div className="space-y-3 preserve-3d">
-                                {[
-                                    { code: 'CS401', title: 'Distributed Cloud Systems', color: '#06b6d4', campus: 'UTAS Tech', files: '14 Books & Packs' },
-                                    { code: 'AI302', title: 'Neural Networks & Deep Learning', color: '#8b5cf6', campus: 'MGU Campus', files: '9 Lecture Decks' },
-                                    { code: 'SEC501', title: 'Applied Cryptography & Cyber', color: '#ec4899', campus: 'Somali Cyber Inst', files: '12 Lab Guides' },
-                                ].map((item, idx) => (
-                                    <div
-                                        key={idx}
-                                        className="p-4 rounded-2xl liquid-glass border border-white/20 hover:border-white/40 transition-all cursor-pointer flex items-center justify-between group/item"
-                                        style={{
-                                            transform: `translateZ(${25 + idx * 15}px)`,
-                                        }}
+                        {/* Title */}
+                        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-900 dark:text-white leading-[1.12] font-heading">
+                            Academic Cabinets for{' '}
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-600 via-coral-500 to-amber-500">
+                                Medical &amp; Laboratory Students.
+                            </span>
+                        </h1>
+
+                        {/* Description */}
+                        <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl font-normal">
+                            Access verified clinical hematology lectures, diagnostic laboratory protocols, blood banking guidelines, and microscopic pathology case studies across Red Sea University, CITYCOT University, and University of Bosaso.
+                        </p>
+
+                        {/* Call to Actions */}
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
+                            {auth?.user ? (
+                                <Link
+                                    href={route('dashboard')}
+                                    className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl bg-gradient-to-r from-rose-600 via-coral-500 to-amber-600 hover:brightness-105 text-white font-extrabold text-sm shadow-xl shadow-rose-600/30 transition-all active:scale-95 cursor-pointer"
+                                >
+                                    <span>{t('goToDashboard', 'Go to My Dashboard')}</span>
+                                    <ArrowRight className="w-4 h-4" />
+                                </Link>
+                            ) : (
+                                <>
+                                    <Link
+                                        href={route('login')}
+                                        className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl bg-gradient-to-r from-rose-600 via-coral-500 to-amber-600 hover:brightness-105 text-white font-extrabold text-sm shadow-xl shadow-rose-600/30 transition-all active:scale-95 cursor-pointer"
                                     >
-                                        <div className="flex items-center gap-3">
-                                            <div
-                                                className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-black text-xs shadow-md"
-                                                style={{ backgroundColor: item.color }}
-                                            >
-                                                {item.code.substring(0, 2)}
-                                            </div>
-                                            <div>
-                                                <h4 className="text-xs font-bold text-slate-900 group-hover/item:text-indigo-600 transition-colors line-clamp-1">
-                                                    {item.title}
-                                                </h4>
-                                                <p className="text-[10px] text-slate-500 mt-0.5">
-                                                    {item.campus} • {item.files}
-                                                </p>
-                                            </div>
-                                        </div>
+                                        <span>{t('instructorStudentSignIn', 'Doctor & Student Sign In')}</span>
+                                        <ArrowRight className="w-4 h-4" />
+                                    </Link>
+                                    <Link
+                                        href={route('register')}
+                                        className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-slate-900/80 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold text-sm shadow-sm transition-all active:scale-95 cursor-pointer"
+                                    >
+                                        <span>{t('registerAsStudent', 'Register as Student')}</span>
+                                    </Link>
+                                </>
+                            )}
+                        </div>
 
-                                        <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 group-hover/item:bg-indigo-600 group-hover/item:text-white transition-colors">
-                                            <ArrowRight className="w-3 h-3" />
-                                        </div>
-                                    </div>
+                        {/* Partner Universities Chips */}
+                        <div className="pt-3">
+                            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2">
+                                Teaching Across Partner Universities:
+                            </span>
+                            <div className="flex flex-wrap items-center gap-2">
+                                {['Red Sea University', 'CITYCOT University', 'University of Bosaso'].map((uni, i) => (
+                                    <span
+                                        key={i}
+                                        className="px-3 py-1 rounded-xl text-xs font-semibold border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-white/5 text-slate-700 dark:text-slate-300 shadow-2xs"
+                                    >
+                                        🏛️ {uni}
+                                    </span>
                                 ))}
                             </div>
+                        </div>
+                    </div>
 
-                            {/* Bottom 3D Hardware Security Badge */}
-                            <div className="mt-5 pt-4 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-400 translate-z-20">
-                                <span className="flex items-center gap-1.5">
-                                    <Smartphone className="w-3.5 h-3.5 text-cyan-400" />
-                                    <span>Single-Device Lock Active</span>
-                                </span>
-                                <span className="flex items-center gap-1.5">
-                                    <Globe className="w-3.5 h-3.5 text-indigo-400" />
-                                    <span>Universal Shelf</span>
-                                </span>
+                    {/* Right Column: 3D Interactive Medical Laboratory Showcase */}
+                    <div className="lg:col-span-5 flex justify-center w-full">
+                        <TiltCard3D
+                            maxTilt={10}
+                            perspective={1400}
+                            scale={1.02}
+                            glowColor="rgba(244, 63, 94, 0.25)"
+                            className="w-full max-w-md"
+                        >
+                            <div className="relative overflow-hidden rounded-3xl border border-white/80 dark:border-white/15 bg-white/90 dark:bg-slate-900/85 p-6 sm:p-7 shadow-2xl backdrop-blur-2xl ring-1 ring-slate-900/5">
+                                {/* Card Top Status */}
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping" />
+                                        <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                                            Medical Laboratory Cabinets
+                                        </span>
+                                    </div>
+                                    <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                                        Dr. Mohammad Sulieman
+                                    </span>
+                                </div>
+
+                                {/* Stacked Course List */}
+                                <div className="space-y-2.5">
+                                    {medicalCourses.map((c, idx) => (
+                                        <div
+                                            key={idx}
+                                            className="p-3 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-slate-50/70 dark:bg-white/5 hover:border-rose-500/40 transition-all flex items-center justify-between group"
+                                        >
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                <div
+                                                    className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-extrabold text-[11px] shadow-sm shrink-0"
+                                                    style={{ backgroundColor: c.color }}
+                                                >
+                                                    {c.code.substring(0, 3)}
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">
+                                                        {c.title}
+                                                    </h4>
+                                                    <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                                                        {c.campus} • {c.semester}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div className="w-6 h-6 rounded-full bg-slate-200/60 dark:bg-white/10 flex items-center justify-center text-slate-500 dark:text-slate-400 group-hover:bg-rose-600 group-hover:text-white transition-colors shrink-0 ml-2">
+                                                <ArrowRight className="w-3 h-3" />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Card Bottom Indicators */}
+                                <div className="mt-4 pt-3 border-t border-slate-200/80 dark:border-white/10 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                                    <span className="flex items-center gap-1.5">
+                                        <Smartphone className="w-3.5 h-3.5 text-rose-500" />
+                                        <span>Single-Device Student Security</span>
+                                    </span>
+                                    <span className="flex items-center gap-1.5">
+                                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                                        <span>View-Only Protection</span>
+                                    </span>
+                                </div>
                             </div>
                         </TiltCard3D>
                     </div>
 
                 </div>
 
-                {/* 3D Liquid Glass Feature Cards Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mt-16 lg:mt-24 perspective-1000">
+                {/* Medical Laboratory Academic Feature Pillars */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-14 sm:mt-20">
                     {[
                         {
-                            icon: Building2,
-                            color: '#6366f1',
-                            title: t('multiUniversityCard'),
-                            desc: t('multiUniversityDesc'),
+                            icon: Microscope,
+                            color: '#E11D48',
+                            title: 'Blood Banking & Immunohematology',
+                            desc: 'ABO/Rh discrepancy resolution, compatibility crossmatching, donor screening, and component therapy.',
                         },
                         {
-                            icon: Lock,
-                            color: '#06b6d4',
-                            title: t('viewOnlyCard'),
-                            desc: t('viewOnlyDesc'),
+                            icon: FlaskConical,
+                            color: '#9333EA',
+                            title: 'Hematology II & Leukemias',
+                            desc: 'Peripheral blood film morphology, acute/chronic leukemias, myeloproliferative neoplasms, and coagulation.',
                         },
                         {
-                            icon: GraduationCap,
-                            color: '#ec4899',
-                            title: t('assignmentsCard'),
-                            desc: t('assignmentsDesc'),
+                            icon: HeartPulse,
+                            color: '#EA580C',
+                            title: 'Advanced RBCs Disorders',
+                            desc: 'Sickle cell disease, thalassemia electrophoresis, hemolytic anemias, and red cell enzyme deficiencies.',
                         },
                         {
-                            icon: ShieldCheck,
-                            color: '#10b981',
-                            title: t('approvalCard'),
-                            desc: t('approvalDesc'),
+                            icon: Dna,
+                            color: '#0D9488',
+                            title: 'Bacteriology & Quality Assurance',
+                            desc: 'Diagnostic culture, antimicrobial susceptibility testing (AST), and ISO 15189 laboratory management.',
                         },
                     ].map((feat, idx) => {
                         const Icon = feat.icon;
                         return (
                             <TiltCard3D
                                 key={idx}
-                                maxTilt={10}
-                                scale={1.03}
-                                glowColor={feat.color}
-                                className="liquid-glass-dark rounded-3xl p-6 border border-white/10 transition-all group"
+                                maxTilt={7}
+                                perspective={1000}
+                                scale={1.02}
+                                className="h-full"
                             >
-                                <div
-                                    className="w-12 h-12 rounded-2xl flex items-center justify-center font-bold mb-4 translate-z-20 shadow-md"
-                                    style={{
-                                        backgroundColor: `${feat.color}20`,
-                                        color: feat.color,
-                                        border: `1px solid ${feat.color}40`,
-                                    }}
-                                >
-                                    <Icon className="w-6 h-6" />
+                                <div className="h-full p-6 rounded-3xl border border-slate-200/80 dark:border-white/10 bg-white/80 dark:bg-slate-900/80 shadow-md backdrop-blur-xl flex flex-col justify-between">
+                                    <div>
+                                        <div
+                                            className="w-12 h-12 rounded-2xl flex items-center justify-center text-white mb-4 shadow-md"
+                                            style={{ backgroundColor: feat.color }}
+                                        >
+                                            <Icon className="w-6 h-6" />
+                                        </div>
+                                        <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-1.5 font-heading">
+                                            {feat.title}
+                                        </h3>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                                            {feat.desc}
+                                        </p>
+                                    </div>
+                                    <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/5 flex items-center gap-1.5 text-[11px] font-bold text-rose-600 dark:text-rose-400">
+                                        <span>Clinical Course Cabinet</span>
+                                        <ArrowRight className="w-3 h-3" />
+                                    </div>
                                 </div>
-                                <h3 className="font-extrabold text-white text-base font-display translate-z-30 group-hover:text-cyan-300 transition-colors">
-                                    {feat.title}
-                                </h3>
-                                <p className="text-xs text-slate-400 mt-2 leading-relaxed translate-z-10">
-                                    {feat.desc}
-                                </p>
                             </TiltCard3D>
                         );
                     })}
                 </div>
             </main>
 
-            {/* Liquid Glass Footer */}
-            <footer className="relative z-10 border-t border-white/10 py-8 px-6 text-center text-xs text-slate-400 liquid-glass-dark">
-                <div className="mx-auto max-w-7xl flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <span>{t('footerText')}</span>
-                    <span className="font-mono text-[11px] text-indigo-400">
-                        Professor's Academic Cabinet • 3D Liquid Glass Architecture
-                    </span>
+            {/* Footer */}
+            <footer className="relative z-10 border-t border-slate-200/80 dark:border-white/10 bg-white/70 dark:bg-slate-950/70 backdrop-blur-md py-6 text-xs text-slate-600 dark:text-slate-400">
+                <div className="mx-auto max-w-7xl px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+                    <div>
+                        <p className="font-medium">
+                            &copy; {new Date().getFullYear()} <strong className="text-slate-900 dark:text-white">Mohammad Sulieman</strong>. All rights reserved.
+                        </p>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                            Teaching across Red Sea University &bull; CITYCOT University &bull; University of Bosaso
+                        </p>
+                    </div>
+
+                    <div>
+                        <a 
+                            href="https://medblog.seeha.tech" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-rose-500/20 bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 hover:border-rose-500/40 text-xs font-bold transition shadow-xs"
+                        >
+                            <span>Dr. Mohammad Sulieman CV &amp; Medical Blog</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                        </a>
+                    </div>
                 </div>
             </footer>
         </div>

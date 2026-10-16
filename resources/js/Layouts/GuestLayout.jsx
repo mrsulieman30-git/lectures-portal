@@ -49,7 +49,17 @@ export default function GuestLayout({ children }) {
 
             {/* Subtle Footer */}
             <footer className="relative z-10 py-6 text-center text-xs text-slate-400">
-                <p>&copy; {new Date().getFullYear()} Lecture Portal &bull; Unified Academic Cabinet &bull; All Rights Reserved.</p>
+                <p>
+                    &copy; {new Date().getFullYear()} <strong className="text-white">Mohammad Sulieman</strong>. All rights reserved. &bull;{' '}
+                    <a 
+                        href="https://medblog.seeha.tech" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-rose-400 hover:text-rose-300 underline font-semibold transition"
+                    >
+                        Dr. Mohammad Sulieman CV &amp; Medical Blog
+                    </a>
+                </p>
             </footer>
         </div>
     );

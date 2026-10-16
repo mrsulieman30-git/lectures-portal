@@ -21,7 +21,12 @@ class RegisteredUserController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('Auth/Register');
+        return Inertia::render('Auth/Register', [
+            'universities' => \App\Models\University::where('is_active', true)
+                ->select('id', 'name', 'slug')
+                ->orderBy('name')
+                ->get(),
+        ]);
     }
 
     /**

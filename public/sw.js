@@ -1,10 +1,10 @@
-const CACHE_NAME = 'lecture-portal-v1';
+const CACHE_NAME = 'lecture-portal-v2';
 const STATIC_ASSETS = [
   '/',
   '/manifest.webmanifest',
   '/favicon.svg',
-  '/icons/icon-192.svg',
-  '/icons/icon-512.svg'
+  '/icons/icon-192.png',
+  '/icons/icon-512.png'
 ];
 
 self.addEventListener('install', (event) => {
