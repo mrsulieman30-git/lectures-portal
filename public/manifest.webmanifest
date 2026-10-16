@@ -1,14 +1,20 @@
 {
-  "name": "Lecture Portal",
-  "short_name": "LecturePortal",
-  "description": "Professor's Unified Academic Cabinet & Course Management OS",
+  "name": "Dr. Mohammad Sulieman — Lecture Portal",
+  "short_name": "Dr. Sulieman Portal",
+  "description": "Official Academic Portal for Dr. Mohammad Sulieman — Course Cabinets, Lectures & Assignments",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#0b0f19",
+  "background_color": "#020617",
   "theme_color": "#ff5e36",
   "orientation": "any",
   "icons": [
+    {
+      "src": "/images/og-square.jpg",
+      "sizes": "1024x1024",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
     {
       "src": "/icons/icon-192.svg",
       "sizes": "192x192",
