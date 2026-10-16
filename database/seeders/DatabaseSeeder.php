@@ -2,17 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Models\ActivityLog;
-use App\Models\Assignment;
-use App\Models\Document;
-use App\Models\Enrollment;
 use App\Models\LectureSchedule;
 use App\Models\Message;
-use App\Models\Notification;
 use App\Models\Semester;
 use App\Models\Subject;
 use App\Models\SubjectUpdate;
-use App\Models\Submission;
 use App\Models\University;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -22,11 +16,12 @@ class DatabaseSeeder extends Seeder
 {
     /**
      * Seed the application's database with Dr. Mohammad Sulieman's
-     * official Medical Laboratory Sciences universities, semesters, and subjects.
+     * official Admin Account and Medical Laboratory Universities/Subjects.
+     * (No student accounts are seeded; students register through the portal).
      */
     public function run(): void
     {
-        // ─── 1. Doctor / Admin Account ─────────────────────────────
+        // ─── 1. Doctor / Admin Account Only ────────────────────────
         $admin = User::firstOrCreate(
             ['email' => 'admin@portal.com'],
             [
@@ -231,126 +226,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // ─── 4. Sample Medical Lab Students ────────────────────────
-        $studentsData = [
-            [
-                'name' => 'Ahmed Hassan Duale',
-                'email' => 'ahmed.duale@rsu.edu.sd',
-                'university_id' => $rsu->id,
-                'student_id_no' => 'RSU-2024-8841',
-                'semester' => 'Semester 7',
-                'year' => 'Year 4',
-                'gender' => 'male',
-                'status' => 'approved',
-                'ip' => '192.168.1.101',
-                'subject_id' => $rsuBloodBanking->id,
-            ],
-            [
-                'name' => 'Fatima Mohamed Ali',
-                'email' => 'fatima.ali@citycot.edu.so',
-                'university_id' => $citycot->id,
-                'student_id_no' => 'CCU-2025-1044',
-                'semester' => 'Semester 5',
-                'year' => 'Year 3',
-                'gender' => 'female',
-                'status' => 'approved',
-                'ip' => '10.0.0.45',
-                'subject_id' => $citycotBloodBanking->id,
-            ],
-            [
-                'name' => 'Hodan Abdirahman Shire',
-                'email' => 'hodan.shire@citycot.edu.so',
-                'university_id' => $citycot->id,
-                'student_id_no' => 'CCU-2024-3310',
-                'semester' => 'Semester 7',
-                'year' => 'Year 4',
-                'gender' => 'female',
-                'status' => 'approved',
-                'ip' => '172.16.0.12',
-                'subject_id' => $citycotHematology2->id,
-            ],
-            [
-                'name' => 'Khadija Omar Barre',
-                'email' => 'khadija.omar@uob.edu.so',
-                'university_id' => $uob->id,
-                'student_id_no' => 'UOB-2025-4402',
-                'semester' => 'Semester 5',
-                'year' => 'Year 3',
-                'gender' => 'female',
-                'status' => 'approved',
-                'ip' => '203.0.113.88',
-                'subject_id' => $uobRbcDisorders->id,
-            ],
-            [
-                'name' => 'Yusuf Aden Warsame',
-                'email' => 'yusuf.aden@uob.edu.so',
-                'university_id' => $uob->id,
-                'student_id_no' => 'UOB-2026-7781',
-                'semester' => 'Semester 3',
-                'year' => 'Year 2',
-                'gender' => 'male',
-                'status' => 'approved',
-                'ip' => '198.51.100.19',
-                'subject_id' => $uobHistopathology->id,
-            ],
-            // Pending student (for admin approval workflow demonstration)
-            [
-                'name' => 'Mustafa Khalid Nuur',
-                'email' => 'mustafa.k@rsu.edu.sd',
-                'university_id' => $rsu->id,
-                'student_id_no' => 'RSU-2026-9912',
-                'semester' => 'Semester 7',
-                'year' => 'Year 4',
-                'gender' => 'male',
-                'status' => 'pending',
-                'ip' => '198.51.100.24',
-                'subject_id' => $rsuBloodBanking->id,
-            ],
-        ];
-
-        foreach ($studentsData as $s) {
-            $user = User::firstOrCreate(
-                ['email' => $s['email']],
-                [
-                    'name' => $s['name'],
-                    'password' => Hash::make('password'),
-                    'role' => 'student',
-                    'status' => $s['status'],
-                    'gender' => $s['gender'],
-                    'university_id' => $s['university_id'],
-                    'student_id_no' => $s['student_id_no'],
-                    'semester' => $s['semester'],
-                    'year' => $s['year'],
-                    'registration_ip_address' => $s['ip'],
-                    'email_verified_at' => $s['status'] === 'approved' ? now() : null,
-                ]
-            );
-
-            Enrollment::firstOrCreate(
-                ['user_id' => $user->id, 'subject_id' => $s['subject_id']],
-                ['status' => 'active']
-            );
-        }
-
-        // Additional enrollment for CITYCOT Semester 5 student to Bacteriology III
-        $fatima = User::where('email', 'fatima.ali@citycot.edu.so')->first();
-        if ($fatima) {
-            Enrollment::firstOrCreate(
-                ['user_id' => $fatima->id, 'subject_id' => $citycotBacteriology->id],
-                ['status' => 'active']
-            );
-        }
-
-        // Additional enrollment for CITYCOT Semester 7 student to Lab Management
-        $hodan = User::where('email', 'hodan.shire@citycot.edu.so')->first();
-        if ($hodan) {
-            Enrollment::firstOrCreate(
-                ['user_id' => $hodan->id, 'subject_id' => $citycotLabManagement->id],
-                ['status' => 'active']
-            );
-        }
-
-        // ─── 5. Clinical Lecture Schedules ─────────────────────────
+        // ─── 4. Clinical Lecture Schedules ─────────────────────────
         LectureSchedule::firstOrCreate(
             ['subject_id' => $rsuBloodBanking->id, 'title' => 'Blood Banking Practical: ABO & Rh(D) Discrepancies'],
             [
@@ -384,7 +260,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // ─── 6. Subject Updates / Announcements ───────────────────
+        // ─── 5. Subject Updates / Announcements ───────────────────
         SubjectUpdate::firstOrCreate(
             ['subject_id' => $rsuBloodBanking->id, 'title' => 'Mid-Semester Immunohematology Practical Protocols'],
             [
@@ -403,7 +279,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // ─── 7. Academic Discussion Messages ───────────────────────
+        // ─── 6. Academic Discussion Messages ───────────────────────
         Message::firstOrCreate(
             ['subject_id' => $rsuBloodBanking->id, 'content' => 'Welcome to Blood Banking and Immunohematology. This cabinet will contain all lecture slides, textbook reference chapters, and clinical practical protocols.'],
             [

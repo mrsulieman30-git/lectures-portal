@@ -1,60 +1,58 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# website: http://ogp.me/ns/website#">
+    <head prefix="og: http://ogp.me/ns#">
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-
-        <title inertia>{{ config('app.name', 'Dr. Mohammad Sulieman — Lecture Portal') }}</title>
-        <meta name="description" content="This is the official website for Dr. Mohammad Sulieman. He will share his lectures, course materials, assignments, and academic announcements with you through it.">
-        <meta name="author" content="Dr. Mohammad Sulieman">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
 
         @php
             $baseUrl = rtrim(config('app.url', 'https://portal.suliemani.cloud'), '/');
             if (!str_starts_with($baseUrl, 'http')) {
                 $baseUrl = 'https://' . $baseUrl;
             }
-            $ogImageCover = $baseUrl . '/images/og-cover.jpg';
-            $ogImageSquare = $baseUrl . '/images/whatsapp-thumb.jpg';
+            $ogImage = $baseUrl . '/images/whatsapp-thumb.jpg';
+            $ogCover = $baseUrl . '/images/og-cover.jpg';
+            $siteTitle = 'Dr. Mohammad Sulieman — Official Lecture Portal';
+            $siteDesc = 'Official academic portal for Dr. Mohammad Sulieman. Access clinical hematology lectures, diagnostic laboratory manuals, and course cabinets.';
         @endphp
 
-        <!-- Open Graph / Facebook / WhatsApp -->
-        <meta property="og:type" content="website">
-        <meta property="og:url" content="{{ $baseUrl }}">
-        <meta property="og:site_name" content="Dr. Mohammad Sulieman — Official Lecture Portal">
-        <meta property="og:title" content="Dr. Mohammad Sulieman — Official Lecture Portal">
-        <meta property="og:description" content="This is the official website for Dr. Mohammad Sulieman. He will share his lectures, course materials, assignments, and academic announcements with you through it.">
-        <meta property="og:image" content="{{ $ogImageCover }}">
-        <meta property="og:image:secure_url" content="{{ $ogImageCover }}">
-        <meta property="og:image:type" content="image/jpeg">
-        <meta property="og:image:width" content="1200">
-        <meta property="og:image:height" content="675">
-        <meta property="og:image:alt" content="Dr. Mohammad Sulieman — Official Lecture Portal">
-
-        <!-- Additional Square OG Image optimized for WhatsApp mobile thumbnails -->
-        <meta property="og:image" content="{{ $ogImageSquare }}">
-        <meta property="og:image:secure_url" content="{{ $ogImageSquare }}">
+        <!-- Primary WhatsApp & OpenGraph Image (Must be at the top of <head> for WhatsApp scrapers) -->
+        <meta property="og:image" content="{{ $ogImage }}">
+        <meta property="og:image:url" content="{{ $ogImage }}">
+        <meta property="og:image:secure_url" content="{{ $ogImage }}">
         <meta property="og:image:type" content="image/jpeg">
         <meta property="og:image:width" content="400">
         <meta property="og:image:height" content="400">
-        <meta property="og:image:alt" content="Dr. Mohammad Sulieman Logo">
+        <meta property="og:image:alt" content="Dr. Mohammad Sulieman Emblem">
+        <link rel="image_src" href="{{ $ogImage }}">
+        <meta name="image" content="{{ $ogImage }}">
 
-        <!-- WhatsApp & Legacy Crawlers Thumbnail -->
-        <link rel="image_src" href="{{ $ogImageSquare }}">
+        <!-- Open Graph / WhatsApp / Facebook Core Metadata -->
+        <meta property="og:site_name" content="Dr. Mohammad Sulieman Portal">
+        <meta property="og:title" content="{{ $siteTitle }}">
+        <meta property="og:description" content="{{ $siteDesc }}">
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="{{ $baseUrl }}">
+
+        <!-- Standard Search & Crawler Meta -->
+        <title inertia>{{ config('app.name', $siteTitle) }}</title>
+        <meta name="title" content="{{ $siteTitle }}">
+        <meta name="description" content="{{ $siteDesc }}">
+        <meta name="author" content="Dr. Mohammad Sulieman">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <!-- Twitter / X Cards -->
         <meta name="twitter:card" content="summary_large_image">
         <meta name="twitter:url" content="{{ $baseUrl }}">
-        <meta name="twitter:title" content="Dr. Mohammad Sulieman — Official Lecture Portal">
-        <meta name="twitter:description" content="This is the official website for Dr. Mohammad Sulieman. He will share his lectures, course materials, assignments, and academic announcements with you through it.">
-        <meta name="twitter:image" content="{{ $ogImageCover }}">
+        <meta name="twitter:title" content="{{ $siteTitle }}">
+        <meta name="twitter:description" content="{{ $siteDesc }}">
+        <meta name="twitter:image" content="{{ $ogCover }}">
 
         <!-- PWA Configuration -->
         <link rel="manifest" href="/manifest.webmanifest">
         <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-        <meta name="theme-color" content="#ff5e36">
+        <meta name="theme-color" content="#e11d48">
         <meta name="apple-mobile-web-app-capable" content="yes">
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="apple-mobile-web-app-status-bar-style" content="default">
         <meta name="apple-mobile-web-app-title" content="Dr. Sulieman Portal">
         <link rel="apple-touch-icon" href="/icons/icon-192.png">
         <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192.png">

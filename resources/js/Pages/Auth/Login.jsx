@@ -86,19 +86,11 @@ export default function Login({ status, canResetPassword, deviceBlocked }) {
 
     const handleQuickFill = (role) => {
         setSelectedRole(role);
-        if (role === 'student') {
-            setData((prev) => ({
-                ...prev,
-                email: 'alex.hayes@utas.edu',
-                password: 'password',
-            }));
-        } else {
-            setData((prev) => ({
-                ...prev,
-                email: 'admin@portal.com',
-                password: 'password',
-            }));
-        }
+        setData((prev) => ({
+            ...prev,
+            email: 'admin@portal.com',
+            password: 'password',
+        }));
     };
 
     return (
