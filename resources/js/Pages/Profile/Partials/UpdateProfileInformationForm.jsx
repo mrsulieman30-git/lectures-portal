@@ -35,6 +35,7 @@ export default function UpdateProfileInformation({
         // Reset status
         setAvatarError(null);
         setAvatarSuccess(false);
+        setImgLoadError(false);
 
         // Validation
         if (!file.type.startsWith('image/')) {

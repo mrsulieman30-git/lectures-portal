@@ -237,11 +237,14 @@ class User extends Authenticatable
             return $this->avatar_path;
         }
 
-        if (\Illuminate\Support\Facades\Storage::disk('public')->exists($this->avatar_path)) {
-            return asset('storage/'.$this->avatar_path);
+        try {
+            return route('user.avatar', [
+                'user' => $this->id,
+                'v' => substr(md5((string) $this->avatar_path . (string) ($this->updated_at?->timestamp ?? '')), 0, 8),
+            ]);
+        } catch (\Throwable $e) {
+            return asset('storage/'.ltrim($this->avatar_path, '/'));
         }
-
-        return null;
     }
 
     public function getInitialsAttribute(): string

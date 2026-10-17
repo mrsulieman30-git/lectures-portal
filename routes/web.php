@@ -26,6 +26,8 @@ Route::get('/', function () {
     ]);
 })->name('welcome');
 
+Route::get('/avatar/{user}', [ProfileController::class, 'avatar'])->name('user.avatar');
+Route::get('/storage/{path}', [ProfileController::class, 'serveStorage'])->where('path', '.*')->name('storage.serve');
 Route::post('/device-change-request', [DeviceController::class, 'submitChangeRequest'])->name('device.request-change');
 
 // ─── Pending Approval Page ─────────────────────────────────────

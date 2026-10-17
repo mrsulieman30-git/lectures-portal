@@ -3,7 +3,7 @@ import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import NotificationBell from '@/Components/NotificationBell';
 import { Link, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
     BookOpen, 
     Building2, 
@@ -28,6 +28,10 @@ export default function AuthenticatedLayout({ header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
     const [avatarError, setAvatarError] = useState(false);
     const { t } = useTranslation();
+
+    useEffect(() => {
+        setAvatarError(false);
+    }, [user?.avatar_url]);
 
     const isAdmin = user.role === 'admin';
     const isFemale = user?.gender === 'female';
