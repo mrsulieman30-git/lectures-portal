@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useTranslation, LanguageSwitcher } from '@/Context/LanguageContext';
 import { ThemeToggle } from '@/Context/ThemeContext';
+import ChatBubble from '@/Components/ChatBubble';
 
 export default function AuthenticatedLayout({ header, children }) {
     const user = usePage().props.auth.user;
@@ -332,71 +333,189 @@ export default function AuthenticatedLayout({ header, children }) {
                     </div>
                 </div>
 
-                {/* Mobile Navigation Dropdown Menu */}
+                {/* Mobile Navigation Dropdown Menu with Line-Separated Touch Buttons */}
                 {showingNavigationDropdown && (
-                    <div className="lg:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#121622] px-4 pt-2 pb-4 space-y-1">
-                        <div className="pb-2 pt-1 flex items-center justify-between gap-2">
+                    <div className="lg:hidden border-t border-slate-200/80 dark:border-white/10 bg-white/95 dark:bg-[#121622]/95 backdrop-blur-xl px-4 pt-3 pb-6 space-y-3">
+                        <div className="pb-1 flex items-center justify-between gap-2">
                             <LanguageSwitcher className="w-full justify-center" />
                         </div>
 
-                        {isAdmin ? (
-                            <>
-                                <ResponsiveNavLink href={route('admin.dashboard')} active={route().current('admin.dashboard')}>
-                                    {t('commandCenter')}
-                                </ResponsiveNavLink>
-                                <ResponsiveNavLink href={route('admin.universities.index')} active={route().current('admin.universities.*')}>
-                                    {t('universities')}
-                                </ResponsiveNavLink>
-                                <ResponsiveNavLink href={route('admin.subjects.index')} active={route().current('admin.subjects.*')}>
-                                    {t('courseCabinets')}
-                                </ResponsiveNavLink>
-                                <ResponsiveNavLink href={route('library.index')} active={route().current('library.*')}>
-                                    {t('universalLibrary', 'Library')}
-                                </ResponsiveNavLink>
-                                <ResponsiveNavLink href={route('admin.users')} active={route().current('admin.users')}>
-                                    {t('students')}
-                                </ResponsiveNavLink>
-                                <ResponsiveNavLink href={route('admin.analytics')} active={route().current('admin.analytics')}>
-                                    {t('analytics')}
-                                </ResponsiveNavLink>
-                                <ResponsiveNavLink href={route('schedule.index')} active={route().current('schedule.*')}>
-                                    {t('schedule')}
-                                </ResponsiveNavLink>
-                                <ResponsiveNavLink href={route('notes.index')} active={route().current('notes.*')}>
-                                    {t('studyNotes')}
-                                </ResponsiveNavLink>
-                                <ResponsiveNavLink href={route('admin.agent-actions.index')} active={route().current('admin.agent-actions.*')} className="text-amber-600 dark:text-amber-400 font-bold flex items-center gap-2">
-                                    <Bot className="w-4 h-4" />
-                                    <span>Agent Approval Hub</span>
-                                </ResponsiveNavLink>
-                            </>
-                        ) : (
-                            <>
-                                <ResponsiveNavLink href={route('dashboard')} active={route().current('dashboard')}>
-                                    {t('myDashboard')}
-                                </ResponsiveNavLink>
-                                <ResponsiveNavLink href={route('library.index')} active={route().current('library.*')}>
-                                    {t('universalLibrary', 'Library')}
-                                </ResponsiveNavLink>
-                                <ResponsiveNavLink href={route('schedule.index')} active={route().current('schedule.*')}>
-                                    {t('lectureSchedule')}
-                                </ResponsiveNavLink>
-                                <ResponsiveNavLink href={route('notes.index')} active={route().current('notes.*')}>
-                                    {t('studyNotes')}
-                                </ResponsiveNavLink>
-                            </>
-                        )}
+                        {/* Line-separated Navigation Menu Group */}
+                        <div className="rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-slate-900/80 divide-y divide-slate-150/70 dark:divide-white/5 overflow-hidden shadow-xs">
+                            {isAdmin ? (
+                                <>
+                                    <ResponsiveNavLink 
+                                        href={route('admin.dashboard')} 
+                                        active={route().current('admin.dashboard')}
+                                        className="py-3 px-4 flex items-center justify-between"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <LayoutDashboard className="w-4 h-4 shrink-0 text-[#ff5e36]" />
+                                            <span>{t('commandCenter')}</span>
+                                        </div>
+                                        <ChevronDown className="w-3.5 h-3.5 -rotate-90 text-slate-400" />
+                                    </ResponsiveNavLink>
 
-                        <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
-                            <div className="flex items-center gap-3 px-3 py-1.5">
+                                    <ResponsiveNavLink 
+                                        href={route('admin.universities.index')} 
+                                        active={route().current('admin.universities.*')}
+                                        className="py-3 px-4 flex items-center justify-between"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <Building2 className="w-4 h-4 shrink-0 text-slate-500" />
+                                            <span>{t('universities')}</span>
+                                        </div>
+                                        <ChevronDown className="w-3.5 h-3.5 -rotate-90 text-slate-400" />
+                                    </ResponsiveNavLink>
+
+                                    <ResponsiveNavLink 
+                                        href={route('admin.subjects.index')} 
+                                        active={route().current('admin.subjects.*')}
+                                        className="py-3 px-4 flex items-center justify-between"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <FolderKanban className="w-4 h-4 shrink-0 text-[#ff5e36]" />
+                                            <span>{t('courseCabinets')}</span>
+                                        </div>
+                                        <ChevronDown className="w-3.5 h-3.5 -rotate-90 text-slate-400" />
+                                    </ResponsiveNavLink>
+
+                                    <ResponsiveNavLink 
+                                        href={route('library.index')} 
+                                        active={route().current('library.*')}
+                                        className="py-3 px-4 flex items-center justify-between"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <BookOpen className="w-4 h-4 shrink-0 text-amber-500" />
+                                            <span>{t('universalLibrary', 'Library')}</span>
+                                        </div>
+                                        <ChevronDown className="w-3.5 h-3.5 -rotate-90 text-slate-400" />
+                                    </ResponsiveNavLink>
+
+                                    <ResponsiveNavLink 
+                                        href={route('admin.users')} 
+                                        active={route().current('admin.users')}
+                                        className="py-3 px-4 flex items-center justify-between"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <Users className="w-4 h-4 shrink-0 text-emerald-500" />
+                                            <span>{t('students')}</span>
+                                        </div>
+                                        <ChevronDown className="w-3.5 h-3.5 -rotate-90 text-slate-400" />
+                                    </ResponsiveNavLink>
+
+                                    <ResponsiveNavLink 
+                                        href={route('admin.analytics')} 
+                                        active={route().current('admin.analytics')}
+                                        className="py-3 px-4 flex items-center justify-between"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <BarChart3 className="w-4 h-4 shrink-0 text-purple-500" />
+                                            <span>{t('analytics')}</span>
+                                        </div>
+                                        <ChevronDown className="w-3.5 h-3.5 -rotate-90 text-slate-400" />
+                                    </ResponsiveNavLink>
+
+                                    <ResponsiveNavLink 
+                                        href={route('schedule.index')} 
+                                        active={route().current('schedule.*')}
+                                        className="py-3 px-4 flex items-center justify-between"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <Calendar className="w-4 h-4 shrink-0 text-cyan-500" />
+                                            <span>{t('schedule')}</span>
+                                        </div>
+                                        <ChevronDown className="w-3.5 h-3.5 -rotate-90 text-slate-400" />
+                                    </ResponsiveNavLink>
+
+                                    <ResponsiveNavLink 
+                                        href={route('notes.index')} 
+                                        active={route().current('notes.*')}
+                                        className="py-3 px-4 flex items-center justify-between"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <FileEdit className="w-4 h-4 shrink-0 text-rose-500" />
+                                            <span>{t('studyNotes')}</span>
+                                        </div>
+                                        <ChevronDown className="w-3.5 h-3.5 -rotate-90 text-slate-400" />
+                                    </ResponsiveNavLink>
+
+                                    <ResponsiveNavLink 
+                                        href={route('admin.agent-actions.index')} 
+                                        active={route().current('admin.agent-actions.*')} 
+                                        className="py-3 px-4 flex items-center justify-between text-amber-600 dark:text-amber-400 font-bold"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <Bot className="w-4 h-4 shrink-0 text-amber-500" />
+                                            <span>Agent Approval Hub</span>
+                                        </div>
+                                        <ChevronDown className="w-3.5 h-3.5 -rotate-90 text-slate-400" />
+                                    </ResponsiveNavLink>
+                                </>
+                            ) : (
+                                <>
+                                    <ResponsiveNavLink 
+                                        href={route('dashboard')} 
+                                        active={route().current('dashboard')}
+                                        className="py-3 px-4 flex items-center justify-between"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <LayoutDashboard className="w-4 h-4 shrink-0 text-[#ff5e36]" />
+                                            <span>{t('myDashboard')}</span>
+                                        </div>
+                                        <ChevronDown className="w-3.5 h-3.5 -rotate-90 text-slate-400" />
+                                    </ResponsiveNavLink>
+
+                                    <ResponsiveNavLink 
+                                        href={route('library.index')} 
+                                        active={route().current('library.*')}
+                                        className="py-3 px-4 flex items-center justify-between"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <BookOpen className="w-4 h-4 shrink-0 text-amber-500" />
+                                            <span>{t('universalLibrary', 'Library')}</span>
+                                        </div>
+                                        <ChevronDown className="w-3.5 h-3.5 -rotate-90 text-slate-400" />
+                                    </ResponsiveNavLink>
+
+                                    <ResponsiveNavLink 
+                                        href={route('schedule.index')} 
+                                        active={route().current('schedule.*')}
+                                        className="py-3 px-4 flex items-center justify-between"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <Calendar className="w-4 h-4 shrink-0 text-cyan-500" />
+                                            <span>{t('lectureSchedule')}</span>
+                                        </div>
+                                        <ChevronDown className="w-3.5 h-3.5 -rotate-90 text-slate-400" />
+                                    </ResponsiveNavLink>
+
+                                    <ResponsiveNavLink 
+                                        href={route('notes.index')} 
+                                        active={route().current('notes.*')}
+                                        className="py-3 px-4 flex items-center justify-between"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <FileEdit className="w-4 h-4 shrink-0 text-emerald-500" />
+                                            <span>{t('studyNotes')}</span>
+                                        </div>
+                                        <ChevronDown className="w-3.5 h-3.5 -rotate-90 text-slate-400" />
+                                    </ResponsiveNavLink>
+                                </>
+                            )}
+                        </div>
+
+                        {/* User Account & Actions Box */}
+                        <div className="rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-slate-900/80 p-3 divide-y divide-slate-100 dark:divide-white/5 space-y-2">
+                            <div className="flex items-center gap-3 px-1 py-1">
                                 {user.avatar_url ? (
                                     <img
                                         src={user.avatar_url}
                                         alt={user.name}
-                                        className="w-9 h-9 rounded-xl object-cover shrink-0 shadow-xs"
+                                        className="w-10 h-10 rounded-xl object-cover shrink-0 shadow-xs"
                                     />
                                 ) : (
-                                    <div className={`w-9 h-9 rounded-xl text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs ${
+                                    <div className={`w-10 h-10 rounded-xl text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs ${
                                         isFemale && !isAdmin
                                             ? 'bg-gradient-to-tr from-rose-500 to-pink-500'
                                             : 'bg-gradient-to-tr from-[#ff5e36] to-[#ff416c]'
@@ -416,11 +535,12 @@ export default function AuthenticatedLayout({ header, children }) {
                                     <div className="text-xs text-slate-500 dark:text-slate-400 truncate">{user.email}</div>
                                 </div>
                             </div>
-                            <div className="mt-2 space-y-1">
-                                <ResponsiveNavLink href={route('profile.edit')}>
+
+                            <div className="pt-2 space-y-1">
+                                <ResponsiveNavLink href={route('profile.edit')} className="py-2.5">
                                     {t('profileSettings')}
                                 </ResponsiveNavLink>
-                                <ResponsiveNavLink href={route('logout')} method="post" as="button">
+                                <ResponsiveNavLink href={route('logout')} method="post" as="button" className="py-2.5 text-rose-600 dark:text-rose-400">
                                     {t('logOut')}
                                 </ResponsiveNavLink>
                             </div>
@@ -439,7 +559,7 @@ export default function AuthenticatedLayout({ header, children }) {
             )}
 
             {/* Main Content Area */}
-            <main className="flex-1">
+            <main className="flex-1 overflow-x-hidden">
                 {children}
             </main>
 
@@ -454,13 +574,16 @@ export default function AuthenticatedLayout({ header, children }) {
                             href="https://medblog.seeha.tech" 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="font-bold text-rose-600 dark:text-rose-400 hover:underline"
+                            className="font-bold text-[#ff5e36] dark:text-[#ff7a54] hover:underline"
                         >
                             Dr. Mohammad Sulieman CV &amp; Medical Blog
                         </a>
                     </div>
                 </div>
             </footer>
+
+            {/* Academic Floating Messenger Bubble */}
+            <ChatBubble />
         </div>
     );
 }

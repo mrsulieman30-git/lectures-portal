@@ -20,7 +20,9 @@ import {
     DownloadCloud,
     Sparkles,
     Layers,
-    FileSpreadsheet
+    FileSpreadsheet,
+    Camera,
+    Image as ImageIcon
 } from 'lucide-react';
 import { useTranslation } from '@/Context/LanguageContext';
 import CountdownTimer from '@/Components/CountdownTimer';
@@ -220,75 +222,77 @@ export default function StudentSubject({ subject = {}, enrolled = false, submiss
                                 {t('noMaterialsPublished')}
                             </div>
                         ) : (
-                            <div className="divide-y divide-slate-100/70 dark:divide-white/5 bg-white/30 dark:bg-slate-900/20">
-                                {subject.documents.map((doc) => (
-                                    <div key={doc.id} className="p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:bg-white/60 dark:hover:bg-slate-800/50 transition-all duration-200 group">
-                                        <div className="flex items-start gap-4">
-                                            <div 
-                                                className="w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-xs uppercase shrink-0 mt-0.5 shadow-sm border transition-transform duration-200 group-hover:scale-105 group-hover:rotate-1"
-                                                style={{
-                                                    backgroundColor: `${subjectColor}15`,
-                                                    borderColor: `${subjectColor}30`,
-                                                    color: subjectColor
-                                                }}
-                                            >
-                                                {doc.file_type || 'DOC'}
-                                            </div>
-                                            <div>
-                                                <h4 className="font-bold text-slate-900 dark:text-white text-sm group-hover:text-[#FF5E36] transition-colors font-display">{doc.title}</h4>
-                                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">{doc.description}</p>
-                                                <div className="flex items-center gap-3 text-[11px] text-slate-400 mt-2 font-mono">
-                                                    <span>{formatBytes(doc.file_size)}</span>
-                                                    {doc.is_view_only ? (
-                                                        <span className="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400 font-semibold font-sans">
-                                                            <Lock className="w-3 h-3" />
-                                                            {t('viewOnlyReading')}
-                                                        </span>
-                                                    ) : (
-                                                        <span className="text-emerald-600 dark:text-emerald-400 font-semibold font-sans">
-                                                            {t('downloadable')}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center gap-2.5 shrink-0">
-                                            {/* Lecture Preview Button with Gender Accent */}
-                                            <a
-                                                href={route('documents.view', doc.id)}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border shadow-xs hover:shadow transition-all hover:scale-105 active:scale-95 ${
-                                                    isFemale
-                                                        ? 'bg-rose-50 hover:bg-rose-100 text-rose-600 border-rose-200 dark:bg-rose-950/40 dark:hover:bg-rose-900/50 dark:text-rose-300 dark:border-rose-900/60 shadow-rose-500/10'
-                                                        : 'bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border-slate-200/80 dark:border-white/10'
-                                                }`}
-                                            >
-                                                <Eye className={`w-3.5 h-3.5 ${isFemale ? 'text-rose-500' : 'text-slate-500 dark:text-slate-400'}`} />
-                                                <span>{t('viewOnline')}</span>
-                                            </a>
-                                            {doc.is_downloadable && !doc.is_view_only && (
-                                                <a
-                                                    href={route('documents.download', doc.id)}
-                                                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-white text-xs font-semibold shadow-md transition-all hover:scale-105 active:scale-95"
+                            <div className="overflow-x-auto w-full scrollbar-thin">
+                                <div className="min-w-[640px] divide-y divide-slate-150/70 dark:divide-white/5 bg-white/40 dark:bg-slate-900/40">
+                                    {subject.documents.map((doc) => (
+                                        <div key={doc.id} className="p-5 flex items-center justify-between gap-4 hover:bg-white/80 dark:hover:bg-slate-800/60 transition-all duration-200 group border-b border-slate-100 dark:border-white/5 last:border-b-0">
+                                            <div className="flex items-center gap-4 min-w-0">
+                                                <div 
+                                                    className="w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-xs uppercase shrink-0 shadow-xs border transition-transform duration-200 group-hover:scale-105"
                                                     style={{
-                                                        background: `linear-gradient(135deg, ${subjectColor} 0%, #1e1b4b 100%)`,
-                                                        boxShadow: `0 4px 12px ${subjectColor}33`
+                                                        backgroundColor: `${subjectColor}15`,
+                                                        borderColor: `${subjectColor}35`,
+                                                        color: subjectColor
                                                     }}
                                                 >
-                                                    <Download className="w-3.5 h-3.5" />
-                                                    {t('download')}
+                                                    {doc.file_type || 'DOC'}
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <h4 className="font-bold text-slate-900 dark:text-white text-sm group-hover:text-[#FF5E36] transition-colors font-display truncate">{doc.title}</h4>
+                                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">{doc.description}</p>
+                                                    <div className="flex items-center gap-3 text-[11px] text-slate-400 mt-1.5 font-mono">
+                                                        <span>{formatBytes(doc.file_size)}</span>
+                                                        {doc.is_view_only ? (
+                                                            <span className="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400 font-semibold font-sans">
+                                                                <Lock className="w-3 h-3" />
+                                                                {t('viewOnlyReading')}
+                                                            </span>
+                                                        ) : (
+                                                            <span className="text-emerald-600 dark:text-emerald-400 font-semibold font-sans">
+                                                                {t('downloadable')}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center gap-2.5 shrink-0">
+                                                {/* Fully Highlighted View / Read Button */}
+                                                <a
+                                                    href={route('documents.view', doc.id)}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold shadow-sm transition-all hover:scale-105 active:scale-95 ${
+                                                        isFemale
+                                                            ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-rose-500/25 hover:brightness-105'
+                                                            : 'bg-[#ff5e36] text-white hover:bg-[#e04822] shadow-[#ff5e36]/30'
+                                                    }`}
+                                                >
+                                                    <Eye className="w-3.5 h-3.5" />
+                                                    <span>{t('viewOnline')}</span>
                                                 </a>
-                                            )}
+                                                {doc.is_downloadable && !doc.is_view_only && (
+                                                    <a
+                                                        href={route('documents.download', doc.id)}
+                                                        className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-white text-xs font-bold shadow-md transition-all hover:scale-105 active:scale-95"
+                                                        style={{
+                                                            background: `linear-gradient(135deg, ${subjectColor} 0%, #1e1b4b 100%)`,
+                                                            boxShadow: `0 4px 12px ${subjectColor}33`
+                                                        }}
+                                                    >
+                                                        <Download className="w-3.5 h-3.5" />
+                                                        <span>{t('download')}</span>
+                                                    </a>
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
                             </div>
                         )}
                     </div>
 
-                    {/* Section 2: Course Assignments */}
+                    {/* Section 2: Course Assignments with Student Marks */}
                     <div className="liquid-glass rounded-3xl border border-white/60 dark:border-white/10 shadow-glass overflow-hidden">
                         <div className="p-6 border-b border-slate-100/80 dark:border-white/10 bg-white/40 dark:bg-slate-800/40 flex items-center justify-between">
                             <div className="flex items-center gap-3">
@@ -313,8 +317,8 @@ export default function StudentSubject({ subject = {}, enrolled = false, submiss
                                     const isDue = new Date(assign.deadline) < new Date();
 
                                     return (
-                                        <div key={assign.id} className="p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:bg-white/60 dark:hover:bg-slate-800/50 transition-colors">
-                                            <div className="space-y-1.5">
+                                        <div key={assign.id} className="p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:bg-white/60 dark:hover:bg-slate-800/50 transition-colors border-b border-slate-100 dark:border-white/5 last:border-b-0">
+                                            <div className="space-y-1.5 flex-1 min-w-0">
                                                 <div className="flex items-center gap-2">
                                                     <h4 className="font-bold text-slate-900 dark:text-white text-base font-display">{assign.title}</h4>
                                                     <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-900/60 text-[#FF5E36] dark:text-[#ff7a54]">
@@ -331,25 +335,32 @@ export default function StudentSubject({ subject = {}, enrolled = false, submiss
                                                 </div>
                                             </div>
 
-                                            <div className="shrink-0 flex items-center gap-3">
+                                            <div className="shrink-0 flex flex-col sm:items-end gap-2">
                                                 {submission ? (
                                                     submission.status === 'graded' ? (
-                                                        <div className="text-right">
-                                                            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shadow-xs">
+                                                        <div className="flex flex-col sm:items-end gap-1.5">
+                                                            <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shadow-xs">
                                                                 <Award className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                                                                {t('score')}: {submission.grade} / {assign.max_grade}
-                                                            </span>
+                                                                <span>{t('score')}: {submission.grade} / {assign.max_grade}</span>
+                                                                <span className="px-1.5 py-0.5 rounded bg-emerald-600 text-white font-mono text-[10px]">
+                                                                    {Math.round((submission.grade / assign.max_grade) * 100)}%
+                                                                </span>
+                                                            </div>
                                                             {submission.feedback && (
-                                                                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 max-w-xs italic">
+                                                                <div className="text-[11px] text-slate-600 dark:text-slate-300 bg-white/80 dark:bg-slate-800/80 p-2.5 rounded-xl border border-slate-200/80 dark:border-white/10 max-w-xs shadow-xs">
+                                                                    <span className="font-bold text-slate-800 dark:text-white">Feedback: </span>
                                                                     "{submission.feedback}"
-                                                                </p>
+                                                                </div>
                                                             )}
                                                         </div>
                                                     ) : (
-                                                        <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 shadow-xs">
-                                                            <CheckCircle2 className="w-3.5 h-3.5 text-amber-600" />
-                                                            {t('submittedPending')}
-                                                        </span>
+                                                        <div className="flex flex-col sm:items-end gap-1">
+                                                            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 shadow-xs">
+                                                                <CheckCircle2 className="w-3.5 h-3.5 text-amber-600" />
+                                                                {t('submittedPending')}
+                                                            </span>
+                                                            <span className="text-[10px] text-slate-400">Under review by Dr. Mohammad Sulieman</span>
+                                                        </div>
                                                     )
                                                 ) : isDue && !assign.allow_late ? (
                                                     <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 text-xs font-semibold border border-slate-200 dark:border-slate-700 cursor-not-allowed">
@@ -359,7 +370,7 @@ export default function StudentSubject({ subject = {}, enrolled = false, submiss
                                                 ) : (
                                                     <button
                                                         onClick={() => setSubmittingAssignment(assign)}
-                                                        className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-white text-xs font-semibold shadow-md transition-all hover:scale-105 active:scale-95 ${
+                                                        className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-white text-xs font-bold shadow-md transition-all hover:scale-105 active:scale-95 ${
                                                             isDue
                                                                 ? 'bg-amber-600 hover:bg-amber-500 shadow-amber-600/20'
                                                                 : isFemale
@@ -382,50 +393,130 @@ export default function StudentSubject({ subject = {}, enrolled = false, submiss
                 </div>
             </div>
 
-            {/* Turn In Assignment Modal in Frosted Liquid Glass */}
+            {/* Turn In Assignment Modal with Direct Mobile Camera Capture */}
             {submittingAssignment && (
                 <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4">
-                    <div className="liquid-glass rounded-3xl border border-white/60 max-w-md w-full p-6 sm:p-8 shadow-2xl relative overflow-hidden">
-                        <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full bg-indigo-500/10 blur-2xl pointer-events-none" />
-                        <h3 className="text-xl font-bold text-slate-900 font-display mb-1">{t('turnInAssignment')}</h3>
-                        <p className="text-xs text-slate-500 mb-5">{submittingAssignment.title}</p>
+                    <div className="liquid-glass rounded-3xl border border-white/60 dark:border-white/10 max-w-lg w-full p-6 sm:p-8 shadow-2xl relative overflow-hidden bg-white/95 dark:bg-[#121622]/95 max-h-[92vh] overflow-y-auto">
+                        <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full bg-[#ff5e36]/15 blur-2xl pointer-events-none" />
+                        
+                        <div className="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-900 dark:text-white font-display">{t('turnInAssignment')}</h3>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{submittingAssignment.title}</p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setSubmittingAssignment(null);
+                                    reset();
+                                }}
+                                className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800"
+                            >
+                                <Lock className="w-4 h-4 hidden" />
+                                &times;
+                            </button>
+                        </div>
 
                         <form onSubmit={handleSubmitAssignment} className="space-y-4">
-                            <div>
-                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">{t('uploadFileArchive')}</label>
-                                <input
-                                    type="file"
-                                    onChange={(e) => setData('file', e.target.files[0])}
-                                    className="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition-all cursor-pointer"
-                                />
-                                {errors.file && <p className="text-xs text-rose-600 mt-1">{errors.file}</p>}
+                            {/* Upload Options: Regular File OR Camera Photo Scan */}
+                            <div className="space-y-3">
+                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                                    Submission File or Handwritten Report Scan
+                                </label>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                    {/* Direct Mobile Camera Capture Button */}
+                                    <label className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 border-dashed border-[#ff5e36]/50 bg-[#ff5e36]/5 hover:bg-[#ff5e36]/10 text-[#ff5e36] cursor-pointer transition-all hover:scale-[1.02] active:scale-95 text-center">
+                                        <Camera className="w-6 h-6" />
+                                        <div>
+                                            <span className="text-xs font-bold block">Snap with Camera</span>
+                                            <span className="text-[10px] opacity-75">Scan handwritten paper</span>
+                                        </div>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            capture="environment"
+                                            className="hidden"
+                                            onChange={(e) => {
+                                                const file = e.target.files[0];
+                                                if (file) {
+                                                    setData('file', file);
+                                                }
+                                            }}
+                                        />
+                                    </label>
+
+                                    {/* Standard File Upload (PDF, Word, etc.) */}
+                                    <label className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 border-dashed border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-slate-800/40 hover:bg-slate-100 text-slate-600 dark:text-slate-300 cursor-pointer transition-all hover:scale-[1.02] active:scale-95 text-center">
+                                        <Upload className="w-6 h-6 text-slate-400" />
+                                        <div>
+                                            <span className="text-xs font-bold block">Browse Files</span>
+                                            <span className="text-[10px] text-slate-400">PDF, Word, or Image</span>
+                                        </div>
+                                        <input
+                                            type="file"
+                                            className="hidden"
+                                            onChange={(e) => {
+                                                const file = e.target.files[0];
+                                                if (file) {
+                                                    setData('file', file);
+                                                }
+                                            }}
+                                        />
+                                    </label>
+                                </div>
+
+                                {/* File selected indicator */}
+                                {data.file && (
+                                    <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs">
+                                        <div className="flex items-center gap-2 truncate">
+                                            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+                                            <span className="font-semibold truncate">{data.file.name}</span>
+                                            <span className="text-[10px] font-mono text-emerald-600">({(data.file.size / 1024).toFixed(0)} KB)</span>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => setData('file', null)}
+                                            className="text-xs text-rose-600 hover:underline font-bold shrink-0 ml-2"
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+                                )}
+
+                                {errors.file && <p className="text-xs text-rose-600">{errors.file}</p>}
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">{t('notesRepoLink')}</label>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+                                    {t('notesRepoLink')}
+                                </label>
                                 <textarea
                                     rows={3}
                                     placeholder={t('notesPlaceholder')}
                                     value={data.text_content}
                                     onChange={(e) => setData('text_content', e.target.value)}
-                                    className="w-full px-3.5 py-2.5 text-sm bg-white/70 border border-slate-200/80 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                                    className="w-full px-3.5 py-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-white/10 rounded-2xl focus:ring-2 focus:ring-[#ff5e36]/30 focus:border-[#ff5e36] text-slate-800 dark:text-white transition-all"
                                 />
                             </div>
 
-                            <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100">
+                            <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-white/10">
                                 <button
                                     type="button"
-                                    onClick={() => setSubmittingAssignment(null)}
-                                    className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 rounded-xl transition-colors"
+                                    onClick={() => {
+                                        setSubmittingAssignment(null);
+                                        reset();
+                                    }}
+                                    className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-xl transition-colors"
                                 >
                                     {t('cancel')}
                                 </button>
                                 <button
                                     type="submit"
-                                    disabled={processing}
-                                    className="px-5 py-2.5 text-xs font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-xl hover:from-indigo-500 hover:to-violet-500 shadow-md shadow-indigo-600/20 hover:scale-105 active:scale-95 transition-all"
+                                    disabled={processing || (!data.file && !data.text_content.trim())}
+                                    className="px-5 py-2.5 text-xs font-bold bg-gradient-to-r from-[#ff5e36] to-[#ff416c] text-white rounded-xl shadow-md shadow-[#ff5e36]/25 hover:brightness-105 active:scale-95 transition-all disabled:opacity-50"
                                 >
-                                    {t('submitWork')}
+                                    {processing ? 'Submitting...' : t('submitWork')}
                                 </button>
                             </div>
                         </form>

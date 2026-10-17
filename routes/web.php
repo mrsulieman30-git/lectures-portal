@@ -117,9 +117,11 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
     Route::patch('/notes/{note}/pin', [NoteController::class, 'togglePin'])->name('notes.pin');
     Route::delete('/notes/{note}', [NoteController::class, 'destroy'])->name('notes.destroy');
 
-    // ─── Messages (AJAX) ──────────────────────────────────────
-    Route::get('/subjects/{subject}/messages', [MessageController::class, 'index'])->name('messages.index');
-    Route::post('/subjects/{subject}/messages', [MessageController::class, 'store'])->name('messages.store');
+    // ─── Direct & Class Messaging (AJAX & Real-time Chat) ─────
+    Route::get('/chat/channels', [MessageController::class, 'channels'])->name('chat.channels');
+    Route::get('/chat/messages', [MessageController::class, 'getThread'])->name('chat.messages');
+    Route::post('/chat/send', [MessageController::class, 'send'])->name('chat.send');
+    Route::get('/chat/unread-count', [MessageController::class, 'unreadCount'])->name('chat.unread');
     Route::delete('/messages/{message}', [MessageController::class, 'destroy'])->name('messages.destroy');
 
     // ─── Notifications (AJAX) ──────────────────────────────────

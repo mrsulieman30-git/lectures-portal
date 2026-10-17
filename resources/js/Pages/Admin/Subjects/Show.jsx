@@ -174,14 +174,14 @@ export default function SubjectShow({ subject = {} }) {
                         )}
                         <button
                             onClick={() => setShowUploadModal(true)}
-                            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs font-bold shadow-md shadow-indigo-600/25 transition-all hover:scale-105 active:scale-95"
+                            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#ff5e36] to-[#ff416c] hover:brightness-105 text-white text-xs font-bold shadow-md shadow-[#ff5e36]/25 transition-all hover:scale-105 active:scale-95"
                         >
                             <Upload className="w-4 h-4" />
                             Upload Material
                         </button>
                         <button
                             onClick={() => setShowAssignmentModal(true)}
-                            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-md shadow-slate-900/20 transition-all hover:scale-105 active:scale-95"
+                            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-slate-900 text-white text-xs font-bold shadow-md shadow-slate-900/20 transition-all hover:scale-105 active:scale-95"
                         >
                             <Plus className="w-4 h-4" />
                             New Assignment
@@ -196,12 +196,12 @@ export default function SubjectShow({ subject = {} }) {
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-6">
 
                     {/* Navigation Tabs in Liquid Glass Capsule */}
-                    <div className="liquid-glass rounded-2xl p-1.5 border border-white/60 shadow-glass flex flex-wrap gap-2 text-xs sm:text-sm font-semibold">
+                    <div className="liquid-glass rounded-2xl p-1.5 border border-slate-200/80 dark:border-white/10 shadow-glass flex flex-wrap gap-2 text-xs sm:text-sm font-semibold">
                         <button
                             onClick={() => setActiveTab('documents')}
                             className={`px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all ${
                                 activeTab === 'documents'
-                                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                                    ? 'bg-[#ff5e36] text-white shadow-sm shadow-[#ff5e36]/30 font-bold'
                                     : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
                             }`}
                         >
@@ -212,7 +212,7 @@ export default function SubjectShow({ subject = {} }) {
                             onClick={() => setActiveTab('assignments')}
                             className={`px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all ${
                                 activeTab === 'assignments'
-                                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                                    ? 'bg-[#ff5e36] text-white shadow-sm shadow-[#ff5e36]/30 font-bold'
                                     : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
                             }`}
                         >
@@ -223,7 +223,7 @@ export default function SubjectShow({ subject = {} }) {
                             onClick={() => setActiveTab('notices')}
                             className={`px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all ${
                                 activeTab === 'notices'
-                                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                                    ? 'bg-[#ff5e36] text-white shadow-sm shadow-[#ff5e36]/30 font-bold'
                                     : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
                             }`}
                         >
@@ -234,7 +234,7 @@ export default function SubjectShow({ subject = {} }) {
                             onClick={() => setActiveTab('students')}
                             className={`px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all ${
                                 activeTab === 'students'
-                                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                                    ? 'bg-[#ff5e36] text-white shadow-sm shadow-[#ff5e36]/30 font-bold'
                                     : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
                             }`}
                         >
@@ -264,87 +264,90 @@ export default function SubjectShow({ subject = {} }) {
                                     </button>
                                 </div>
                             ) : (
-                                <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-                                    <table className="w-full text-left text-sm text-slate-600">
-                                        <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-500 border-b border-slate-100">
-                                            <tr>
-                                                <th className="px-6 py-3.5">Material Title & Format</th>
-                                                <th className="px-6 py-3.5">File Size</th>
-                                                <th className="px-6 py-3.5">Security / Mode</th>
-                                                <th className="px-6 py-3.5">Engagement</th>
-                                                <th className="px-6 py-3.5 text-right">Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-slate-100">
-                                            {subject.documents.map((doc) => (
-                                                <tr key={doc.id} className="hover:bg-slate-50/60 transition-colors">
-                                                    <td className="px-6 py-4">
-                                                        <div className="font-semibold text-slate-900">{doc.title}</div>
-                                                        <div className="text-xs text-slate-400 font-mono mt-0.5">{doc.file_name}</div>
-                                                    </td>
-                                                    <td className="px-6 py-4 text-xs font-mono text-slate-500">
-                                                        {formatBytes(doc.file_size)}
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <div className="flex flex-wrap items-center gap-1.5">
-                                                            {doc.is_view_only ? (
-                                                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
-                                                                    <Lock className="w-3 h-3 text-amber-600" />
-                                                                    View-Only
-                                                                </span>
-                                                            ) : (
-                                                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                                                    <Download className="w-3 h-3 text-emerald-600" />
-                                                                    Downloadable
-                                                                </span>
-                                                            )}
-                                                            {doc.is_universal && (
-                                                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                                                                    <Globe className="w-3 h-3 text-indigo-600" />
-                                                                    Universal Library
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-4 text-xs text-slate-500">
-                                                        <span>{doc.download_count} downloads</span> • <span>{doc.view_count} views</span>
-                                                    </td>
-                                                    <td className="px-6 py-4 text-right">
-                                                        <div className="inline-flex items-center gap-2">
-                                                            <button
-                                                                onClick={() => handleToggleUniversal(doc)}
-                                                                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold inline-flex items-center gap-1 transition-all ${
-                                                                    doc.is_universal
-                                                                        ? 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200'
-                                                                        : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
-                                                                }`}
-                                                                title={doc.is_universal ? 'Remove from Universal Library' : 'Publish to Universal Library'}
-                                                            >
-                                                                <Globe className="w-3.5 h-3.5" />
-                                                                {doc.is_universal ? 'Universal: ON' : 'Make Universal'}
-                                                            </button>
-                                                            <a
-                                                                href={route('documents.view', doc.id)}
-                                                                target="_blank"
-                                                                rel="noreferrer"
-                                                                className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold inline-flex items-center gap-1"
-                                                            >
-                                                                <Eye className="w-3.5 h-3.5" />
-                                                                Preview
-                                                            </a>
-                                                            <button
-                                                                onClick={() => handleDeleteDocument(doc.id, doc.title)}
-                                                                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50"
-                                                                title="Delete file"
-                                                            >
-                                                                <Trash2 className="w-4 h-4" />
-                                                            </button>
-                                                        </div>
-                                                    </td>
+                                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-white/10 shadow-sm overflow-hidden">
+                                    <div className="overflow-x-auto w-full scrollbar-thin">
+                                        <table className="w-full min-w-[700px] text-left text-sm text-slate-600 dark:text-slate-300">
+                                            <thead className="bg-slate-50 dark:bg-slate-800/60 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200/80 dark:border-white/10">
+                                                <tr>
+                                                    <th className="px-6 py-3.5">Material Title & Format</th>
+                                                    <th className="px-6 py-3.5">File Size</th>
+                                                    <th className="px-6 py-3.5">Security / Mode</th>
+                                                    <th className="px-6 py-3.5">Engagement</th>
+                                                    <th className="px-6 py-3.5 text-right">Actions</th>
                                                 </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody className="divide-y divide-slate-150/70 dark:divide-white/5">
+                                                {subject.documents.map((doc) => (
+                                                    <tr key={doc.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
+                                                        <td className="px-6 py-4">
+                                                            <div className="font-semibold text-slate-900 dark:text-white">{doc.title}</div>
+                                                            <div className="text-xs text-slate-400 font-mono mt-0.5">{doc.file_name}</div>
+                                                        </td>
+                                                        <td className="px-6 py-4 text-xs font-mono text-slate-500 dark:text-slate-400">
+                                                            {formatBytes(doc.file_size)}
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex flex-wrap items-center gap-1.5">
+                                                                {doc.is_view_only ? (
+                                                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                                                                        <Lock className="w-3 h-3 text-amber-600" />
+                                                                        View-Only
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                                                        <Download className="w-3 h-3 text-emerald-600" />
+                                                                        Downloadable
+                                                                    </span>
+                                                                )}
+                                                                {doc.is_universal && (
+                                                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#ff5e36]/10 text-[#ff5e36] border border-[#ff5e36]/25">
+                                                                        <Globe className="w-3 h-3 text-[#ff5e36]" />
+                                                                        Universal Library
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4 text-xs text-slate-500 dark:text-slate-400">
+                                                            <span>{doc.download_count} downloads</span> • <span>{doc.view_count} views</span>
+                                                        </td>
+                                                        <td className="px-6 py-4 text-right">
+                                                            <div className="inline-flex items-center gap-2">
+                                                                <button
+                                                                    onClick={() => handleToggleUniversal(doc)}
+                                                                    className={`px-2.5 py-1.5 rounded-xl text-xs font-bold inline-flex items-center gap-1 transition-all ${
+                                                                        doc.is_universal
+                                                                            ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30'
+                                                                            : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300'
+                                                                    }`}
+                                                                    title={doc.is_universal ? 'Remove from Universal Library' : 'Publish to Universal Library'}
+                                                                >
+                                                                    <Globe className="w-3.5 h-3.5" />
+                                                                    {doc.is_universal ? 'Universal: ON' : 'Make Universal'}
+                                                                </button>
+                                                                {/* Highlighted Preview Pill Button */}
+                                                                <a
+                                                                    href={route('documents.view', doc.id)}
+                                                                    target="_blank"
+                                                                    rel="noreferrer"
+                                                                    className="px-3 py-1.5 rounded-xl bg-[#ff5e36] hover:bg-[#e04822] text-white text-xs font-bold inline-flex items-center gap-1 shadow-sm shadow-[#ff5e36]/25 transition-all hover:scale-105 active:scale-95"
+                                                                >
+                                                                    <Eye className="w-3.5 h-3.5" />
+                                                                    Preview
+                                                                </a>
+                                                                <button
+                                                                    onClick={() => handleDeleteDocument(doc.id, doc.title)}
+                                                                    className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-rose-500 transition-colors shadow-xs"
+                                                                    title="Delete file"
+                                                                >
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -387,7 +390,7 @@ export default function SubjectShow({ subject = {} }) {
                                         </div>
                                         <Link
                                             href={route('admin.assignments.submissions', assign.id)}
-                                            className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm text-center shrink-0"
+                                            className="px-4 py-2 rounded-xl bg-[#ff5e36] hover:bg-[#e04822] text-white text-xs font-bold shadow-sm shadow-[#ff5e36]/25 text-center shrink-0 transition-all hover:scale-105 active:scale-95"
                                         >
                                             View & Grade Submissions &rarr;
                                         </Link>
@@ -403,24 +406,24 @@ export default function SubjectShow({ subject = {} }) {
                             <div className="flex justify-end">
                                 <button
                                     onClick={() => setShowNoticeModal(true)}
-                                    className="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-semibold"
+                                    className="px-4 py-2 rounded-xl bg-[#ff5e36] hover:bg-[#e04822] text-white text-xs font-bold shadow-sm shadow-[#ff5e36]/25 transition-all hover:scale-105 active:scale-95"
                                 >
                                     + Post Bulletin
                                 </button>
                             </div>
 
                             {(subject.updates || []).length === 0 ? (
-                                <div className="bg-white rounded-2xl border border-slate-200/80 p-10 text-center text-xs text-slate-400">
+                                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-white/10 p-10 text-center text-xs text-slate-400">
                                     No announcements posted yet.
                                 </div>
                             ) : (
                                 subject.updates.map((update) => (
-                                    <div key={update.id} className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-2">
+                                    <div key={update.id} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-white/10 p-6 shadow-sm space-y-2">
                                         <div className="flex items-center justify-between">
-                                            <h4 className="font-bold text-slate-900 text-base">{update.title}</h4>
+                                            <h4 className="font-bold text-slate-900 dark:text-white text-base">{update.title}</h4>
                                             <span className="text-xs text-slate-400">{new Date(update.created_at).toLocaleDateString()}</span>
                                         </div>
-                                        <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-line">{update.content}</p>
+                                        <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line">{update.content}</p>
                                     </div>
                                 ))
                             )}
@@ -429,10 +432,10 @@ export default function SubjectShow({ subject = {} }) {
 
                     {/* TAB 4: Enrolled Students */}
                     {activeTab === 'students' && (
-                        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-                            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
-                                <h3 className="font-bold text-slate-900 text-base">Enrolled Class Roster</h3>
-                                <span className="text-xs text-slate-500">{(subject.active_students || []).length} Students</span>
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-white/10 shadow-sm overflow-hidden">
+                            <div className="p-5 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between">
+                                <h3 className="font-bold text-slate-900 dark:text-white text-base">Enrolled Class Roster</h3>
+                                <span className="text-xs text-slate-500 dark:text-slate-400">{(subject.active_students || []).length} Students</span>
                             </div>
 
                             {(subject.active_students || []).length === 0 ? (
@@ -440,24 +443,26 @@ export default function SubjectShow({ subject = {} }) {
                                     No students actively enrolled in this subject yet.
                                 </div>
                             ) : (
-                                <table className="w-full text-left text-sm text-slate-600">
-                                    <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-500 border-b border-slate-100">
-                                        <tr>
-                                            <th className="px-6 py-3">Student Name</th>
-                                            <th className="px-6 py-3">Student ID</th>
-                                            <th className="px-6 py-3">Email</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-100">
-                                        {subject.active_students.map((student) => (
-                                            <tr key={student.id}>
-                                                <td className="px-6 py-4 font-semibold text-slate-900">{student.name}</td>
-                                                <td className="px-6 py-4 font-mono text-xs text-slate-500">{student.student_id_no || '—'}</td>
-                                                <td className="px-6 py-4 text-xs text-slate-500">{student.email}</td>
+                                <div className="overflow-x-auto w-full scrollbar-thin">
+                                    <table className="w-full min-w-[500px] text-left text-sm text-slate-600 dark:text-slate-300">
+                                        <thead className="bg-slate-50 dark:bg-slate-800/60 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200/80 dark:border-white/10">
+                                            <tr>
+                                                <th className="px-6 py-3">Student Name</th>
+                                                <th className="px-6 py-3">Student ID</th>
+                                                <th className="px-6 py-3">Email</th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-150/70 dark:divide-white/5">
+                                            {subject.active_students.map((student) => (
+                                                <tr key={student.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
+                                                    <td className="px-6 py-4 font-semibold text-slate-900 dark:text-white">{student.name}</td>
+                                                    <td className="px-6 py-4 font-mono text-xs text-slate-500 dark:text-slate-400">{student.student_id_no || '—'}</td>
+                                                    <td className="px-6 py-4 text-xs text-slate-500 dark:text-slate-400">{student.email}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
                             )}
                         </div>
                     )}

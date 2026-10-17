@@ -13,16 +13,19 @@ class Message extends Model
     protected $fillable = [
         'subject_id',
         'user_id',
+        'recipient_id',
         'content',
         'attachment_path',
         'attachment_name',
         'is_announcement',
         'is_pinned',
+        'is_read',
     ];
 
     protected $casts = [
         'is_announcement' => 'boolean',
         'is_pinned' => 'boolean',
+        'is_read' => 'boolean',
     ];
 
     // ─── Relationships ─────────────────────────────────────────
@@ -35,6 +38,11 @@ class Message extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function recipient(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'recipient_id');
     }
 
     // ─── Scopes ────────────────────────────────────────────────
