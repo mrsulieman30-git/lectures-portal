@@ -49,8 +49,9 @@
 
         <!-- PWA Configuration -->
         <link rel="manifest" href="/manifest.webmanifest">
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-        <meta name="theme-color" content="#e11d48">
+        <link rel="icon" type="image/png" href="/favicon.png">
+        <link rel="shortcut icon" href="/favicon.png">
+        <meta name="theme-color" content="#ff5e36">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="default">
         <meta name="apple-mobile-web-app-title" content="Dr. Sulieman Portal">

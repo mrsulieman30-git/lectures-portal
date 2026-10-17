@@ -2,6 +2,7 @@ import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import NotificationBell from '@/Components/NotificationBell';
+import ApplicationLogo from '@/Components/ApplicationLogo';
 import { Link, usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import { 
@@ -58,9 +59,7 @@ export default function AuthenticatedLayout({ header, children }) {
                         {/* Logo & Desktop Nav Links */}
                         <div className="flex items-center gap-8">
                             <Link href="/" className="flex items-center gap-2.5 group">
-                                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#ff5e36] via-[#ff6b4a] to-[#ff416c] text-white flex items-center justify-center font-bold text-base shadow-sm shadow-[#ff5e36]/30 group-hover:scale-105 transition-all">
-                                    <FolderKanban className="w-5 h-5 drop-shadow" />
-                                </div>
+                                <ApplicationLogo className="w-9 h-9 group-hover:scale-105 transition-all" />
                                 <div>
                                     <span className="font-bold text-slate-900 dark:text-white tracking-tight text-base block leading-none">
                                         {t('appName')}

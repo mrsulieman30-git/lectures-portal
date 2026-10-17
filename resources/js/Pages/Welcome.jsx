@@ -83,9 +83,9 @@ export default function Welcome({ auth }) {
             <Head title="Dr. Mohammad Sulieman — Medical Laboratory & Hematology Academic Portal" />
 
             {/* Nimbuzzy Soft Ambient Background Glows */}
-            <div className="fixed top-0 -left-32 w-96 h-96 bg-rose-500/12 dark:bg-rose-600/10 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse" />
+            <div className="fixed top-0 -left-32 w-96 h-96 bg-[#ff5e36]/15 dark:bg-[#ff5e36]/10 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse" />
             <div className="fixed top-1/3 -right-32 w-96 h-96 bg-amber-500/10 dark:bg-amber-600/10 rounded-full blur-3xl pointer-events-none -z-10" />
-            <div className="fixed -bottom-32 left-1/3 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-900/10 rounded-full blur-3xl pointer-events-none -z-10" />
+            <div className="fixed -bottom-32 left-1/3 w-96 h-96 bg-orange-500/10 dark:bg-orange-950/20 rounded-full blur-3xl pointer-events-none -z-10" />
 
             {/* Interactive 3D Background Canvas Layer */}
             <div className="fixed inset-0 z-0 opacity-25 dark:opacity-40 pointer-events-none">
@@ -99,14 +99,12 @@ export default function Welcome({ auth }) {
                         
                         {/* Brand Logo & Title */}
                         <Link href="/" className="flex items-center gap-3 group min-w-0">
-                            <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-rose-500 via-rose-600 to-amber-600 p-0.5 shadow-md shadow-rose-500/25 group-hover:scale-105 transition-transform duration-200 shrink-0">
-                                <ApplicationLogo className="w-full h-full" />
-                            </div>
+                            <ApplicationLogo className="w-10 h-10 sm:w-11 sm:h-11 group-hover:scale-105 transition-transform duration-200 shrink-0" />
                             <div className="min-w-0">
                                 <span className="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base tracking-tight block leading-tight font-heading truncate">
                                     Dr. Mohammad Sulieman
                                 </span>
-                                <span className="text-[10px] sm:text-[11px] font-semibold text-rose-600 dark:text-rose-400 block tracking-wide truncate">
+                                <span className="text-[10px] sm:text-[11px] font-semibold text-[#ff5e36] dark:text-[#ff7a54] block tracking-wide truncate">
                                     Medical Laboratory &amp; Hematology
                                 </span>
                             </div>
@@ -123,7 +121,7 @@ export default function Welcome({ auth }) {
                                 {auth?.user ? (
                                     <Link
                                         href={route('dashboard')}
-                                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white text-xs font-bold shadow-lg shadow-rose-600/25 transition-all active:scale-95"
+                                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#ff5e36] to-[#e04822] hover:from-[#e04822] hover:to-[#ff5e36] text-white text-xs font-bold shadow-lg shadow-[#ff5e36]/25 transition-all active:scale-95"
                                     >
                                         <span>{t('goToDashboard', 'Go to My Dashboard')}</span>
                                         <ArrowRight className="w-4 h-4" />
@@ -132,13 +130,13 @@ export default function Welcome({ auth }) {
                                     <>
                                         <Link
                                             href={route('login')}
-                                            className="px-4 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-rose-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-all"
+                                            className="px-4 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-[#ff5e36] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-all"
                                         >
                                             {t('signIn', 'Sign In')}
                                         </Link>
                                         <Link
                                             href={route('register')}
-                                            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-amber-600 text-white hover:brightness-110 text-xs font-extrabold shadow-md shadow-rose-600/25 transition-all active:scale-95"
+                                            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#ff5e36] to-[#e04822] text-white hover:brightness-110 text-xs font-extrabold shadow-md shadow-[#ff5e36]/25 transition-all active:scale-95"
                                         >
                                             <span>{t('studentAccess', 'Student Access')}</span>
                                         </Link>
@@ -176,7 +174,7 @@ export default function Welcome({ auth }) {
                             {auth?.user ? (
                                 <Link
                                     href={route('dashboard')}
-                                    className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-gradient-to-r from-rose-600 to-amber-600 text-white font-bold text-xs shadow-md"
+                                    className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-gradient-to-r from-[#ff5e36] to-[#e04822] text-white font-bold text-xs shadow-md"
                                 >
                                     <span>{t('goToDashboard', 'Go to Dashboard')}</span>
                                     <ArrowRight className="w-4 h-4" />
@@ -191,7 +189,7 @@ export default function Welcome({ auth }) {
                                     </Link>
                                     <Link
                                         href={route('register')}
-                                        className="flex items-center justify-center gap-1.5 w-full py-3 rounded-xl bg-gradient-to-r from-rose-600 to-amber-600 text-white font-bold text-xs shadow-md"
+                                        className="flex items-center justify-center gap-1.5 w-full py-3 rounded-xl bg-gradient-to-r from-[#ff5e36] to-[#e04822] text-white font-bold text-xs shadow-md"
                                     >
                                         <span>{t('studentAccess', 'Student Registration')}</span>
                                         <ArrowRight className="w-4 h-4" />
@@ -211,15 +209,15 @@ export default function Welcome({ auth }) {
                     <div className="lg:col-span-7 space-y-5 sm:space-y-6">
                         
                         {/* Medical Science Pill Badge */}
-                        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-rose-500/20 bg-rose-50 dark:bg-rose-950/40 text-xs font-bold text-rose-600 dark:text-rose-300 shadow-xs backdrop-blur-md">
-                            <Droplet className="w-3.5 h-3.5 text-rose-500 animate-pulse" />
+                        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#ff5e36]/30 bg-[#ff5e36]/10 text-xs font-bold text-[#ff5e36] dark:text-[#ff7a54] shadow-xs backdrop-blur-md">
+                            <Droplet className="w-3.5 h-3.5 text-[#ff5e36] animate-pulse" />
                             <span>Dr. Mohammad Sulieman • Medical Laboratory Academic OS</span>
                         </div>
 
                         {/* Title */}
                         <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-900 dark:text-white leading-[1.12] font-heading">
                             Academic Cabinets for{' '}
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-600 via-coral-500 to-amber-500">
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff5e36] via-[#ff7043] to-amber-500">
                                 Medical &amp; Laboratory Students.
                             </span>
                         </h1>
@@ -234,7 +232,7 @@ export default function Welcome({ auth }) {
                             {auth?.user ? (
                                 <Link
                                     href={route('dashboard')}
-                                    className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl bg-gradient-to-r from-rose-600 via-coral-500 to-amber-600 hover:brightness-105 text-white font-extrabold text-sm shadow-xl shadow-rose-600/30 transition-all active:scale-95 cursor-pointer"
+                                    className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl bg-gradient-to-r from-[#ff5e36] via-[#ff7043] to-[#e04822] hover:brightness-105 text-white font-extrabold text-sm shadow-xl shadow-[#ff5e36]/30 transition-all active:scale-95 cursor-pointer"
                                 >
                                     <span>{t('goToDashboard', 'Go to My Dashboard')}</span>
                                     <ArrowRight className="w-4 h-4" />
@@ -243,7 +241,7 @@ export default function Welcome({ auth }) {
                                 <>
                                     <Link
                                         href={route('login')}
-                                        className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl bg-gradient-to-r from-rose-600 via-coral-500 to-amber-600 hover:brightness-105 text-white font-extrabold text-sm shadow-xl shadow-rose-600/30 transition-all active:scale-95 cursor-pointer"
+                                        className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl bg-gradient-to-r from-[#ff5e36] via-[#ff7043] to-[#e04822] hover:brightness-105 text-white font-extrabold text-sm shadow-xl shadow-[#ff5e36]/30 transition-all active:scale-95 cursor-pointer"
                                     >
                                         <span>{t('instructorStudentSignIn', 'Doctor & Student Sign In')}</span>
                                         <ArrowRight className="w-4 h-4" />
@@ -282,39 +280,48 @@ export default function Welcome({ auth }) {
                             maxTilt={10}
                             perspective={1400}
                             scale={1.02}
-                            glowColor="rgba(244, 63, 94, 0.25)"
+                            glowColor="rgba(255, 94, 54, 0.25)"
                             className="w-full max-w-md"
                         >
-                            <div className="relative overflow-hidden rounded-3xl border border-white/80 dark:border-white/15 bg-white/90 dark:bg-slate-900/85 p-6 sm:p-7 shadow-2xl backdrop-blur-2xl ring-1 ring-slate-900/5">
-                                {/* Card Top Status */}
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping" />
-                                        <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                                            Medical Laboratory Cabinets
-                                        </span>
+                            <div className="relative overflow-hidden rounded-3xl border border-white/80 dark:border-white/15 bg-white/95 dark:bg-[#0f131f]/95 p-5 sm:p-6 shadow-2xl backdrop-blur-2xl ring-1 ring-slate-900/5">
+                                {/* Featured Visual Banner with Official Logo */}
+                                <div className="relative rounded-2xl overflow-hidden border border-slate-200/80 dark:border-white/10 shadow-sm mb-4 group/banner bg-slate-950">
+                                    <img 
+                                        src="/images/og-preview.jpg" 
+                                        alt="Dr. Mohammad Sulieman Official Academic Portal"
+                                        className="w-full h-40 object-cover object-center group-hover/banner:scale-105 transition-transform duration-500"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-transparent flex flex-col justify-end p-3.5">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <span className="w-2 h-2 rounded-full bg-[#ff5e36] animate-pulse" />
+                                                <span className="text-xs font-bold text-white tracking-wide">
+                                                    Official Academic Cabinets
+                                                </span>
+                                            </div>
+                                            <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-[#ff5e36]/30 text-white border border-[#ff5e36]/40 backdrop-blur-md">
+                                                Verified Portal
+                                            </span>
+                                        </div>
                                     </div>
-                                    <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
-                                        Dr. Mohammad Sulieman
-                                    </span>
                                 </div>
 
                                 {/* Stacked Course List */}
-                                <div className="space-y-2.5">
-                                    {medicalCourses.map((c, idx) => (
+                                <div className="space-y-2">
+                                    {medicalCourses.slice(0, 3).map((c, idx) => (
                                         <div
                                             key={idx}
-                                            className="p-3 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-slate-50/70 dark:bg-white/5 hover:border-rose-500/40 transition-all flex items-center justify-between group"
+                                            className="p-2.5 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/70 dark:bg-white/5 hover:border-[#ff5e36]/40 transition-all flex items-center justify-between group"
                                         >
-                                            <div className="flex items-center gap-3 min-w-0">
+                                            <div className="flex items-center gap-2.5 min-w-0">
                                                 <div
-                                                    className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-extrabold text-[11px] shadow-sm shrink-0"
+                                                    className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-extrabold text-[10px] shadow-sm shrink-0"
                                                     style={{ backgroundColor: c.color }}
                                                 >
                                                     {c.code.substring(0, 3)}
                                                 </div>
                                                 <div className="min-w-0">
-                                                    <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">
+                                                    <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate group-hover:text-[#ff5e36] transition-colors">
                                                         {c.title}
                                                     </h4>
                                                     <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
@@ -323,8 +330,8 @@ export default function Welcome({ auth }) {
                                                 </div>
                                             </div>
 
-                                            <div className="w-6 h-6 rounded-full bg-slate-200/60 dark:bg-white/10 flex items-center justify-center text-slate-500 dark:text-slate-400 group-hover:bg-rose-600 group-hover:text-white transition-colors shrink-0 ml-2">
-                                                <ArrowRight className="w-3 h-3" />
+                                            <div className="w-5 h-5 rounded-full bg-slate-200/60 dark:bg-white/10 flex items-center justify-center text-slate-500 dark:text-slate-400 group-hover:bg-[#ff5e36] group-hover:text-white transition-colors shrink-0 ml-2">
+                                                <ArrowRight className="w-2.5 h-2.5" />
                                             </div>
                                         </div>
                                     ))}
@@ -333,12 +340,12 @@ export default function Welcome({ auth }) {
                                 {/* Card Bottom Indicators */}
                                 <div className="mt-4 pt-3 border-t border-slate-200/80 dark:border-white/10 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
                                     <span className="flex items-center gap-1.5">
-                                        <Smartphone className="w-3.5 h-3.5 text-rose-500" />
-                                        <span>Single-Device Student Security</span>
+                                        <Smartphone className="w-3.5 h-3.5 text-[#ff5e36]" />
+                                        <span>Single-Device Protection</span>
                                     </span>
                                     <span className="flex items-center gap-1.5">
                                         <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-                                        <span>View-Only Protection</span>
+                                        <span>View-Only Cabinets</span>
                                     </span>
                                 </div>
                             </div>
@@ -399,7 +406,7 @@ export default function Welcome({ auth }) {
                                             {feat.desc}
                                         </p>
                                     </div>
-                                    <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/5 flex items-center gap-1.5 text-[11px] font-bold text-rose-600 dark:text-rose-400">
+                                    <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/5 flex items-center gap-1.5 text-[11px] font-bold text-[#ff5e36] dark:text-[#ff7a54]">
                                         <span>Clinical Course Cabinet</span>
                                         <ArrowRight className="w-3 h-3" />
                                     </div>
@@ -427,7 +434,7 @@ export default function Welcome({ auth }) {
                             href="https://medblog.seeha.tech" 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-rose-500/20 bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 hover:border-rose-500/40 text-xs font-bold transition shadow-xs"
+                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-[#ff5e36]/30 bg-[#ff5e36]/10 text-[#ff5e36] dark:text-[#ff7a54] hover:bg-[#ff5e36]/20 text-xs font-bold transition shadow-xs"
                         >
                             <span>Dr. Mohammad Sulieman CV &amp; Medical Blog</span>
                             <ArrowRight className="w-3.5 h-3.5" />

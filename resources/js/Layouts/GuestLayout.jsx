@@ -22,9 +22,7 @@ export default function GuestLayout({ children }) {
             {/* Top Navigation Bar */}
             <header className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex items-center justify-between">
                 <Link href="/" className="group flex items-center gap-3 transition">
-                    <div className="relative flex items-center justify-center w-11 h-11 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-600 p-2 shadow-lg shadow-orange-500/20 ring-1 ring-white/20 group-hover:scale-105 transition-transform duration-300">
-                        <ApplicationLogo className="w-full h-full fill-white" />
-                    </div>
+                    <ApplicationLogo className="w-11 h-11 group-hover:scale-105 transition-transform duration-300" />
                     <div>
                         <span className="font-heading font-black text-lg sm:text-xl tracking-tight text-white block leading-none">
                             LECTURE <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-300">PORTAL</span>
@@ -55,7 +53,7 @@ export default function GuestLayout({ children }) {
                         href="https://medblog.seeha.tech" 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-rose-400 hover:text-rose-300 underline font-semibold transition"
+                        className="text-[#ff5e36] hover:text-[#ff7a54] underline font-semibold transition"
                     >
                         Dr. Mohammad Sulieman CV &amp; Medical Blog
                     </a>
