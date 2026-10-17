@@ -248,16 +248,16 @@ export default function SubjectShow({ subject = {} }) {
                         <div className="space-y-6">
                             {(subject.documents || []).length === 0 ? (
                                 <div className="bg-white rounded-2xl border border-slate-200/80 p-12 text-center">
-                                    <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-3">
+                                    <div className="w-12 h-12 rounded-2xl bg-[#ff5e36]/10 text-[#ff5e36] flex items-center justify-center mx-auto mb-3">
                                         <FileText className="w-6 h-6" />
                                     </div>
-                                    <h3 className="text-base font-bold text-slate-900">Cabinet is Empty</h3>
-                                    <p className="text-xs text-slate-500 mt-1 mb-4">
+                                    <h3 className="text-base font-bold text-slate-900 dark:text-white">Cabinet is Empty</h3>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-4">
                                         Upload your lecture presentations, official textbook chapters, and exam materials.
                                     </p>
                                     <button
                                         onClick={() => setShowUploadModal(true)}
-                                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold"
+                                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#ff5e36] hover:bg-[#e04822] text-white text-xs font-bold shadow-md shadow-[#ff5e36]/20 transition-all"
                                     >
                                         <Upload className="w-3.5 h-3.5" />
                                         Upload Files
@@ -565,7 +565,7 @@ export default function SubjectShow({ subject = {} }) {
                                 <button
                                     type="submit"
                                     disabled={docProcessing || docData.files.length === 0}
-                                    className="px-5 py-2.5 text-xs font-bold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white rounded-xl shadow-md shadow-indigo-600/30 hover:scale-105 active:scale-95 transition-all inline-flex items-center gap-2 disabled:opacity-50 disabled:scale-100"
+                                    className="px-5 py-2.5 text-xs font-bold bg-[#ff5e36] hover:bg-[#e04822] text-white rounded-xl shadow-md shadow-[#ff5e36]/25 hover:scale-105 active:scale-95 transition-all inline-flex items-center gap-2 disabled:opacity-50 disabled:scale-100"
                                 >
                                     {docProcessing ? (
                                         <>
@@ -658,7 +658,7 @@ export default function SubjectShow({ subject = {} }) {
                                 <button
                                     type="submit"
                                     disabled={assignProcessing}
-                                    className="px-5 py-2 text-xs font-semibold bg-indigo-600 text-white rounded-xl hover:bg-indigo-500 shadow-sm"
+                                    className="px-5 py-2 text-xs font-bold bg-[#ff5e36] text-white rounded-xl hover:bg-[#e04822] shadow-md shadow-[#ff5e36]/20 transition-all"
                                 >
                                     Publish Assignment
                                 </button>

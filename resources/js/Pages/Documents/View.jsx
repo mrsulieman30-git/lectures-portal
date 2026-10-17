@@ -524,7 +524,7 @@ export default function DocumentView({
                             <div className="flex items-center p-0.5 rounded-xl bg-slate-800 border border-white/10">
                                 <button
                                     onClick={() => setViewMode('slide')}
-                                    className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1.5 transition-all ${viewMode === 'slide' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}
+                                    className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1.5 transition-all ${viewMode === 'slide' ? 'bg-[#ff5e36] text-white shadow' : 'text-slate-400 hover:text-white'}`}
                                     title="Single Slide Presentation"
                                 >
                                     <Presentation className="w-3.5 h-3.5" />
@@ -532,7 +532,7 @@ export default function DocumentView({
                                 </button>
                                 <button
                                     onClick={() => setViewMode('continuous')}
-                                    className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1.5 transition-all ${viewMode === 'continuous' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}
+                                    className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1.5 transition-all ${viewMode === 'continuous' ? 'bg-[#ff5e36] text-white shadow' : 'text-slate-400 hover:text-white'}`}
                                     title="All Slides Continuous Scroll"
                                 >
                                     <Layers className="w-3.5 h-3.5" />
@@ -630,7 +630,7 @@ export default function DocumentView({
                                     <p className="text-xs text-slate-400 leading-relaxed">{loadError}</p>
                                     <button
                                         onClick={loadDocument}
-                                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md"
+                                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#ff5e36] hover:bg-[#e04822] text-white text-xs font-bold shadow-md shadow-[#ff5e36]/20"
                                     >
                                         <RefreshCw className="w-3.5 h-3.5" />
                                         Retry Streaming
@@ -675,7 +675,7 @@ export default function DocumentView({
                                     <p className="text-xs text-slate-400 leading-relaxed">{loadError}</p>
                                     <button
                                         onClick={loadDocument}
-                                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md"
+                                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#ff5e36] hover:bg-[#e04822] text-white text-xs font-bold shadow-md shadow-[#ff5e36]/20"
                                     >
                                         <RefreshCw className="w-3.5 h-3.5" />
                                         Retry
@@ -715,7 +715,7 @@ export default function DocumentView({
                                     <p className="text-xs text-slate-400 leading-relaxed">{loadError}</p>
                                     <button
                                         onClick={loadDocument}
-                                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md"
+                                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#ff5e36] hover:bg-[#e04822] text-white text-xs font-bold shadow-md shadow-[#ff5e36]/20"
                                     >
                                         <RefreshCw className="w-3.5 h-3.5" />
                                         Retry
@@ -850,7 +850,7 @@ export default function DocumentView({
                             document.is_downloadable && (
                                 <a
                                     href={route('documents.download', document.id)}
-                                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm"
+                                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#ff5e36] hover:bg-[#e04822] text-white text-xs font-bold shadow-md shadow-[#ff5e36]/20"
                                 >
                                     <Download className="w-4 h-4" />
                                     Download File

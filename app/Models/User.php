@@ -229,7 +229,15 @@ class User extends Authenticatable
 
     public function getAvatarUrlAttribute(): ?string
     {
-        if ($this->avatar_path) {
+        if (! $this->avatar_path) {
+            return null;
+        }
+
+        if (str_starts_with($this->avatar_path, 'http://') || str_starts_with($this->avatar_path, 'https://')) {
+            return $this->avatar_path;
+        }
+
+        if (\Illuminate\Support\Facades\Storage::disk('public')->exists($this->avatar_path)) {
             return asset('storage/'.$this->avatar_path);
         }
 

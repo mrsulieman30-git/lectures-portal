@@ -282,7 +282,7 @@ export default function Login({ status, canResetPassword, deviceBlocked }) {
                                                         <button
                                                             type="submit"
                                                             disabled={requestForm.processing}
-                                                            className="w-full py-2.5 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md transition flex items-center justify-center gap-1.5 disabled:opacity-50"
+                                                            className="w-full py-2.5 px-3 rounded-xl bg-[#ff5e36] hover:bg-[#e04822] text-white text-xs font-bold shadow-md shadow-[#ff5e36]/25 transition flex items-center justify-center gap-1.5 disabled:opacity-50"
                                                         >
                                                             <Send className="w-3.5 h-3.5" />
                                                             <span>{requestForm.processing ? t('submitting', 'Submitting...') : t('submitForApproval', 'Submit Request to Professor')}</span>

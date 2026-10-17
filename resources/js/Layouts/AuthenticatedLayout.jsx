@@ -26,6 +26,7 @@ import ChatBubble from '@/Components/ChatBubble';
 export default function AuthenticatedLayout({ header, children }) {
     const user = usePage().props.auth.user;
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
+    const [avatarError, setAvatarError] = useState(false);
     const { t } = useTranslation();
 
     const isAdmin = user.role === 'admin';
@@ -40,11 +41,10 @@ export default function AuthenticatedLayout({ header, children }) {
                           route().current('admin.analytics');
 
     return (
-        <div className="min-h-screen bg-[#f8fafc] dark:bg-[#0b0e14] text-slate-800 dark:text-slate-100 flex flex-col relative selection:bg-[#ff5e36] selection:text-white transition-colors duration-200">
-            {/* Ambient Background Glows - Nimbuzz Coral/Tangerine & Deep Violet */}
-            <div className="fixed top-0 -left-32 w-96 h-96 bg-[#ff5e36]/15 dark:bg-[#ff5e36]/10 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse-glow" />
-            <div className="fixed top-1/3 -right-32 w-96 h-96 bg-[#ff416c]/15 dark:bg-[#ff416c]/10 rounded-full blur-3xl pointer-events-none -z-10" />
-            <div className="fixed -bottom-32 left-1/3 w-96 h-96 bg-purple-500/10 dark:bg-purple-900/10 rounded-full blur-3xl pointer-events-none -z-10" />
+        <div className="min-h-screen bg-[#f8fafc] dark:bg-[#07090e] text-slate-800 dark:text-slate-100 flex flex-col relative selection:bg-[#ff5e36] selection:text-white transition-colors duration-200">
+            {/* Ambient Background Glows - Nimbuzz Coral/Orange Only */}
+            <div className="fixed top-0 -left-32 w-96 h-96 bg-[#ff5e36]/15 dark:bg-[#ff5e36]/5 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse-glow" />
+            <div className="fixed top-1/3 -right-32 w-96 h-96 bg-[#ff5e36]/10 dark:bg-[#ff5e36]/5 rounded-full blur-3xl pointer-events-none -z-10" />
 
             {/* Top Navigation */}
             <nav className="border-b border-white/80 dark:border-white/10 sticky top-0 z-40 backdrop-blur-2xl bg-white/80 dark:bg-[#121622]/80 shadow-xs transition-colors duration-200">
@@ -272,17 +272,18 @@ export default function AuthenticatedLayout({ header, children }) {
                                             className="inline-flex items-center gap-1.5 p-1 pr-2 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white/80 dark:bg-[#161B26] hover:bg-slate-50 dark:hover:bg-[#1E2433] focus:outline-none transition-all shadow-xs group"
                                             title={user.name}
                                         >
-                                            {user.avatar_url ? (
+                                            {user.avatar_url && !avatarError ? (
                                                 <img
                                                     src={user.avatar_url}
                                                     alt={user.name}
+                                                    onError={() => setAvatarError(true)}
                                                     className="w-8 h-8 rounded-xl object-cover shrink-0 shadow-xs"
                                                 />
                                             ) : (
                                                 <div className={`w-8 h-8 rounded-xl text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs ${
                                                     isFemale && !isAdmin
                                                         ? 'bg-gradient-to-tr from-rose-500 to-pink-500'
-                                                        : 'bg-gradient-to-tr from-[#ff5e36] to-[#ff416c]'
+                                                        : 'bg-[#ff5e36]'
                                                 }`}>
                                                     {user.name.charAt(0).toUpperCase()}
                                                 </div>
@@ -508,17 +509,18 @@ export default function AuthenticatedLayout({ header, children }) {
                         {/* User Account & Actions Box */}
                         <div className="rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-slate-900/80 p-3 divide-y divide-slate-100 dark:divide-white/5 space-y-2">
                             <div className="flex items-center gap-3 px-1 py-1">
-                                {user.avatar_url ? (
+                                {user.avatar_url && !avatarError ? (
                                     <img
                                         src={user.avatar_url}
                                         alt={user.name}
+                                        onError={() => setAvatarError(true)}
                                         className="w-10 h-10 rounded-xl object-cover shrink-0 shadow-xs"
                                     />
                                 ) : (
                                     <div className={`w-10 h-10 rounded-xl text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs ${
                                         isFemale && !isAdmin
                                             ? 'bg-gradient-to-tr from-rose-500 to-pink-500'
-                                            : 'bg-gradient-to-tr from-[#ff5e36] to-[#ff416c]'
+                                            : 'bg-[#ff5e36]'
                                     }`}>
                                         {user.name.charAt(0).toUpperCase()}
                                     </div>

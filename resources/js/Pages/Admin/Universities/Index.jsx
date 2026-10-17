@@ -35,7 +35,7 @@ export default function UniversitiesIndex({ universities = [] }) {
                     </div>
                     <Link
                         href={route('admin.universities.create')}
-                        className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm transition-all shadow-indigo-600/20"
+                        className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#ff5e36] hover:bg-[#e04822] text-white text-xs font-bold shadow-md shadow-[#ff5e36]/20 transition-all"
                     >
                         <Plus className="w-4 h-4" />
                         Add New University
@@ -49,15 +49,15 @@ export default function UniversitiesIndex({ universities = [] }) {
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-6">
 
                     {universities.length === 0 ? (
-                        <div className="bg-white rounded-2xl border border-slate-200/80 p-12 text-center">
-                            <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-3">
+                        <div className="bg-white dark:bg-[#0c1017] rounded-2xl border border-slate-200/80 dark:border-white/10 p-12 text-center">
+                            <div className="w-12 h-12 rounded-2xl bg-[#ff5e36]/10 text-[#ff5e36] flex items-center justify-center mx-auto mb-3">
                                 <Building2 className="w-6 h-6" />
                             </div>
-                            <h3 className="text-base font-bold text-slate-900">No Universities Yet</h3>
-                            <p className="text-xs text-slate-500 mt-1 mb-4">Add the universities or colleges where you lecture.</p>
+                            <h3 className="text-base font-bold text-slate-900 dark:text-white">No Universities Yet</h3>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-4">Add the universities or colleges where you lecture.</p>
                             <Link
                                 href={route('admin.universities.create')}
-                                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold"
+                                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#ff5e36] hover:bg-[#e04822] text-white text-xs font-bold shadow-sm"
                             >
                                 <Plus className="w-3.5 h-3.5" />
                                 Add First University
@@ -68,27 +68,27 @@ export default function UniversitiesIndex({ universities = [] }) {
                             {universities.map((uni) => (
                                 <div
                                     key={uni.id}
-                                    className="bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-200 flex flex-col justify-between overflow-hidden group"
+                                    className="bg-white dark:bg-[#0c1017] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-sm hover:shadow-md hover:border-[#ff5e36]/40 transition-all duration-200 flex flex-col justify-between overflow-hidden group"
                                 >
                                     <div className="p-6">
                                         <div className="flex items-start justify-between gap-3 mb-4">
-                                            <div className="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center font-bold text-lg border border-indigo-500/20 group-hover:scale-105 transition-transform">
+                                            <div className="w-12 h-12 rounded-xl bg-[#ff5e36]/10 text-[#ff5e36] flex items-center justify-center font-bold text-lg border border-[#ff5e36]/20 group-hover:scale-105 transition-transform">
                                                 {uni.name.charAt(0)}
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <Link
                                                     href={route('admin.universities.edit', uni.id)}
-                                                    className="px-2.5 py-1 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+                                                    className="px-2.5 py-1 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 rounded-lg transition-colors"
                                                 >
                                                     Edit
                                                 </Link>
                                             </div>
                                         </div>
 
-                                        <h3 className="text-lg font-bold text-slate-900 leading-snug">
+                                        <h3 className="text-lg font-bold text-slate-900 dark:text-white leading-snug">
                                             {uni.name}
                                         </h3>
-                                        <p className="text-xs text-slate-500 mt-2 line-clamp-2 leading-relaxed">
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 line-clamp-2 leading-relaxed">
                                             {uni.description || 'No description provided for this campus.'}
                                         </p>
 
@@ -100,13 +100,13 @@ export default function UniversitiesIndex({ universities = [] }) {
                                         )}
                                     </div>
 
-                                    <div className="p-4 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between text-xs">
+                                    <div className="p-4 bg-slate-50/80 dark:bg-black/30 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-xs">
                                         <div className="flex items-center gap-4">
-                                            <div className="flex items-center gap-1 text-slate-600 font-medium">
-                                                <BookOpen className="w-3.5 h-3.5 text-indigo-500" />
+                                            <div className="flex items-center gap-1 text-slate-600 dark:text-slate-400 font-medium">
+                                                <BookOpen className="w-3.5 h-3.5 text-[#ff5e36]" />
                                                 <span>{uni.subjects_count || 0} Subjects</span>
                                             </div>
-                                            <div className="flex items-center gap-1 text-slate-600 font-medium">
+                                            <div className="flex items-center gap-1 text-slate-600 dark:text-slate-400 font-medium">
                                                 <Users className="w-3.5 h-3.5 text-emerald-500" />
                                                 <span>{uni.students_count || 0} Students</span>
                                             </div>
@@ -114,7 +114,7 @@ export default function UniversitiesIndex({ universities = [] }) {
 
                                         <Link
                                             href={route('admin.universities.show', uni.id)}
-                                            className="inline-flex items-center gap-1 font-semibold text-indigo-600 hover:text-indigo-700"
+                                            className="inline-flex items-center gap-1 font-bold text-[#ff5e36] hover:text-[#e04822] hover:translate-x-0.5 transition-all"
                                         >
                                             Manage Cabinet &rarr;
                                         </Link>

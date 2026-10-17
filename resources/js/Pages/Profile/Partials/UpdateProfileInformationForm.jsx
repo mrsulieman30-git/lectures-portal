@@ -16,6 +16,7 @@ export default function UpdateProfileInformation({
     const fileInputRef = useRef(null);
 
     const [previewUrl, setPreviewUrl] = useState(null);
+    const [imgLoadError, setImgLoadError] = useState(false);
     const [avatarProcessing, setAvatarProcessing] = useState(false);
     const [avatarError, setAvatarError] = useState(null);
     const [avatarSuccess, setAvatarSuccess] = useState(false);
@@ -117,10 +118,11 @@ export default function UpdateProfileInformation({
             <div className="mt-6 p-5 rounded-3xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-white/10 flex flex-col sm:flex-row items-center sm:items-start gap-5">
                 <div className="relative group shrink-0">
                     <div className="w-24 h-24 rounded-2xl overflow-hidden ring-4 ring-white dark:ring-slate-900 shadow-md bg-gradient-to-tr from-[#ff5e36] to-[#ff416c] flex items-center justify-center text-white text-3xl font-extrabold select-none">
-                        {previewUrl || user.avatar_url ? (
+                        {(previewUrl || user.avatar_url) && !imgLoadError ? (
                             <img
                                 src={previewUrl || user.avatar_url}
                                 alt={user.name}
+                                onError={() => setImgLoadError(true)}
                                 className="w-full h-full object-cover"
                             />
                         ) : (

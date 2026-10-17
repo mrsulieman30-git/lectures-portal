@@ -42,10 +42,10 @@ export default function UniversityCreate() {
 
             <div className="py-8">
                 <div className="mx-auto max-w-3xl sm:px-6 lg:px-8">
-                    <div className="bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-8 shadow-sm">
+                    <div className="bg-white dark:bg-[#0c1017] rounded-2xl border border-slate-200/80 dark:border-white/10 p-6 sm:p-8 shadow-sm">
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div>
-                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
                                     University / Institution Name *
                                 </label>
                                 <input
@@ -54,13 +54,13 @@ export default function UniversityCreate() {
                                     placeholder="e.g. University of Technology & Applied Sciences"
                                     value={data.name}
                                     onChange={(e) => setData('name', e.target.value)}
-                                    className="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                                    className="w-full px-4 py-2.5 text-sm border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-800 dark:text-white rounded-xl focus:ring-2 focus:ring-[#ff5e36]/20 focus:border-[#ff5e36] transition-all"
                                 />
                                 {errors.name && <p className="text-xs text-rose-600 mt-1">{errors.name}</p>}
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
                                     Description & Overview
                                 </label>
                                 <textarea
@@ -68,14 +68,14 @@ export default function UniversityCreate() {
                                     placeholder="Brief summary of your department or faculty role..."
                                     value={data.description}
                                     onChange={(e) => setData('description', e.target.value)}
-                                    className="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                                    className="w-full px-4 py-2.5 text-sm border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-800 dark:text-white rounded-xl focus:ring-2 focus:ring-[#ff5e36]/20 focus:border-[#ff5e36] transition-all"
                                 />
                                 {errors.description && <p className="text-xs text-rose-600 mt-1">{errors.description}</p>}
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+                                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
                                         Website URL
                                     </label>
                                     <input
@@ -83,12 +83,12 @@ export default function UniversityCreate() {
                                         placeholder="https://example.edu"
                                         value={data.website}
                                         onChange={(e) => setData('website', e.target.value)}
-                                        className="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                                        className="w-full px-4 py-2.5 text-sm border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-800 dark:text-white rounded-xl focus:ring-2 focus:ring-[#ff5e36]/20 focus:border-[#ff5e36]"
                                     />
                                     {errors.website && <p className="text-xs text-rose-600 mt-1">{errors.website}</p>}
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+                                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
                                         Official Contact Email
                                     </label>
                                     <input
@@ -96,7 +96,7 @@ export default function UniversityCreate() {
                                         placeholder="dept@example.edu"
                                         value={data.contact_email}
                                         onChange={(e) => setData('contact_email', e.target.value)}
-                                        className="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                                        className="w-full px-4 py-2.5 text-sm border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-800 dark:text-white rounded-xl focus:ring-2 focus:ring-[#ff5e36]/20 focus:border-[#ff5e36]"
                                     />
                                     {errors.contact_email && <p className="text-xs text-rose-600 mt-1">{errors.contact_email}</p>}
                                 </div>
@@ -104,7 +104,7 @@ export default function UniversityCreate() {
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+                                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
                                         Phone Number
                                     </label>
                                     <input
@@ -112,11 +112,11 @@ export default function UniversityCreate() {
                                         placeholder="+1 (555) 000-0000"
                                         value={data.phone}
                                         onChange={(e) => setData('phone', e.target.value)}
-                                        className="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                                        className="w-full px-4 py-2.5 text-sm border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-800 dark:text-white rounded-xl focus:ring-2 focus:ring-[#ff5e36]/20 focus:border-[#ff5e36]"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+                                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
                                         Campus Address
                                     </label>
                                     <input
@@ -124,22 +124,22 @@ export default function UniversityCreate() {
                                         placeholder="City, Campus Location"
                                         value={data.address}
                                         onChange={(e) => setData('address', e.target.value)}
-                                        className="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                                        className="w-full px-4 py-2.5 text-sm border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-800 dark:text-white rounded-xl focus:ring-2 focus:ring-[#ff5e36]/20 focus:border-[#ff5e36]"
                                     />
                                 </div>
                             </div>
 
-                            <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+                            <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-white/5">
                                 <Link
                                     href={route('admin.universities.index')}
-                                    className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:text-slate-900 text-sm font-semibold transition-all"
+                                    className="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-sm font-semibold transition-all"
                                 >
                                     Cancel
                                 </Link>
                                 <button
                                     type="submit"
                                     disabled={processing}
-                                    className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-sm transition-all shadow-indigo-600/20 disabled:opacity-50"
+                                    className="px-6 py-2.5 rounded-xl bg-[#ff5e36] hover:bg-[#e04822] text-white text-sm font-bold shadow-md shadow-[#ff5e36]/20 transition-all disabled:opacity-50"
                                 >
                                     Save University
                                 </button>

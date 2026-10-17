@@ -119,9 +119,9 @@ export default function Dashboard({ stats = {}, pendingUsers = [], recentActivit
                         </Link>
                         <Link
                             href={route('admin.subjects.create')}
-                            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#ff5e36] hover:bg-[#e04822] text-white text-xs font-bold shadow-md shadow-[#ff5e36]/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
                         >
-                            <BookOpen className="w-3.5 h-3.5 text-indigo-200" />
+                            <BookOpen className="w-3.5 h-3.5 text-white/80" />
                             {t('newSubject')}
                         </Link>
                     </div>
@@ -173,7 +173,7 @@ export default function Dashboard({ stats = {}, pendingUsers = [], recentActivit
                                         </div>
                                         <div className="mt-4 pt-3 border-t border-slate-100/80 flex items-center justify-between text-xs text-slate-500">
                                             <span>{card.badge}</span>
-                                            <span className="font-semibold text-indigo-600 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                                            <span className="font-bold text-[#ff5e36] flex items-center gap-1 group-hover:translate-x-1 transition-transform">
                                                 Manage &rarr;
                                             </span>
                                         </div>
@@ -245,7 +245,7 @@ export default function Dashboard({ stats = {}, pendingUsers = [], recentActivit
                                 </div>
                                 <Link
                                     href={route('admin.users')}
-                                    className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 inline-flex items-center gap-1 group"
+                                    className="text-xs font-bold text-[#ff5e36] hover:text-[#e04822] inline-flex items-center gap-1 group"
                                 >
                                     {t('viewAllUsers')} 
                                     <span className="group-hover:translate-x-0.5 transition-transform">&rarr;</span>
@@ -273,14 +273,14 @@ export default function Dashboard({ stats = {}, pendingUsers = [], recentActivit
                                         </thead>
                                         <tbody className="divide-y divide-slate-100/60 bg-white/30">
                                             {pendingUsers.map((user) => (
-                                                <tr key={user.id} className="hover:bg-indigo-500/5 transition-colors group">
+                                                <tr key={user.id} className="hover:bg-[#ff5e36]/5 transition-colors group">
                                                     <td className="px-6 py-4">
-                                                        <div className="font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors">{user.name}</div>
+                                                        <div className="font-semibold text-slate-900 group-hover:text-[#ff5e36] transition-colors">{user.name}</div>
                                                         <div className="text-xs text-slate-500">{user.email}</div>
                                                     </td>
                                                     <td className="px-6 py-4">
                                                         <div className="text-slate-800 font-medium">{user.university?.name || 'Unassigned'}</div>
-                                                        <div className="text-xs font-mono text-indigo-600/80 bg-indigo-50 inline-block px-1.5 py-0.5 rounded border border-indigo-100 mt-0.5">{user.student_id_no || 'No ID'}</div>
+                                                        <div className="text-xs font-mono text-[#ff5e36] bg-[#ff5e36]/10 inline-block px-1.5 py-0.5 rounded border border-[#ff5e36]/20 mt-0.5">{user.student_id_no || 'No ID'}</div>
                                                     </td>
                                                     <td className="px-6 py-4 text-xs font-mono text-slate-500">
                                                         {user.registration_ip_address || '127.0.0.1'}
@@ -317,7 +317,7 @@ export default function Dashboard({ stats = {}, pendingUsers = [], recentActivit
                         <div className="liquid-glass rounded-3xl border border-white/60 shadow-glass overflow-hidden flex flex-col">
                             <div className="p-6 border-b border-slate-100/80 bg-white/40 flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 flex items-center justify-center shadow-inner">
+                                    <div className="w-10 h-10 rounded-xl bg-[#ff5e36]/10 border border-[#ff5e36]/20 text-[#ff5e36] flex items-center justify-center shadow-inner">
                                         <Activity className="w-5 h-5" />
                                     </div>
                                     <div>
@@ -327,7 +327,7 @@ export default function Dashboard({ stats = {}, pendingUsers = [], recentActivit
                                 </div>
                                 <Link
                                     href={route('admin.analytics')}
-                                    className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 inline-flex items-center gap-1 group"
+                                    className="text-xs font-bold text-[#ff5e36] hover:text-[#e04822] inline-flex items-center gap-1 group"
                                 >
                                     {t('analytics')} 
                                     <span className="group-hover:translate-x-0.5 transition-transform">&rarr;</span>

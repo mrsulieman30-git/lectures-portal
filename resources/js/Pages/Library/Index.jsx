@@ -201,8 +201,8 @@ export default function LibraryIndex({ documents = { data: [] }, filters = {}, s
                                     onClick={() => handleFilterType(btn.key)}
                                     className={`px-3 py-1.5 text-xs font-semibold rounded-xl transition-all whitespace-nowrap ${
                                         fileType === btn.key
-                                            ? 'bg-indigo-600 text-white shadow-xs'
-                                            : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300'
+                                            ? 'bg-[#ff5e36] text-white shadow-sm shadow-[#ff5e36]/30 font-bold'
+                                            : 'bg-slate-100 hover:bg-slate-200 dark:bg-[#0d1117] dark:hover:bg-[#161b22] text-slate-700 dark:text-slate-300 border border-transparent dark:border-white/10'
                                     }`}
                                 >
                                     {btn.label}
@@ -474,7 +474,7 @@ export default function LibraryIndex({ documents = { data: [] }, filters = {}, s
                                 <button
                                     type="submit"
                                     disabled={uploadProcessing || uploadData.files.length === 0}
-                                    className="px-5 py-2.5 text-xs font-bold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white rounded-xl shadow-md shadow-indigo-600/30 hover:scale-105 active:scale-95 transition-all inline-flex items-center gap-2 disabled:opacity-50 disabled:scale-100"
+                                    className="px-5 py-2.5 text-xs font-bold bg-[#ff5e36] hover:bg-[#e04822] text-white rounded-xl shadow-md shadow-[#ff5e36]/25 hover:scale-105 active:scale-95 transition-all inline-flex items-center gap-2 disabled:opacity-50 disabled:scale-100"
                                 >
                                     {uploadProcessing ? (
                                         <>

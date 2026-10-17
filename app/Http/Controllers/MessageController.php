@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Enrollment;
 use App\Models\Message;
+use App\Models\Semester;
 use App\Models\Subject;
+use App\Models\University;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -23,23 +25,21 @@ class MessageController extends Controller
         // 1. Dr. Mohammad Sulieman (Admin / Professor)
         $professor = User::where('role', 'admin')->first(['id', 'name', 'avatar_path', 'role']);
 
-        // 2. Class / Subject channels the user has access to
-        if ($user->isAdmin()) {
-            $subjects = Subject::where('is_active', true)->get(['id', 'title', 'code', 'color']);
-            
-            // List students who have messaged or are enrolled
-            $recentSenderIds = Message::where('recipient_id', $user->id)
-                ->orWhere('user_id', $user->id)
-                ->whereNotNull('recipient_id')
-                ->pluck('user_id')
-                ->merge(Message::where('recipient_id', $user->id)->pluck('user_id'))
-                ->unique()
-                ->reject(fn ($id) => $id == $user->id);
+        // 2. Universities & Semesters for filter dropdowns
+        $universities = University::where('is_active', true)->get(['id', 'name']);
+        $semesters = Semester::where('is_active', true)->get(['id', 'name', 'university_id']);
 
-            $students = User::whereIn('id', $recentSenderIds)
-                ->orWhere('role', 'student')
-                ->limit(20)
-                ->get(['id', 'name', 'email', 'avatar_path', 'student_id_no']);
+        // 3. Class / Subject channels the user has access to
+        if ($user->isAdmin()) {
+            $subjects = Subject::where('is_active', true)
+                ->with(['university:id,name', 'semester:id,name'])
+                ->get(['id', 'title', 'code', 'color', 'university_id', 'semester_id']);
+            
+            // All enrolled or active students
+            $students = User::where('role', 'student')
+                ->where('status', 'active')
+                ->with('university:id,name')
+                ->get(['id', 'name', 'email', 'avatar_path', 'student_id_no', 'university_id', 'semester']);
         } else {
             // Student's enrolled subjects
             $enrolledSubjectIds = Enrollment::where('user_id', $user->id)
@@ -48,7 +48,8 @@ class MessageController extends Controller
 
             $subjects = Subject::whereIn('id', $enrolledSubjectIds)
                 ->where('is_active', true)
-                ->get(['id', 'title', 'code', 'color']);
+                ->with(['university:id,name', 'semester:id,name'])
+                ->get(['id', 'title', 'code', 'color', 'university_id', 'semester_id']);
 
             // Classmates from the same subjects
             $classmateIds = Enrollment::whereIn('subject_id', $enrolledSubjectIds)
@@ -58,7 +59,8 @@ class MessageController extends Controller
                 ->unique();
 
             $students = User::whereIn('id', $classmateIds)
-                ->get(['id', 'name', 'email', 'avatar_path', 'student_id_no']);
+                ->with('university:id,name')
+                ->get(['id', 'name', 'email', 'avatar_path', 'student_id_no', 'university_id', 'semester']);
         }
 
         // Calculate unread counts per channel / sender
@@ -72,6 +74,8 @@ class MessageController extends Controller
             'professor' => $user->isAdmin() ? null : $professor,
             'subjects' => $subjects,
             'classmates' => $students,
+            'universities' => $universities,
+            'semesters' => $semesters,
             'unread_counts' => $unreadCounts,
         ]);
     }

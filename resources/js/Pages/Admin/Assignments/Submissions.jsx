@@ -264,7 +264,7 @@ export default function SubmissionsIndex({ assignment = {}, submissions = [] }) 
                                                             )}
                                                             <button
                                                                 onClick={() => openGrading(sub)}
-                                                                className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-xs transition-all active:scale-95"
+                                                                className="px-3 py-1.5 rounded-lg bg-[#ff5e36] hover:bg-[#e04822] text-white text-xs font-bold shadow-xs transition-all active:scale-95"
                                                             >
                                                                 {sub.status === 'graded' ? 'Edit Score' : 'Review & Grade'}
                                                             </button>
@@ -385,7 +385,7 @@ export default function SubmissionsIndex({ assignment = {}, submissions = [] }) 
                                 <button
                                     type="submit"
                                     disabled={processing}
-                                    className="px-5 py-2.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl shadow-md transition-all"
+                                    className="px-5 py-2.5 text-xs font-bold bg-[#ff5e36] hover:bg-[#e04822] text-white rounded-xl shadow-md shadow-[#ff5e36]/20 transition-all"
                                 >
                                     Publish Grade
                                 </button>
