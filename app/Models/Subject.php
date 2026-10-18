@@ -19,6 +19,7 @@ class Subject extends Model
         'guidelines',
         'university_id',
         'semester_id',
+        'original_subject_id',
         'color',
         'is_active',
     ];
@@ -37,6 +38,16 @@ class Subject extends Model
     public function semester(): BelongsTo
     {
         return $this->belongsTo(Semester::class);
+    }
+
+    public function originalSubject(): BelongsTo
+    {
+        return $this->belongsTo(Subject::class, 'original_subject_id');
+    }
+
+    public function sharedInstances(): HasMany
+    {
+        return $this->hasMany(Subject::class, 'original_subject_id');
     }
 
     public function documents(): HasMany

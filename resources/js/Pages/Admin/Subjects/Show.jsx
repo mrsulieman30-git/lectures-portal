@@ -24,15 +24,51 @@ import {
     BookMarked,
     Sparkles,
     X,
-    Loader2
+    Loader2,
+    Share2,
+    ArrowRightLeft,
+    Edit3,
+    RefreshCw,
+    RotateCcw
 } from 'lucide-react';
 import FileUploadZone from '@/Components/FileUploadZone';
 
-export default function SubjectShow({ subject = {} }) {
+export default function SubjectShow({ subject = {}, sharedCampuses = [], allUniversities = [] }) {
     const [activeTab, setActiveTab] = useState('documents');
     const [showUploadModal, setShowUploadModal] = useState(false);
     const [showAssignmentModal, setShowAssignmentModal] = useState(false);
     const [showNoticeModal, setShowNoticeModal] = useState(false);
+    const [showTransferModal, setShowTransferModal] = useState(false);
+    const [showShareModal, setShowShareModal] = useState(false);
+
+    // Transfer Form
+    const { 
+        data: transferData, 
+        setData: setTransferData, 
+        post: postTransfer, 
+        processing: transferProcessing, 
+        reset: resetTransfer,
+        errors: transferErrors 
+    } = useForm({
+        university_id: subject.university_id || (allUniversities[0]?.id || ''),
+        semester_id: subject.semester_id || '',
+        reset_enrollments: true,
+    });
+
+    // Share Form
+    const { 
+        data: shareData, 
+        setData: setShareData, 
+        post: postShare, 
+        processing: shareProcessing, 
+        reset: resetShare,
+        errors: shareErrors 
+    } = useForm({
+        target_university_id: '',
+        target_semester_id: '',
+        copy_documents: true,
+        copy_assignments: true,
+    });
 
     // Document Upload Form
     const { 
@@ -69,6 +105,43 @@ export default function SubjectShow({ subject = {} }) {
     });
 
     const { delete: destroyDoc } = useForm();
+
+    const transferUniversity = allUniversities.find(u => String(u.id) === String(transferData.university_id));
+    const transferSemesters = transferUniversity?.semesters || [];
+
+    const shareUniversity = allUniversities.find(u => String(u.id) === String(shareData.target_university_id));
+    const shareSemesters = shareUniversity?.semesters || [];
+
+    const handleTransferSubject = (e) => {
+        e.preventDefault();
+        postTransfer(route('admin.subjects.transfer', subject.id), {
+            onSuccess: () => {
+                setShowTransferModal(false);
+            }
+        });
+    };
+
+    const handleShareSubject = (e) => {
+        e.preventDefault();
+        postShare(route('admin.subjects.share', subject.id), {
+            onSuccess: () => {
+                setShowShareModal(false);
+                resetShare();
+            }
+        });
+    };
+
+    const handleSyncMaterials = () => {
+        if (confirm('Synchronize new documents from this cabinet to all other campus cabinets sharing this course?')) {
+            router.post(route('admin.subjects.sync', subject.id), {}, { preserveScroll: true });
+        }
+    };
+
+    const handleDeleteSubject = () => {
+        if (confirm(`Move '${subject.title}' to Recycle Bin? You can recover it anytime from the Recycle Bin.`)) {
+            router.delete(route('admin.subjects.destroy', subject.id));
+        }
+    };
 
     const handleUploadDocuments = (e) => {
         e.preventDefault();
@@ -161,7 +234,42 @@ export default function SubjectShow({ subject = {} }) {
                         </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2.5">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <button
+                            onClick={() => setShowTransferModal(true)}
+                            className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200/80 dark:border-white/10 transition-all shadow-sm hover:scale-105 active:scale-95"
+                            title="Transfer this subject to a different university or semester"
+                        >
+                            <ArrowRightLeft className="w-4 h-4 text-cyan-600" />
+                            <span>Transfer</span>
+                        </button>
+
+                        <button
+                            onClick={() => setShowShareModal(true)}
+                            className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200/80 dark:border-white/10 transition-all shadow-sm hover:scale-105 active:scale-95"
+                            title="Share this subject with another university or semester (separate analytics)"
+                        >
+                            <Share2 className="w-4 h-4 text-[#ff5e36]" />
+                            <span>Share to Campus</span>
+                        </button>
+
+                        <Link
+                            href={route('admin.subjects.edit', subject.id)}
+                            className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200/80 dark:border-white/10 transition-all shadow-sm hover:scale-105 active:scale-95"
+                            title="Edit Subject Cabinet Settings"
+                        >
+                            <Edit3 className="w-4 h-4 text-slate-500" />
+                            <span>Edit</span>
+                        </Link>
+
+                        <button
+                            onClick={handleDeleteSubject}
+                            className="p-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900 transition-colors"
+                            title="Move to Recycle Bin"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                        </button>
+
                         {(subject.documents || []).some(d => d.is_downloadable && !d.is_view_only) && (
                             <a
                                 href={route('subjects.download-pack', subject.id)}
@@ -169,7 +277,7 @@ export default function SubjectShow({ subject = {} }) {
                                 title="Download all downloadable lecture slides as a single ZIP archive"
                             >
                                 <DownloadCloud className="w-4 h-4 text-indigo-600" />
-                                <span>Download Pack (.zip)</span>
+                                <span>Pack (.zip)</span>
                             </a>
                         )}
                         <button
@@ -240,6 +348,22 @@ export default function SubjectShow({ subject = {} }) {
                         >
                             <Users className="w-4 h-4" />
                             Students ({(subject.active_students || []).length})
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('network')}
+                            className={`px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all ${
+                                activeTab === 'network'
+                                    ? 'bg-[#ff5e36] text-white shadow-sm shadow-[#ff5e36]/30 font-bold'
+                                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+                            }`}
+                        >
+                            <Globe className="w-4 h-4" />
+                            <span>Campus Network</span>
+                            <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                                activeTab === 'network' ? 'bg-white text-[#ff5e36]' : 'bg-[#ff5e36]/15 text-[#ff5e36]'
+                            }`}>
+                                {sharedCampuses.length}
+                            </span>
                         </button>
                     </div>
 
@@ -464,6 +588,117 @@ export default function SubjectShow({ subject = {} }) {
                                     </table>
                                 </div>
                             )}
+                        </div>
+                    )}
+
+                    {/* TAB 5: Multi-Campus Network & Independent Analytics */}
+                    {activeTab === 'network' && (
+                        <div className="space-y-6">
+                            <div className="bg-gradient-to-r from-slate-900 to-[#121622] text-white p-6 sm:p-8 rounded-3xl border border-white/10 shadow-xl relative overflow-hidden">
+                                <div className="absolute -right-16 -top-16 w-64 h-64 bg-[#ff5e36]/20 rounded-full blur-3xl pointer-events-none" />
+                                <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+                                    <div className="space-y-2 max-w-2xl">
+                                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#ff5e36]/20 text-[#ff5e36] text-xs font-bold border border-[#ff5e36]/30">
+                                            <Globe className="w-3.5 h-3.5" />
+                                            <span>Unified Academic Network</span>
+                                        </div>
+                                        <h3 className="text-xl sm:text-2xl font-black font-display tracking-tight">
+                                            Multi-Campus Course Sharing &amp; Independent Analytics
+                                        </h3>
+                                        <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                                            This course syllabus is deployed across <strong>{sharedCampuses.length} partner campus cabinet(s)</strong>.
+                                            Each university maintains strict independence: separate student rosters, isolated assignment submissions &amp; grades, and individual download engagement metrics.
+                                        </p>
+                                    </div>
+                                    <div className="flex flex-wrap sm:flex-col gap-2.5 shrink-0">
+                                        <button
+                                            onClick={() => setShowShareModal(true)}
+                                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#ff5e36] hover:bg-[#e04822] text-white text-xs font-bold shadow-md shadow-[#ff5e36]/30 transition-all hover:scale-105 active:scale-95"
+                                        >
+                                            <Share2 className="w-4 h-4" />
+                                            <span>Deploy to Another Campus</span>
+                                        </button>
+                                        {sharedCampuses.length > 1 && (
+                                            <button
+                                                onClick={handleSyncMaterials}
+                                                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold border border-white/15 transition-all hover:scale-105 active:scale-95"
+                                                title="Push newly added documents to all other campus instances"
+                                            >
+                                                <RefreshCw className="w-4 h-4 text-cyan-400" />
+                                                <span>Sync Materials to All Campuses</span>
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Campuses Comparison Cards */}
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                {sharedCampuses.map((campus) => (
+                                    <div 
+                                        key={campus.id}
+                                        className={`rounded-3xl border p-6 transition-all ${
+                                            campus.is_current 
+                                                ? 'bg-white dark:bg-[#0c1017] border-[#ff5e36] shadow-md ring-2 ring-[#ff5e36]/20' 
+                                                : 'bg-white dark:bg-[#0c1017] border-slate-200/80 dark:border-white/10 hover:border-slate-300'
+                                        }`}
+                                    >
+                                        <div className="flex items-start justify-between gap-3 mb-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-12 h-12 rounded-2xl bg-[#ff5e36]/10 text-[#ff5e36] flex items-center justify-center font-bold text-lg border border-[#ff5e36]/20">
+                                                    {campus.university?.name ? campus.university.name.charAt(0) : 'U'}
+                                                </div>
+                                                <div>
+                                                    <div className="flex items-center gap-2">
+                                                        <h4 className="font-bold text-slate-900 dark:text-white text-base">
+                                                            {campus.university?.name || 'Partner Campus'}
+                                                        </h4>
+                                                        {campus.is_current && (
+                                                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#ff5e36] text-white">
+                                                                Viewing Now
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div className="text-xs text-slate-400 font-medium">
+                                                        Term: <strong>{campus.semester?.name || 'Standard Term'}</strong> • Code: <span className="font-mono">{campus.code || 'COURSE'}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {!campus.is_current && (
+                                                <Link
+                                                    href={route('admin.subjects.show', campus.id)}
+                                                    className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-[#ff5e36] hover:text-white text-slate-700 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-[#ff5e36] text-xs font-bold transition-all"
+                                                >
+                                                    Open Cabinet &rarr;
+                                                </Link>
+                                            )}
+                                        </div>
+
+                                        {/* Isolated Analytics Grid for This Campus */}
+                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-100 dark:border-white/5">
+                                            <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/5">
+                                                <span className="text-[10px] uppercase font-bold text-slate-400 block">Enrolled Students</span>
+                                                <span className="text-lg font-black text-slate-800 dark:text-white">{campus.students_count}</span>
+                                            </div>
+                                            <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/5">
+                                                <span className="text-[10px] uppercase font-bold text-slate-400 block">File Downloads</span>
+                                                <span className="text-lg font-black text-[#ff5e36]">{campus.total_downloads}</span>
+                                            </div>
+                                            <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/5">
+                                                <span className="text-[10px] uppercase font-bold text-slate-400 block">Submissions</span>
+                                                <span className="text-lg font-black text-emerald-600 dark:text-emerald-400">{campus.submissions_count}</span>
+                                            </div>
+                                            <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/5">
+                                                <span className="text-[10px] uppercase font-bold text-slate-400 block">Avg. Grade</span>
+                                                <span className="text-lg font-black text-indigo-600 dark:text-indigo-400">
+                                                    {campus.average_grade ? `${campus.average_grade}%` : 'N/A'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     )}
 
@@ -708,6 +943,256 @@ export default function SubjectShow({ subject = {} }) {
                                     className="px-5 py-2 text-xs font-semibold bg-slate-900 text-white rounded-xl"
                                 >
                                     Broadcast Notice
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Transfer Subject Modal */}
+            {showTransferModal && (
+                <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="bg-white dark:bg-[#0c1017] rounded-3xl border border-slate-200/90 dark:border-white/10 max-w-xl w-full p-6 sm:p-8 shadow-2xl">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2.5">
+                                <div className="w-10 h-10 rounded-2xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center">
+                                    <ArrowRightLeft className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-slate-900 dark:text-white font-display">
+                                        Transfer Course Cabinet
+                                    </h3>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                        Move '{subject.title}' to another university campus or academic term.
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setShowTransferModal(false)}
+                                className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-white/5"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleTransferSubject} className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+                                    Target Partner University *
+                                </label>
+                                <select
+                                    required
+                                    value={transferData.university_id}
+                                    onChange={(e) => {
+                                        const uniId = e.target.value;
+                                        const foundUni = allUniversities.find(u => String(u.id) === String(uniId));
+                                        setTransferData({
+                                            ...transferData,
+                                            university_id: uniId,
+                                            semester_id: foundUni?.semesters?.[0]?.id || ''
+                                        });
+                                    }}
+                                    className="w-full px-4 py-2.5 text-sm border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-800 dark:text-white rounded-xl focus:ring-2 focus:ring-[#ff5e36]/20 focus:border-[#ff5e36]"
+                                >
+                                    <option value="">Select University</option>
+                                    {allUniversities.map(u => (
+                                        <option key={u.id} value={u.id}>{u.name}</option>
+                                    ))}
+                                </select>
+                                {transferErrors.university_id && <p className="text-xs text-rose-600 mt-1">{transferErrors.university_id}</p>}
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+                                    Target Academic Semester / Term *
+                                </label>
+                                <select
+                                    required
+                                    value={transferData.semester_id}
+                                    onChange={(e) => setTransferData('semester_id', e.target.value)}
+                                    className="w-full px-4 py-2.5 text-sm border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-800 dark:text-white rounded-xl focus:ring-2 focus:ring-[#ff5e36]/20 focus:border-[#ff5e36]"
+                                >
+                                    <option value="">Select Semester</option>
+                                    {transferSemesters.map(s => (
+                                        <option key={s.id} value={s.id}>{s.name}</option>
+                                    ))}
+                                </select>
+                                {transferErrors.semester_id && <p className="text-xs text-rose-600 mt-1">{transferErrors.semester_id}</p>}
+                            </div>
+
+                            <div className="p-4 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-200/80 dark:border-white/5">
+                                <label className="flex items-start gap-2.5 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={transferData.reset_enrollments}
+                                        onChange={(e) => setTransferData('reset_enrollments', e.target.checked)}
+                                        className="mt-0.5 rounded border-slate-300 text-[#ff5e36] focus:ring-[#ff5e36]"
+                                    />
+                                    <div>
+                                        <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                                            Reset Enrollments for Previous University
+                                        </span>
+                                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                                            Removes students registered under the old campus so they no longer have access to this cabinet. (Recommended when transferring across campuses).
+                                        </p>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-white/5">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowTransferModal(false)}
+                                    className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 rounded-xl"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={transferProcessing || !transferData.semester_id}
+                                    className="px-5 py-2.5 text-xs font-bold bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl shadow-md shadow-cyan-600/25 transition-all inline-flex items-center gap-1.5 disabled:opacity-50"
+                                >
+                                    <ArrowRightLeft className="w-4 h-4" />
+                                    <span>{transferProcessing ? 'Transferring...' : 'Execute Transfer'}</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Share Subject with Campus Modal */}
+            {showShareModal && (
+                <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="bg-white dark:bg-[#0c1017] rounded-3xl border border-slate-200/90 dark:border-white/10 max-w-xl w-full p-6 sm:p-8 shadow-2xl">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2.5">
+                                <div className="w-10 h-10 rounded-2xl bg-[#ff5e36]/10 text-[#ff5e36] flex items-center justify-center">
+                                    <Share2 className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-slate-900 dark:text-white font-display">
+                                        Share Course Across Campuses
+                                    </h3>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                        Deploy '{subject.title}' to another university with completely isolated analytics.
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setShowShareModal(false)}
+                                className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-white/5"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleShareSubject} className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+                                    Deploy to University *
+                                </label>
+                                <select
+                                    required
+                                    value={shareData.target_university_id}
+                                    onChange={(e) => {
+                                        const uniId = e.target.value;
+                                        const foundUni = allUniversities.find(u => String(u.id) === String(uniId));
+                                        setShareData({
+                                            ...shareData,
+                                            target_university_id: uniId,
+                                            target_semester_id: foundUni?.semesters?.[0]?.id || ''
+                                        });
+                                    }}
+                                    className="w-full px-4 py-2.5 text-sm border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-800 dark:text-white rounded-xl focus:ring-2 focus:ring-[#ff5e36]/20 focus:border-[#ff5e36]"
+                                >
+                                    <option value="">Select University</option>
+                                    {allUniversities.map(u => (
+                                        <option key={u.id} value={u.id}>{u.name}</option>
+                                    ))}
+                                </select>
+                                {shareErrors.target_university_id && <p className="text-xs text-rose-600 mt-1">{shareErrors.target_university_id}</p>}
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+                                    Semester / Academic Term *
+                                </label>
+                                <select
+                                    required
+                                    value={shareData.target_semester_id}
+                                    onChange={(e) => setShareData('target_semester_id', e.target.value)}
+                                    className="w-full px-4 py-2.5 text-sm border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-800 dark:text-white rounded-xl focus:ring-2 focus:ring-[#ff5e36]/20 focus:border-[#ff5e36]"
+                                >
+                                    <option value="">Select Semester</option>
+                                    {shareSemesters.map(s => (
+                                        <option key={s.id} value={s.id}>{s.name}</option>
+                                    ))}
+                                </select>
+                                {shareErrors.target_semester_id && <p className="text-xs text-rose-600 mt-1">{shareErrors.target_semester_id}</p>}
+                            </div>
+
+                            <div className="p-4 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-200/80 dark:border-white/5 space-y-3">
+                                <label className="flex items-start gap-2.5 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={shareData.copy_documents}
+                                        onChange={(e) => setShareData('copy_documents', e.target.checked)}
+                                        className="mt-0.5 rounded border-slate-300 text-[#ff5e36] focus:ring-[#ff5e36]"
+                                    />
+                                    <div>
+                                        <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                                            Replicate Lecture Materials &amp; Slides ({(subject.documents || []).length} Files)
+                                        </span>
+                                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                                            All lecture presentations will be available in the new campus cabinet with fresh, independent download and view metrics.
+                                        </p>
+                                    </div>
+                                </label>
+
+                                <label className="flex items-start gap-2.5 cursor-pointer pt-2.5 border-t border-slate-200/60 dark:border-white/5">
+                                    <input
+                                        type="checkbox"
+                                        checked={shareData.copy_assignments}
+                                        onChange={(e) => setShareData('copy_assignments', e.target.checked)}
+                                        className="mt-0.5 rounded border-slate-300 text-[#ff5e36] focus:ring-[#ff5e36]"
+                                    />
+                                    <div>
+                                        <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                                            Replicate Assignments &amp; Tasks ({(subject.assignments || []).length} Tasks)
+                                        </span>
+                                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                                            Assignment criteria and rubrics will be set up with a clean roster of 0 student submissions.
+                                        </p>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-start gap-2.5 text-xs text-emerald-700 dark:text-emerald-300">
+                                <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-emerald-600 dark:text-emerald-400" />
+                                <p className="leading-relaxed">
+                                    <strong>Complete Isolation:</strong> Students at this new university will never see other campuses' submissions, grades, chat messages, or analytics.
+                                </p>
+                            </div>
+
+                            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-white/5">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowShareModal(false)}
+                                    className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 rounded-xl"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={shareProcessing || !shareData.target_semester_id}
+                                    className="px-5 py-2.5 text-xs font-bold bg-[#ff5e36] hover:bg-[#e04822] text-white rounded-xl shadow-md shadow-[#ff5e36]/25 transition-all inline-flex items-center gap-1.5 disabled:opacity-50"
+                                >
+                                    <Share2 className="w-4 h-4" />
+                                    <span>{shareProcessing ? 'Deploying...' : 'Deploy to Campus'}</span>
                                 </button>
                             </div>
                         </form>

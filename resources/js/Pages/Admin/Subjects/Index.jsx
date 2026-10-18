@@ -8,7 +8,9 @@ import {
     Plus, 
     Building2, 
     ArrowUpRight,
-    Search
+    Search,
+    Globe,
+    Trash2
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -36,13 +38,23 @@ export default function SubjectsIndex({ subjects = { data: [] }, universities = 
                             Individual subject cabinets containing lectures, assignments, and student files.
                         </p>
                     </div>
-                    <Link
-                        href={route('admin.subjects.create')}
-                        className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#ff5e36] hover:bg-[#e04822] text-white text-xs font-bold shadow-sm shadow-[#ff5e36]/25 transition-all hover:scale-105 active:scale-95"
-                    >
-                        <Plus className="w-4 h-4" />
-                        New Subject Cabinet
-                    </Link>
+                    <div className="flex items-center gap-2">
+                        <Link
+                            href={route('admin.recycle-bin.index')}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 text-xs font-bold border border-slate-200/80 dark:border-white/10 transition-all shadow-xs"
+                            title="Open Recycle Bin"
+                        >
+                            <Trash2 className="w-4 h-4 text-rose-500" />
+                            <span>Recycle Bin</span>
+                        </Link>
+                        <Link
+                            href={route('admin.subjects.create')}
+                            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#ff5e36] hover:bg-[#e04822] text-white text-xs font-bold shadow-sm shadow-[#ff5e36]/25 transition-all hover:scale-105 active:scale-95"
+                        >
+                            <Plus className="w-4 h-4" />
+                            New Subject Cabinet
+                        </Link>
+                    </div>
                 </div>
             }
         >
@@ -104,12 +116,20 @@ export default function SubjectsIndex({ subjects = { data: [] }, universities = 
                                 >
                                     <div className="p-6">
                                         <div className="flex items-start justify-between gap-3 mb-3">
-                                            <span 
-                                                className="px-2.5 py-1 rounded-lg text-xs font-mono font-bold tracking-wider"
-                                                style={{ backgroundColor: `${subj.color || '#ff5e36'}15`, color: subj.color || '#ff5e36' }}
-                                            >
-                                                {subj.code || 'COURSE'}
-                                            </span>
+                                            <div className="flex items-center gap-2">
+                                                <span 
+                                                    className="px-2.5 py-1 rounded-lg text-xs font-mono font-bold tracking-wider"
+                                                    style={{ backgroundColor: `${subj.color || '#ff5e36'}15`, color: subj.color || '#ff5e36' }}
+                                                >
+                                                    {subj.code || 'COURSE'}
+                                                </span>
+                                                {(subj.shared_instances_count > 0 || subj.original_subject_id) && (
+                                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#ff5e36]/10 text-[#ff5e36] border border-[#ff5e36]/20">
+                                                        <Globe className="w-3 h-3" />
+                                                        Shared
+                                                    </span>
+                                                )}
+                                            </div>
                                             <ArrowUpRight className="w-4 h-4 text-slate-300 group-hover:text-[#ff5e36] transition-colors" />
                                         </div>
 

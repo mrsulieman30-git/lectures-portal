@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AgentActionController;
+use App\Http\Controllers\Admin\RecycleBinController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\DeviceController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\NoteController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\SemesterController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\UniversityController;
 use App\Models\Assignment;
@@ -153,14 +155,26 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
         Route::post('/enroll', [AdminController::class, 'enrollStudent'])->name('enroll');
         Route::post('/unenroll', [AdminController::class, 'unenrollStudent'])->name('unenroll');
 
-        // University Management
+        // University & Semester Management
         Route::resource('universities', UniversityController::class);
         Route::post('/universities/{university}/semesters', [UniversityController::class, 'addSemester'])->name('universities.semesters.store');
+        Route::put('/universities/{university}/semesters/{semester}', [UniversityController::class, 'updateSemester'])->name('universities.semesters.update');
         Route::delete('/universities/{university}/semesters/{semester}', [UniversityController::class, 'deleteSemester'])->name('universities.semesters.destroy');
+        Route::resource('semesters', SemesterController::class)->only(['store', 'update', 'destroy']);
 
         // Subject Management
         Route::resource('subjects', SubjectController::class);
+        Route::post('/subjects/{subject}/transfer', [SubjectController::class, 'transfer'])->name('subjects.transfer');
+        Route::post('/subjects/{subject}/share', [SubjectController::class, 'share'])->name('subjects.share');
+        Route::post('/subjects/{subject}/sync', [SubjectController::class, 'sync'])->name('subjects.sync');
         Route::post('/subjects/{subject}/updates', [SubjectController::class, 'addUpdate'])->name('subjects.updates.store');
+
+        // Recycle Bin (Undo & Trash Management)
+        Route::get('/recycle-bin', [RecycleBinController::class, 'index'])->name('recycle-bin.index');
+        Route::post('/recycle-bin/restore', [RecycleBinController::class, 'restore'])->name('recycle-bin.restore');
+        Route::delete('/recycle-bin/force-delete', [RecycleBinController::class, 'forceDelete'])->name('recycle-bin.force-delete');
+        Route::post('/recycle-bin/restore-all', [RecycleBinController::class, 'restoreAll'])->name('recycle-bin.restore-all');
+        Route::delete('/recycle-bin/empty', [RecycleBinController::class, 'emptyTrash'])->name('recycle-bin.empty');
 
         // Document Management
         Route::post('/subjects/{subject}/documents', [DocumentController::class, 'store'])->name('documents.store');
