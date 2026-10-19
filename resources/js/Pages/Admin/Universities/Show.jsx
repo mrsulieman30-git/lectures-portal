@@ -60,12 +60,29 @@ export default function UniversityShow({ university = {} }) {
         });
     };
 
+    const formatDate = (dateStr) => {
+        if (!dateStr) return '';
+        const clean = String(dateStr).split('T')[0];
+        try {
+            const [y, m, d] = clean.split('-');
+            if (y && m && d) {
+                const dateObj = new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
+                return dateObj.toLocaleDateString(undefined, {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                });
+            }
+        } catch (e) {}
+        return clean;
+    };
+
     const openEditSemester = (sem) => {
         setEditingSemester(sem);
         setEditData({
             name: sem.name || '',
-            start_date: sem.start_date || '',
-            end_date: sem.end_date || '',
+            start_date: sem.start_date ? String(sem.start_date).split('T')[0] : '',
+            end_date: sem.end_date ? String(sem.end_date).split('T')[0] : '',
             is_active: Boolean(sem.is_active),
             sort_order: sem.sort_order || 0,
         });
@@ -373,7 +390,7 @@ export default function UniversityShow({ university = {} }) {
                                                 </div>
                                                 <span className="text-xs text-slate-400">
                                                     {(sem.subjects || []).length} Course Module(s)
-                                                    {sem.start_date && ` • ${sem.start_date} to ${sem.end_date || 'Ongoing'}`}
+                                                    {sem.start_date && ` • ${formatDate(sem.start_date)} to ${sem.end_date ? formatDate(sem.end_date) : 'Ongoing'}`}
                                                 </span>
                                             </div>
                                         </div>

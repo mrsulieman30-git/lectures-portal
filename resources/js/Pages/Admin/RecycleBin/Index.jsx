@@ -61,6 +61,23 @@ export default function RecycleBinIndex({
         }
     };
 
+    const formatDate = (dateStr) => {
+        if (!dateStr) return '';
+        const clean = String(dateStr).split('T')[0];
+        try {
+            const [y, m, d] = clean.split('-');
+            if (y && m && d) {
+                const dateObj = new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
+                return dateObj.toLocaleDateString(undefined, {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                });
+            }
+        } catch (e) {}
+        return clean;
+    };
+
     // Filter items
     const filteredSubjects = subjects.filter(s => 
         s.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -355,7 +372,7 @@ export default function RecycleBinIndex({
                                                             {sem.start_date && (
                                                                 <>
                                                                     <span>•</span>
-                                                                    <span>Duration: {sem.start_date} to {sem.end_date || 'Ongoing'}</span>
+                                                                    <span>Duration: {formatDate(sem.start_date)} to {sem.end_date ? formatDate(sem.end_date) : 'Ongoing'}</span>
                                                                 </>
                                                             )}
                                                         </div>
