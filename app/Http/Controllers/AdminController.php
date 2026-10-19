@@ -77,6 +77,7 @@ class AdminController extends Controller
     public function approveUser(User $user)
     {
         $user->update(['status' => 'approved']);
+        $enrolledCount = $user->autoEnrollUniversitySubjects();
 
         Notification::notify(
             $user->id,
@@ -88,7 +89,22 @@ class AdminController extends Controller
 
         ActivityLog::log('user_approved', $user);
 
-        return redirect()->back()->with('message', "User {$user->name} approved successfully.");
+        $enrollMsg = $enrolledCount > 0 ? " and enrolled into {$enrolledCount} university courses" : '';
+        return redirect()->back()->with('message', "User {$user->name} approved successfully{$enrollMsg}.");
+    }
+
+    /**
+     * Bulk sync all approved students with active subjects of their universities.
+     */
+    public function syncEnrollments()
+    {
+        $students = User::where('role', 'student')->where('status', 'approved')->whereNotNull('university_id')->get();
+        $totalSynced = 0;
+        foreach ($students as $student) {
+            $totalSynced += $student->autoEnrollUniversitySubjects();
+        }
+
+        return redirect()->back()->with('message', "Synced {$totalSynced} course enrollments across {$students->count()} approved students.");
     }
 
     /**

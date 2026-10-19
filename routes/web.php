@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AgentActionController;
+use App\Http\Controllers\Admin\PendingCabinetController;
 use App\Http\Controllers\Admin\RecycleBinController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AssignmentController;
@@ -48,11 +49,15 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
             return redirect()->route('admin.dashboard');
         }
 
-        // Student dashboard data
-        $enrolledSubjects = $user->subjects()
+        // Auto-enroll student into university subjects if not enrolled yet
+        if ($user->university_id && $user->enrollments()->count() === 0) {
+            $user->autoEnrollUniversitySubjects();
+        }
+
+        // Student dashboard data (accessible subjects via active enrollment OR university affiliation)
+        $enrolledSubjects = $user->accessibleSubjects()
             ->with(['university:id,name', 'semester:id,name'])
             ->withCount('documents', 'assignments')
-            ->wherePivot('status', 'active')
             ->get();
 
         $upcomingAssignments = Assignment::whereIn('subject_id', $enrolledSubjects->pluck('id'))
@@ -152,6 +157,7 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
         Route::post('/users/{user}/reset-device', [DeviceController::class, 'resetDevice'])->name('users.reset-device');
 
         // Enrollment Management
+        Route::post('/users/sync-enrollments', [AdminController::class, 'syncEnrollments'])->name('users.sync-enrollments');
         Route::post('/enroll', [AdminController::class, 'enrollStudent'])->name('enroll');
         Route::post('/unenroll', [AdminController::class, 'unenrollStudent'])->name('unenroll');
 
@@ -175,6 +181,13 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
         Route::delete('/recycle-bin/force-delete', [RecycleBinController::class, 'forceDelete'])->name('recycle-bin.force-delete');
         Route::post('/recycle-bin/restore-all', [RecycleBinController::class, 'restoreAll'])->name('recycle-bin.restore-all');
         Route::delete('/recycle-bin/empty', [RecycleBinController::class, 'emptyTrash'])->name('recycle-bin.empty');
+
+        // Pending Cabinet (Staged Documents & Bulk Assignment)
+        Route::get('/pending-cabinet', [PendingCabinetController::class, 'index'])->name('pending-cabinet.index');
+        Route::post('/pending-cabinet/upload', [PendingCabinetController::class, 'upload'])->name('pending-cabinet.upload');
+        Route::post('/pending-cabinet/assign', [PendingCabinetController::class, 'assign'])->name('pending-cabinet.assign');
+        Route::post('/pending-cabinet/bulk-schedule', [PendingCabinetController::class, 'bulkSchedule'])->name('pending-cabinet.bulk-schedule');
+        Route::post('/pending-cabinet/bulk-delete', [PendingCabinetController::class, 'bulkDelete'])->name('pending-cabinet.bulk-delete');
 
         // Document Management
         Route::post('/subjects/{subject}/documents', [DocumentController::class, 'store'])->name('documents.store');

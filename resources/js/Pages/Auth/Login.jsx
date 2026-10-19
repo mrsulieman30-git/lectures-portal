@@ -28,12 +28,11 @@ import {
 import { useTranslation } from '@/Context/LanguageContext';
 import { getOrCreateDeviceToken, detectDeviceName } from '@/Utils/deviceDetector';
 
-export default function Login({ status, canResetPassword, deviceBlocked }) {
+export default function Login({ status, info, canResetPassword, deviceBlocked }) {
     const { t } = useTranslation();
     const [detectedName, setDetectedName] = useState('Scanning Hardware...');
     const [showRequestForm, setShowRequestForm] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-    const [selectedRole, setSelectedRole] = useState('student'); // 'student' | 'instructor'
 
     const { data, setData, post, processing, errors, reset } = useForm({
         email: deviceBlocked?.email || '',
@@ -84,14 +83,7 @@ export default function Login({ status, canResetPassword, deviceBlocked }) {
         });
     };
 
-    const handleQuickFill = (role) => {
-        setSelectedRole(role);
-        setData((prev) => ({
-            ...prev,
-            email: 'admin@portal.com',
-            password: 'password',
-        }));
-    };
+
 
     return (
         <GuestLayout>
@@ -118,43 +110,15 @@ export default function Login({ status, canResetPassword, deviceBlocked }) {
                         {/* Card Header */}
                         <div className="text-center mb-6">
                             <div className="inline-flex items-center gap-2 rounded-full border border-orange-500/30 bg-orange-500/10 px-3 py-1 text-xs font-semibold text-orange-400 mb-3 backdrop-blur-md">
-                                <Sparkles className="w-3.5 h-3.5 text-orange-400 animate-spin" style={{ animationDuration: '6s' }} />
-                                <span>Academic OS Authentication</span>
+                                <GraduationCap className="w-3.5 h-3.5 text-orange-400" />
+                                <span>Student Portal Access</span>
                             </div>
                             <h2 className="text-2xl sm:text-3xl font-black font-heading text-white tracking-tight">
-                                Welcome Back
+                                Student Sign In
                             </h2>
                             <p className="mt-1 text-xs text-slate-400 font-medium">
-                                Sign in with your registered university credentials
+                                Sign in with your student email to access lecture cabinets
                             </p>
-                        </div>
-
-                        {/* Role Switcher Pill Tabs */}
-                        <div className="mb-6 grid grid-cols-2 gap-1 rounded-2xl bg-slate-950/60 p-1 border border-white/10 text-xs font-bold">
-                            <button
-                                type="button"
-                                onClick={() => handleQuickFill('student')}
-                                className={`flex items-center justify-center gap-2 rounded-xl py-2 px-3 transition-all duration-200 ${
-                                    selectedRole === 'student'
-                                        ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-lg shadow-orange-500/25 ring-1 ring-white/20'
-                                        : 'text-slate-400 hover:text-white hover:bg-white/5'
-                                }`}
-                            >
-                                <GraduationCap className="w-4 h-4" />
-                                <span>Student</span>
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => handleQuickFill('instructor')}
-                                className={`flex items-center justify-center gap-2 rounded-xl py-2 px-3 transition-all duration-200 ${
-                                    selectedRole === 'instructor'
-                                        ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-600/25 ring-1 ring-white/20'
-                                        : 'text-slate-400 hover:text-white hover:bg-white/5'
-                                }`}
-                            >
-                                <Shield className="w-4 h-4" />
-                                <span>Faculty / Admin</span>
-                            </button>
                         </div>
 
                         {/* Status Flash Alert */}
@@ -162,6 +126,14 @@ export default function Login({ status, canResetPassword, deviceBlocked }) {
                             <div className="mb-5 p-3 rounded-2xl bg-emerald-950/60 border border-emerald-500/30 text-xs font-semibold text-emerald-300 flex items-center gap-2.5 backdrop-blur-md">
                                 <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                                 <span>{status}</span>
+                            </div>
+                        )}
+
+                        {/* Info Alert */}
+                        {info && (
+                            <div className="mb-5 p-3 rounded-2xl bg-amber-950/60 border border-amber-500/30 text-xs font-semibold text-amber-300 flex items-center gap-2.5 backdrop-blur-md">
+                                <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+                                <span>{info}</span>
                             </div>
                         )}
 
@@ -427,29 +399,19 @@ export default function Login({ status, canResetPassword, deviceBlocked }) {
                             </div>
                         </form>
 
-                        {/* Demo Quick-Fill Buttons */}
+                        {/* Separate Faculty & Staff Portal Entry */}
                         <div className="mt-6 pt-5 border-t border-white/10 text-center">
-                            <span className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold block mb-2.5">
-                                Quick Demo Logins
+                            <span className="text-[11px] text-slate-400 font-medium block mb-2.5">
+                                Teaching faculty or system administrator?
                             </span>
-                            <div className="flex items-center justify-center gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => handleQuickFill('student')}
-                                    className="rounded-xl border border-white/10 bg-white/5 px-2.5 py-1.5 text-[11px] font-semibold text-slate-300 hover:bg-orange-500/20 hover:text-orange-300 hover:border-orange-500/30 transition flex items-center gap-1.5"
-                                >
-                                    <GraduationCap className="w-3.5 h-3.5 text-orange-400" />
-                                    <span>Alex (Student)</span>
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => handleQuickFill('instructor')}
-                                    className="rounded-xl border border-white/10 bg-white/5 px-2.5 py-1.5 text-[11px] font-semibold text-slate-300 hover:bg-indigo-500/20 hover:text-indigo-300 hover:border-indigo-500/30 transition flex items-center gap-1.5"
-                                >
-                                    <Shield className="w-3.5 h-3.5 text-indigo-400" />
-                                    <span>Professor (Admin)</span>
-                                </button>
-                            </div>
+                            <Link
+                                href={route('admin.login')}
+                                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-2.5 rounded-xl border border-indigo-500/30 bg-indigo-950/40 hover:bg-indigo-900/50 text-indigo-300 hover:text-white text-xs font-bold transition shadow-sm group"
+                            >
+                                <Shield className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform" />
+                                <span>Faculty &amp; Staff Portal Login</span>
+                                <ArrowRight className="w-3.5 h-3.5 text-indigo-400 group-hover:translate-x-1 transition-transform" />
+                            </Link>
                         </div>
 
                         {/* Register Link */}

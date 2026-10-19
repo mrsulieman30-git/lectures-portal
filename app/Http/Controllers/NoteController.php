@@ -39,8 +39,7 @@ class NoteController extends Controller
         if ($user->isAdmin()) {
             $subjects = Subject::active()->get(['id', 'title', 'color']);
         } else {
-            $enrolledIds = $user->enrollments()->active()->pluck('subject_id');
-            $subjects = Subject::whereIn('id', $enrolledIds)->get(['id', 'title', 'color']);
+            $subjects = $user->accessibleSubjects()->get(['id', 'title', 'color']);
         }
 
         return Inertia::render('Notes/Index', [

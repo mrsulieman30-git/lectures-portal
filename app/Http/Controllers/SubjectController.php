@@ -56,6 +56,7 @@ class SubjectController extends Controller
         ]);
 
         $subject = Subject::create($validated);
+        $subject->enrollUniversityStudents();
         ActivityLog::log('subject_created', $subject);
 
         return redirect()->route('admin.subjects.show', $subject)
@@ -365,20 +366,30 @@ class SubjectController extends Controller
     {
         $user = auth()->user();
 
-        // Check enrollment
-        $isEnrolled = $subject->enrollments()
-            ->where('user_id', $user->id)
-            ->where('status', 'active')
-            ->exists();
+        // Check RBAC access
+        if (! $user->canAccessSubject($subject)) {
+            abort(403, 'You do not have access to this subject.');
+        }
 
-        if (! $isEnrolled && ! $user->isAdmin()) {
-            abort(403, 'You are not enrolled in this subject.');
+        $isEnrolled = true;
+
+        // Auto-enroll if accessing via university affiliation
+        if (! $user->isAdmin()) {
+            Enrollment::firstOrCreate([
+                'user_id' => $user->id,
+                'subject_id' => $subject->id,
+            ], [
+                'status' => 'active',
+                'enrolled_at' => now(),
+            ]);
         }
 
         $subject->load([
             'university:id,name,logo_path',
             'semester:id,name',
-            'documents' => fn ($q) => $q->orderBy('sort_order'),
+            'documents' => fn ($q) => $user->isAdmin()
+                ? $q->orderBy('sort_order')
+                : $q->published()->orderBy('sort_order'),
             'assignments' => fn ($q) => $q->published()->orderBy('deadline'),
             'updates' => fn ($q) => $q->with('user:id,name')->latest()->take(10),
         ]);

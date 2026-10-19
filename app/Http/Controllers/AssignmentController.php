@@ -85,14 +85,9 @@ class AssignmentController extends Controller
     {
         $user = auth()->user();
 
-        // Check enrollment
-        $isEnrolled = $assignment->subject->enrollments()
-            ->where('user_id', $user->id)
-            ->where('status', 'active')
-            ->exists();
-
-        if (! $isEnrolled) {
-            abort(403, 'You are not enrolled in this subject.');
+        // Check RBAC access
+        if (! $user->canAccessSubject($assignment->subject)) {
+            abort(403, 'You do not have access to this assignment.');
         }
 
         // Check for existing submission

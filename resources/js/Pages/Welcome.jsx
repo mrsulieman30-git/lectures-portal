@@ -129,16 +129,24 @@ export default function Welcome({ auth }) {
                                 ) : (
                                     <>
                                         <Link
-                                            href={route('login')}
-                                            className="px-4 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-[#ff5e36] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-all"
+                                            href={route('admin.login')}
+                                            className="px-3 py-2 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-all inline-flex items-center gap-1.5"
                                         >
-                                            {t('signIn', 'Sign In')}
+                                            <Shield className="w-3.5 h-3.5 text-indigo-500" />
+                                            <span>Faculty Portal</span>
+                                        </Link>
+                                        <Link
+                                            href={route('login')}
+                                            className="px-4 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-[#ff5e36] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-all inline-flex items-center gap-1.5"
+                                        >
+                                            <GraduationCap className="w-3.5 h-3.5 text-orange-500" />
+                                            <span>Student Login</span>
                                         </Link>
                                         <Link
                                             href={route('register')}
                                             className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#ff5e36] to-[#e04822] text-white hover:brightness-110 text-xs font-extrabold shadow-md shadow-[#ff5e36]/25 transition-all active:scale-95"
                                         >
-                                            <span>{t('studentAccess', 'Student Access')}</span>
+                                            <span>{t('studentAccess', 'Student Register')}</span>
                                         </Link>
                                     </>
                                 )}
@@ -183,9 +191,17 @@ export default function Welcome({ auth }) {
                                 <>
                                     <Link
                                         href={route('login')}
-                                        className="flex items-center justify-center w-full py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-800 dark:text-white font-bold text-xs"
+                                        className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-800 dark:text-white font-bold text-xs"
                                     >
-                                        {t('signIn', 'Sign In to Portal')}
+                                        <GraduationCap className="w-3.5 h-3.5 text-orange-500" />
+                                        <span>Student Sign In</span>
+                                    </Link>
+                                    <Link
+                                        href={route('admin.login')}
+                                        className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl border border-indigo-500/20 bg-indigo-50/50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300 font-bold text-xs"
+                                    >
+                                        <Shield className="w-3.5 h-3.5 text-indigo-500" />
+                                        <span>Faculty &amp; Staff Portal</span>
                                     </Link>
                                     <Link
                                         href={route('register')}

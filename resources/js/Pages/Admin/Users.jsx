@@ -81,6 +81,12 @@ export default function UsersIndex({ users = { data: [] }, universities = [], fi
         }
     };
 
+    const handleSyncEnrollments = () => {
+        if (confirm('Sync all approved students with active subjects of their universities?')) {
+            router.post(route('admin.users.sync-enrollments'));
+        }
+    };
+
     return (
         <AuthenticatedLayout
             header={
@@ -93,6 +99,15 @@ export default function UsersIndex({ users = { data: [] }, universities = [], fi
                             Verify enrollments, approve student accounts, and inspect university memberships.
                         </p>
                     </div>
+
+                    <button
+                        type="button"
+                        onClick={handleSyncEnrollments}
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-orange-50 hover:bg-orange-100 dark:bg-orange-950/40 dark:hover:bg-orange-900/50 text-[#ff5e36] text-xs font-bold border border-orange-200 dark:border-orange-800 transition shadow-2xs self-start sm:self-auto"
+                    >
+                        <RefreshCw className="w-3.5 h-3.5" />
+                        <span>Sync Course Enrollments</span>
+                    </button>
                 </div>
             }
         >

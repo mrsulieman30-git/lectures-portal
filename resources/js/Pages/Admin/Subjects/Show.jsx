@@ -29,7 +29,9 @@ import {
     ArrowRightLeft,
     Edit3,
     RefreshCw,
-    RotateCcw
+    RotateCcw,
+    CheckSquare,
+    Square
 } from 'lucide-react';
 import FileUploadZone from '@/Components/FileUploadZone';
 
@@ -44,11 +46,17 @@ export default function SubjectShow({ subject = {}, sharedCampuses = [], allUniv
     const [editDocData, setEditDocData] = useState({
         title: '',
         description: '',
+        published_at: '',
         is_downloadable: true,
         is_view_only: false,
         is_universal: false,
     });
     const [editDocProcessing, setEditDocProcessing] = useState(false);
+
+    // Multi-file upload scheduling state
+    const [docSchedules, setDocSchedules] = useState({});
+    const [selectedDocIndexes, setSelectedDocIndexes] = useState([]);
+    const [batchDocScheduleDate, setBatchDocScheduleDate] = useState('');
 
     // Transfer Form
     const { 
@@ -155,11 +163,46 @@ export default function SubjectShow({ subject = {}, sharedCampuses = [], allUniv
     const handleUploadDocuments = (e) => {
         e.preventDefault();
         postDoc(route('admin.documents.store', subject.id), {
+            data: {
+                ...docData,
+                schedules: docSchedules,
+            },
             onSuccess: () => {
                 resetDoc();
+                setDocSchedules({});
+                setSelectedDocIndexes([]);
+                setBatchDocScheduleDate('');
                 setShowUploadModal(false);
             }
         });
+    };
+
+    const allDocSelected = docData.files.length > 0 && selectedDocIndexes.length === docData.files.length;
+
+    const toggleSelectAllUploadDocs = () => {
+        if (allDocSelected) {
+            setSelectedDocIndexes([]);
+        } else {
+            setSelectedDocIndexes(docData.files.map((_, i) => i));
+        }
+    };
+
+    const toggleSelectUploadDoc = (idx) => {
+        if (selectedDocIndexes.includes(idx)) {
+            setSelectedDocIndexes(selectedDocIndexes.filter(i => i !== idx));
+        } else {
+            setSelectedDocIndexes([...selectedDocIndexes, idx]);
+        }
+    };
+
+    const applyBatchDocSchedule = () => {
+        if (!batchDocScheduleDate) return;
+        const newSched = { ...docSchedules };
+        const targets = selectedDocIndexes.length > 0 ? selectedDocIndexes : docData.files.map((_, i) => i);
+        targets.forEach(i => {
+            newSched[i] = batchDocScheduleDate;
+        });
+        setDocSchedules(newSched);
     };
 
     const handleCreateAssignment = (e) => {
@@ -205,6 +248,7 @@ export default function SubjectShow({ subject = {}, sharedCampuses = [], allUniv
         setEditDocData({
             title: doc.title || '',
             description: doc.description || '',
+            published_at: doc.published_at ? doc.published_at.substring(0, 16) : '',
             is_downloadable: Boolean(doc.is_downloadable),
             is_view_only: Boolean(doc.is_view_only),
             is_universal: Boolean(doc.is_universal),
@@ -957,6 +1001,89 @@ export default function SubjectShow({ subject = {}, sharedCampuses = [], allUniv
                                 hint="Upload textbooks, slide decks, assignments, or archives (up to 512MB each)."
                             />
 
+                            {/* Batch & Individual File Scheduling Bar */}
+                            {docData.files.length > 0 && (
+                                <div className="p-3.5 bg-orange-50/70 rounded-2xl border border-orange-200/80 space-y-2.5">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                                        <button
+                                            type="button"
+                                            onClick={toggleSelectAllUploadDocs}
+                                            className="inline-flex items-center gap-1.5 font-bold text-slate-700 hover:text-[#ff5e36]"
+                                        >
+                                            {allDocSelected ? (
+                                                <CheckSquare className="w-4 h-4 text-[#ff5e36]" />
+                                            ) : (
+                                                <Square className="w-4 h-4" />
+                                            )}
+                                            <span>Select All ({docData.files.length})</span>
+                                        </button>
+
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                type="datetime-local"
+                                                value={batchDocScheduleDate}
+                                                onChange={(e) => setBatchDocScheduleDate(e.target.value)}
+                                                className="px-2.5 py-1 text-xs rounded-xl border border-orange-200 bg-white"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={applyBatchDocSchedule}
+                                                disabled={!batchDocScheduleDate}
+                                                className="px-3 py-1 rounded-xl bg-[#ff5e36] text-white font-bold text-xs hover:bg-[#e04822] disabled:opacity-40 whitespace-nowrap shadow-xs"
+                                            >
+                                                {selectedDocIndexes.length > 0 ? `Schedule (${selectedDocIndexes.length})` : 'Schedule All'}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* List of files with individual schedule pickers */}
+                                    <div className="max-h-40 overflow-y-auto space-y-1.5 pr-1">
+                                        {docData.files.map((file, idx) => {
+                                            const isChecked = selectedDocIndexes.includes(idx);
+                                            const sched = docSchedules[idx] || '';
+
+                                            return (
+                                                <div
+                                                    key={`${file.name}_${idx}`}
+                                                    className={`p-2 rounded-xl border text-xs flex items-center justify-between gap-2 ${
+                                                        isChecked ? 'bg-orange-100/70 border-orange-300' : 'bg-white border-slate-200/80'
+                                                    }`}
+                                                >
+                                                    <div className="flex items-center gap-2 min-w-0">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => toggleSelectUploadDoc(idx)}
+                                                            className="text-slate-400 hover:text-slate-600"
+                                                        >
+                                                            {isChecked ? (
+                                                                <CheckSquare className="w-3.5 h-3.5 text-[#ff5e36]" />
+                                                            ) : (
+                                                                <Square className="w-3.5 h-3.5" />
+                                                            )}
+                                                        </button>
+                                                        <span className="font-medium text-slate-800 truncate max-w-[160px] sm:max-w-xs">
+                                                            {file.name}
+                                                        </span>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-1.5 shrink-0">
+                                                        <Clock className="w-3 h-3 text-slate-400" />
+                                                        <input
+                                                            type="datetime-local"
+                                                            value={sched}
+                                                            onChange={(e) => {
+                                                                setDocSchedules({ ...docSchedules, [idx]: e.target.value });
+                                                            }}
+                                                            className="px-2 py-0.5 text-[11px] rounded-lg border border-slate-200 bg-slate-50 text-slate-800"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
                             <div className="p-4 bg-slate-50 rounded-2xl space-y-3 border border-slate-200/80">
                                 <label className="flex items-start gap-2.5 cursor-pointer">
                                     <input
@@ -1412,6 +1539,116 @@ export default function SubjectShow({ subject = {}, sharedCampuses = [], allUniv
                                 >
                                     <Share2 className="w-4 h-4" />
                                     <span>{shareProcessing ? 'Deploying...' : 'Deploy to Campus'}</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Document Modal */}
+            {editingDoc && (
+                <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="bg-white dark:bg-[#0c1017] rounded-3xl border border-slate-200/90 dark:border-white/10 max-w-md w-full p-6 sm:p-8 shadow-2xl relative">
+                        <div className="flex items-center justify-between pb-4 border-b border-slate-200/80 dark:border-white/10">
+                            <div>
+                                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                                    Edit Document Options
+                                </h3>
+                                <p className="text-xs text-slate-500 font-mono truncate max-w-xs mt-0.5">
+                                    {editingDoc.file_name}
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setEditingDoc(null)}
+                                className="p-2 rounded-xl text-slate-400 hover:text-slate-600 text-sm font-bold"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleUpdateDocument} className="mt-5 space-y-4 text-xs">
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
+                                    Document Title *
+                                </label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={editDocData.title}
+                                    onChange={(e) => setEditDocData({ ...editDocData, title: e.target.value })}
+                                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#ff5e36]"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
+                                    Scheduled Release Date &amp; Time
+                                </label>
+                                <input
+                                    type="datetime-local"
+                                    value={editDocData.published_at || ''}
+                                    onChange={(e) => setEditDocData({ ...editDocData, published_at: e.target.value })}
+                                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#ff5e36]"
+                                />
+                                <p className="text-[11px] text-slate-400 mt-1">
+                                    If set to a future date, students cannot see, stream, or download this file until that time.
+                                </p>
+                            </div>
+
+                            <div className="pt-2 space-y-2">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={Boolean(editDocData.is_downloadable)}
+                                        onChange={(e) => setEditDocData({ ...editDocData, is_downloadable: e.target.checked })}
+                                        className="w-4 h-4 rounded text-[#ff5e36] focus:ring-[#ff5e36]"
+                                    />
+                                    <span className="font-semibold text-slate-700 dark:text-slate-300">
+                                        Allow Student Direct Download
+                                    </span>
+                                </label>
+
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={Boolean(editDocData.is_view_only)}
+                                        onChange={(e) => setEditDocData({ ...editDocData, is_view_only: e.target.checked })}
+                                        className="w-4 h-4 rounded text-[#ff5e36] focus:ring-[#ff5e36]"
+                                    />
+                                    <span className="font-semibold text-slate-700 dark:text-slate-300">
+                                        Strict View-Only Mode (Anti-Download Protection)
+                                    </span>
+                                </label>
+
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={Boolean(editDocData.is_universal)}
+                                        onChange={(e) => setEditDocData({ ...editDocData, is_universal: e.target.checked })}
+                                        className="w-4 h-4 rounded text-[#ff5e36] focus:ring-[#ff5e36]"
+                                    />
+                                    <span className="font-semibold text-slate-700 dark:text-slate-300">
+                                        Publish to Universal Library
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200/80 dark:border-white/10">
+                                <button
+                                    type="button"
+                                    onClick={() => setEditingDoc(null)}
+                                    className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={editDocProcessing}
+                                    className="px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider text-white bg-gradient-to-r from-[#ff5e36] to-[#ff416c] hover:brightness-105 active:scale-95 disabled:opacity-50 shadow-sm"
+                                >
+                                    {editDocProcessing ? 'Saving...' : 'Save Changes'}
                                 </button>
                             </div>
                         </form>

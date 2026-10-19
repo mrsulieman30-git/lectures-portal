@@ -17,7 +17,11 @@ import {
     CheckCircle2,
     Info,
     Layers,
-    UserCheck
+    UserCheck,
+    UploadCloud,
+    SlidersHorizontal,
+    Eye,
+    Settings
 } from 'lucide-react';
 import { useTranslation } from '@/Context/LanguageContext';
 
@@ -25,6 +29,7 @@ export default function ScheduleIndex({
     events = [], 
     upcomingLectures = [], 
     subjects = [], 
+    pendingDocuments = [],
     reminders = [], 
     isAdmin = false 
 }) {
@@ -38,13 +43,51 @@ export default function ScheduleIndex({
     const [selectedDate, setSelectedDate] = useState(today);
     const [selectedSubjectFilter, setSelectedSubjectFilter] = useState('all');
 
+    // Calendar Settings (persisted in localStorage)
+    const [calendarSettings, setCalendarSettings] = useState(() => {
+        try {
+            const saved = localStorage.getItem('lecture_portal_calendar_settings');
+            return saved ? JSON.parse(saved) : {
+                defaultDurationMins: 90,
+                defaultLocation: 'Main Lecture Hall',
+                hidePastEvents: false,
+                defaultView: 'month'
+            };
+        } catch (e) {
+            return {
+                defaultDurationMins: 90,
+                defaultLocation: 'Main Lecture Hall',
+                hidePastEvents: false,
+                defaultView: 'month'
+            };
+        }
+    });
+
     // Modals
     const [showLectureModal, setShowLectureModal] = useState(false);
     const [showReminderModal, setShowReminderModal] = useState(false);
+    const [showSettingsModal, setShowSettingsModal] = useState(false);
+
+    const updateCalendarSettings = (newSettings) => {
+        const merged = { ...calendarSettings, ...newSettings };
+        setCalendarSettings(merged);
+        try {
+            localStorage.setItem('lecture_portal_calendar_settings', JSON.stringify(merged));
+        } catch (e) {}
+    };
+
+    const formatBytes = (bytes) => {
+        if (!bytes || bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    };
 
     // Lecture Schedule Form (Admin)
     const { data: lecData, setData: setLecData, post: postLec, processing: lecProcessing, reset: resetLec } = useForm({
         subject_id: subjects[0]?.id || '',
+        document_id: '',
         title: '',
         description: '',
         start_time: '',
@@ -183,16 +226,63 @@ export default function ScheduleIndex({
 
     const openLectureModalForDate = (date) => {
         const dateStr = formatDateKey(date);
+        const duration = calendarSettings.defaultDurationMins || 90;
+        const startDate = new Date(date);
+        startDate.setHours(9, 0, 0, 0);
+        const endDate = new Date(startDate.getTime() + duration * 60000);
+
+        const formatIsoInput = (d) => {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            const h = String(d.getHours()).padStart(2, '0');
+            const min = String(d.getMinutes()).padStart(2, '0');
+            return `${y}-${m}-${day}T${h}:${min}`;
+        };
+
         setLecData({
             subject_id: subjects[0]?.id || '',
+            document_id: '',
             title: '',
             description: '',
-            start_time: `${dateStr}T09:00`,
-            end_time: `${dateStr}T11:00`,
-            location: '',
+            start_time: formatIsoInput(startDate),
+            end_time: formatIsoInput(endDate),
+            location: calendarSettings.defaultLocation || '',
             color: '#FF5E36',
         });
         setShowLectureModal(true);
+    };
+
+    const handleSelectPendingDocument = (docId) => {
+        const chosenDoc = pendingDocuments.find(d => String(d.id) === String(docId));
+        setLecData(prev => ({
+            ...prev,
+            document_id: docId,
+            title: (!prev.title || prev.title.trim() === '') && chosenDoc ? chosenDoc.title : prev.title,
+            description: (!prev.description || prev.description.trim() === '') && chosenDoc ? `Discussion and materials for ${chosenDoc.title}` : prev.description,
+        }));
+    };
+
+    const handleStartTimeChange = (newStartTime) => {
+        if (!newStartTime) {
+            setLecData('start_time', newStartTime);
+            return;
+        }
+        const start = new Date(newStartTime);
+        const duration = calendarSettings.defaultDurationMins || 90;
+        const end = new Date(start.getTime() + duration * 60000);
+        const y = end.getFullYear();
+        const m = String(end.getMonth() + 1).padStart(2, '0');
+        const day = String(end.getDate()).padStart(2, '0');
+        const h = String(end.getHours()).padStart(2, '0');
+        const min = String(end.getMinutes()).padStart(2, '0');
+        const endIso = `${y}-${m}-${day}T${h}:${min}`;
+
+        setLecData(prev => ({
+            ...prev,
+            start_time: newStartTime,
+            end_time: endIso
+        }));
     };
 
     const openReminderModalForDate = (date) => {
@@ -228,6 +318,14 @@ export default function ScheduleIndex({
                     </div>
 
                     <div className="flex items-center gap-2.5">
+                        <button
+                            onClick={() => setShowSettingsModal(true)}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs font-semibold shadow-xs transition-all"
+                            title="Calendar Settings"
+                        >
+                            <SlidersHorizontal className="w-3.5 h-3.5 text-slate-500" />
+                            <span className="hidden sm:inline">Settings</span>
+                        </button>
                         <button
                             onClick={() => openReminderModalForDate(selectedDate)}
                             className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs font-semibold shadow-xs transition-all"
@@ -521,6 +619,31 @@ export default function ScheduleIndex({
                                                         </p>
                                                     )}
 
+                                                    {evt.extendedProps?.document && (
+                                                        <div className="mt-2.5 p-2.5 rounded-xl bg-orange-50/70 dark:bg-orange-950/30 border border-orange-200/60 dark:border-orange-900/40 flex items-center justify-between gap-2">
+                                                            <div className="flex items-center gap-2 min-w-0">
+                                                                <UploadCloud className="w-4 h-4 text-[#ff5e36] shrink-0" />
+                                                                <div className="min-w-0">
+                                                                    <span className="font-bold text-xs text-slate-800 dark:text-slate-100 truncate block">
+                                                                        {evt.extendedProps.document.title || evt.extendedProps.document.file_name}
+                                                                    </span>
+                                                                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
+                                                                        Class Material • {evt.extendedProps.document.file_type?.toUpperCase()}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <a
+                                                                href={route('documents.view', evt.extendedProps.document.id)}
+                                                                target="_blank"
+                                                                rel="noreferrer"
+                                                                className="px-2.5 py-1 rounded-lg bg-[#ff5e36] hover:bg-[#e04822] text-white text-[11px] font-bold shrink-0 shadow-xs flex items-center gap-1 transition-all"
+                                                            >
+                                                                <Eye className="w-3 h-3" />
+                                                                <span>Open</span>
+                                                            </a>
+                                                        </div>
+                                                    )}
+
                                                     <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-white/5 flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
                                                         <span className="flex items-center gap-1 font-semibold text-slate-700 dark:text-slate-200">
                                                             <Clock className="w-3.5 h-3.5 text-[#FF5E36]" />
@@ -677,6 +800,38 @@ export default function ScheduleIndex({
                                 </select>
                             </div>
 
+                            {/* Attach Staged Document from Pending Cabinet */}
+                            {isAdmin && pendingDocuments.length > 0 && (
+                                <div className="p-3.5 rounded-2xl bg-orange-50/70 dark:bg-orange-950/30 border border-orange-200/80 dark:border-orange-900/50 space-y-2">
+                                    <label className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-[#ff5e36] dark:text-[#ff7a54]">
+                                        <span className="flex items-center gap-1.5">
+                                            <UploadCloud className="w-4 h-4" />
+                                            Attach from Pending Cabinet
+                                        </span>
+                                        <span className="text-[10px] font-mono lowercase font-normal bg-orange-100 dark:bg-orange-900/60 px-2 py-0.5 rounded-full">
+                                            {pendingDocuments.length} files staged
+                                        </span>
+                                    </label>
+                                    <select
+                                        value={lecData.document_id}
+                                        onChange={(e) => handleSelectPendingDocument(e.target.value)}
+                                        className="w-full px-3 py-2 rounded-xl border border-orange-200 dark:border-orange-800 bg-white dark:bg-slate-900 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#ff5e36]"
+                                    >
+                                        <option value="">-- None (Lecture Without Staged File) --</option>
+                                        {pendingDocuments.map((doc) => (
+                                            <option key={doc.id} value={doc.id}>
+                                                📄 {doc.title} ({doc.file_name}) - {formatBytes(doc.file_size)}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {lecData.document_id && (
+                                        <p className="text-[11px] text-orange-900 dark:text-orange-200 leading-relaxed font-medium">
+                                            💡 <strong>Scheduled Release Active:</strong> This document will be automatically assigned to the chosen class and unlocked for students on this exact session date at the scheduled start time!
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+
                             <div>
                                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
                                     Lecture Topic / Title *
@@ -700,7 +855,7 @@ export default function ScheduleIndex({
                                         type="datetime-local"
                                         required
                                         value={lecData.start_time}
-                                        onChange={(e) => setLecData('start_time', e.target.value)}
+                                        onChange={(e) => handleStartTimeChange(e.target.value)}
                                         className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/80 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#FF5E36]"
                                     />
                                 </div>
@@ -844,6 +999,102 @@ export default function ScheduleIndex({
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* ─── Calendar Settings Modal ───────────────────────────────── */}
+            {showSettingsModal && (
+                <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4">
+                    <div className="liquid-glass border border-white/60 dark:border-white/10 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative">
+                        <div className="flex items-center justify-between pb-4 border-b border-slate-200/80 dark:border-white/10">
+                            <div className="flex items-center gap-2.5">
+                                <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center">
+                                    <SlidersHorizontal className="w-4 h-4" />
+                                </div>
+                                <div>
+                                    <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                                        Calendar &amp; Schedule Settings
+                                    </h3>
+                                    <p className="text-[11px] text-slate-400">
+                                        Customize default session timings and preferences.
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setShowSettingsModal(false)}
+                                className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-bold"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        <div className="mt-5 space-y-4 text-xs">
+                            {/* Default Lecture Duration */}
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+                                    Default Session Duration
+                                </label>
+                                <select
+                                    value={calendarSettings.defaultDurationMins || 90}
+                                    onChange={(e) => updateCalendarSettings({ defaultDurationMins: parseInt(e.target.value) })}
+                                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 dark:text-white"
+                                >
+                                    <option value={45}>45 Minutes (Express / Quiz)</option>
+                                    <option value={60}>60 Minutes (1 Hour Lecture)</option>
+                                    <option value={90}>90 Minutes (Standard Academic Block)</option>
+                                    <option value={120}>120 Minutes (2 Hour Seminar)</option>
+                                    <option value={180}>180 Minutes (3 Hour Lab / Practical)</option>
+                                </select>
+                                <p className="text-[11px] text-slate-400 mt-1">
+                                    When you select any date on the calendar, the end time automatically defaults to this duration.
+                                </p>
+                            </div>
+
+                            {/* Default Location */}
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+                                    Default Location / Hall
+                                </label>
+                                <input
+                                    type="text"
+                                    value={calendarSettings.defaultLocation || ''}
+                                    onChange={(e) => updateCalendarSettings({ defaultLocation: e.target.value })}
+                                    placeholder="e.g. Main Lecture Hall"
+                                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 dark:text-white"
+                                />
+                            </div>
+
+                            {/* Hide Past Lectures */}
+                            <div className="pt-2">
+                                <label className="flex items-center gap-2.5 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={Boolean(calendarSettings.hidePastEvents)}
+                                        onChange={(e) => updateCalendarSettings({ hidePastEvents: e.target.checked })}
+                                        className="w-4 h-4 rounded text-[#ff5e36] focus:ring-[#ff5e36]"
+                                    />
+                                    <div>
+                                        <span className="font-semibold text-slate-800 dark:text-slate-200 block">
+                                            Dim Past Sessions
+                                        </span>
+                                        <span className="text-[11px] text-slate-400 block">
+                                            Focus primarily on today and future upcoming lectures.
+                                        </span>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div className="flex items-center justify-end pt-4 border-t border-slate-200/80 dark:border-white/10">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowSettingsModal(false)}
+                                    className="px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider text-white bg-gradient-to-r from-[#ff5e36] to-[#ff416c] hover:brightness-105 active:scale-95 shadow-sm"
+                                >
+                                    Done
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}

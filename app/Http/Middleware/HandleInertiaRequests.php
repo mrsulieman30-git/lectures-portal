@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Document;
 use App\Models\Semester;
 use App\Models\Subject;
 use App\Models\University;
@@ -50,6 +51,7 @@ class HandleInertiaRequests extends Middleware
                 Semester::onlyTrashed()->count() +
                 University::onlyTrashed()->count()
             ) : 0,
+            'pendingCabinetCount' => fn () => $isAdmin ? Document::whereNull('subject_id')->count() : 0,
         ];
     }
 }

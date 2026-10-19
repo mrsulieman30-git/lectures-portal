@@ -20,16 +20,25 @@ class DocumentController extends Controller
         $request->validate([
             'files' => 'required|array',
             'files.*' => 'file|max:524288', // 512MB max per file to support 200MB+ large textbooks
-            'is_downloadable' => 'boolean',
-            'is_view_only' => 'boolean',
-            'is_universal' => 'boolean',
+            'is_downloadable' => 'nullable|boolean',
+            'is_view_only' => 'nullable|boolean',
+            'is_universal' => 'nullable|boolean',
+            'published_at' => 'nullable|date',
+            'schedules' => 'nullable|array',
         ]);
 
         $uploaded = [];
 
-        foreach ($request->file('files') as $file) {
+        foreach ($request->file('files') as $index => $file) {
             $path = $file->store("documents/{$subject->id}", 'public');
             $extension = strtolower($file->getClientOriginalExtension());
+
+            $filePublishedAt = null;
+            if ($request->has("schedules.{$index}") && ! empty($request->input("schedules.{$index}"))) {
+                $filePublishedAt = $request->input("schedules.{$index}");
+            } elseif ($request->filled('published_at')) {
+                $filePublishedAt = $request->input('published_at');
+            }
 
             $document = Document::create([
                 'title' => pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME),
@@ -43,6 +52,7 @@ class DocumentController extends Controller
                 'is_downloadable' => $request->boolean('is_downloadable', true),
                 'is_view_only' => $request->boolean('is_view_only', false),
                 'is_universal' => $request->boolean('is_universal', false),
+                'published_at' => $filePublishedAt,
             ]);
 
             $uploaded[] = $document;
@@ -67,6 +77,7 @@ class DocumentController extends Controller
             'is_downloadable' => 'nullable|boolean',
             'is_view_only' => 'nullable|boolean',
             'is_universal' => 'nullable|boolean',
+            'published_at' => 'nullable|date',
             'sort_order' => 'nullable|integer',
         ]);
 
@@ -84,14 +95,19 @@ class DocumentController extends Controller
     {
         $user = auth()->user();
 
+        // Check scheduled release
+        if (! $user->isAdmin() && $document->published_at && $document->published_at->isFuture()) {
+            abort(403, 'This material is scheduled to be released on '.$document->published_at->format('M d, Y h:i A').'.');
+        }
+
+        // Staged pending documents are only accessible to administrators
+        if (! $user->isAdmin() && empty($document->subject_id) && ! $document->is_universal) {
+            abort(403, 'This document is staged in the pending cabinet and not yet published to any class.');
+        }
+
         // Check access
         if (! $user->isAdmin() && ! $document->is_universal) {
-            $isEnrolled = $document->subject->enrollments()
-                ->where('user_id', $user->id)
-                ->where('status', 'active')
-                ->exists();
-
-            if (! $isEnrolled) {
+            if (! $user->canAccessSubject($document->subject)) {
                 abort(403, 'You do not have access to this document.');
             }
 
@@ -122,14 +138,19 @@ class DocumentController extends Controller
     {
         $user = auth()->user();
 
+        // Check scheduled release
+        if (! $user->isAdmin() && $document->published_at && $document->published_at->isFuture()) {
+            abort(403, 'This material is scheduled to be released on '.$document->published_at->format('M d, Y h:i A').'.');
+        }
+
+        // Staged pending documents are only accessible to administrators
+        if (! $user->isAdmin() && empty($document->subject_id) && ! $document->is_universal) {
+            abort(403, 'This document is staged in the pending cabinet and not yet published to any class.');
+        }
+
         // Check access
         if (! $user->isAdmin() && ! $document->is_universal) {
-            $isEnrolled = $document->subject->enrollments()
-                ->where('user_id', $user->id)
-                ->where('status', 'active')
-                ->exists();
-
-            if (! $isEnrolled) {
+            if (! $user->canAccessSubject($document->subject)) {
                 abort(403, 'You do not have access to this document.');
             }
         }
@@ -153,14 +174,19 @@ class DocumentController extends Controller
     {
         $user = auth()->user();
 
+        // Check scheduled release
+        if (! $user->isAdmin() && $document->published_at && $document->published_at->isFuture()) {
+            abort(403, 'This material is scheduled to be released on '.$document->published_at->format('M d, Y h:i A').'.');
+        }
+
+        // Staged pending documents are only accessible to administrators
+        if (! $user->isAdmin() && empty($document->subject_id) && ! $document->is_universal) {
+            abort(403, 'This document is staged in the pending cabinet and not yet published to any class.');
+        }
+
         // Check access
         if (! $user->isAdmin() && ! $document->is_universal) {
-            $isEnrolled = $document->subject->enrollments()
-                ->where('user_id', $user->id)
-                ->where('status', 'active')
-                ->exists();
-
-            if (! $isEnrolled) {
+            if (! $user->canAccessSubject($document->subject)) {
                 abort(403, 'You do not have access to this document.');
             }
         }
@@ -273,16 +299,9 @@ class DocumentController extends Controller
     {
         $user = auth()->user();
 
-        // Check enrollment or admin
-        if (! $user->isAdmin()) {
-            $isEnrolled = $subject->enrollments()
-                ->where('user_id', $user->id)
-                ->where('status', 'active')
-                ->exists();
-
-            if (! $isEnrolled) {
-                abort(403, 'You do not have access to this course cabinet.');
-            }
+        // Check RBAC access
+        if (! $user->canAccessSubject($subject)) {
+            abort(403, 'You do not have access to this course cabinet.');
         }
 
         // Fetch only downloadable, non-view-only documents

@@ -27,6 +27,7 @@ class Document extends Model
         'download_count',
         'view_count',
         'sort_order',
+        'published_at',
     ];
 
     protected $casts = [
@@ -36,6 +37,7 @@ class Document extends Model
         'file_size' => 'integer',
         'download_count' => 'integer',
         'view_count' => 'integer',
+        'published_at' => 'datetime',
     ];
 
     // ─── Relationships ─────────────────────────────────────────
@@ -57,6 +59,25 @@ class Document extends Model
     public function downloadLogs(): HasMany
     {
         return $this->hasMany(DownloadLog::class);
+    }
+
+    public function lectureSchedules(): HasMany
+    {
+        return $this->hasMany(LectureSchedule::class);
+    }
+
+    // ─── Scopes ────────────────────────────────────────────────
+
+    public function scopePublished($query)
+    {
+        return $query->where(function ($q) {
+            $q->whereNull('published_at')->orWhere('published_at', '<=', now());
+        });
+    }
+
+    public function scopePendingCabinet($query)
+    {
+        return $query->whereNull('subject_id');
     }
 
     // ─── Helpers ───────────────────────────────────────────────

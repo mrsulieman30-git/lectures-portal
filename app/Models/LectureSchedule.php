@@ -9,6 +9,7 @@ class LectureSchedule extends Model
 {
     protected $fillable = [
         'subject_id',
+        'document_id',
         'title',
         'description',
         'start_time',
@@ -28,6 +29,11 @@ class LectureSchedule extends Model
     public function subject(): BelongsTo
     {
         return $this->belongsTo(Subject::class);
+    }
+
+    public function document(): BelongsTo
+    {
+        return $this->belongsTo(Document::class);
     }
 
     // ─── Helpers ───────────────────────────────────────────────
@@ -58,6 +64,15 @@ class LectureSchedule extends Model
                 'subject_title' => $this->subject->title ?? '',
                 'location' => $this->location,
                 'description' => $this->description,
+                'document_id' => $this->document_id,
+                'document' => $this->document ? [
+                    'id' => $this->document->id,
+                    'title' => $this->document->title,
+                    'file_name' => $this->document->file_name,
+                    'file_type' => $this->document->file_type,
+                    'is_downloadable' => $this->document->is_downloadable,
+                    'is_view_only' => $this->document->is_view_only,
+                ] : null,
             ],
         ];
     }

@@ -17,15 +17,16 @@ class ScheduleController extends Controller
     {
         $user = auth()->user();
 
-        $query = LectureSchedule::with(['subject' => function ($q) {
-            $q->select('id', 'title', 'code', 'color', 'university_id')->with('university:id,name');
-        }]);
+        $query = LectureSchedule::with([
+            'subject' => function ($q) {
+                $q->select('id', 'title', 'code', 'color', 'university_id')->with('university:id,name');
+            },
+            'document:id,title,file_name,file_type,is_downloadable,is_view_only,published_at',
+        ]);
 
-        // Students only see schedules for their enrolled subjects
+        // Students only see schedules for their accessible subjects (enrolled or university)
         if ($user->isStudent()) {
-            $enrolledSubjectIds = $user->enrollments()
-                ->active()
-                ->pluck('subject_id');
+            $enrolledSubjectIds = $user->accessibleSubjects()->pluck('id');
             $query->whereIn('subject_id', $enrolledSubjectIds);
         }
 
@@ -45,9 +46,12 @@ class ScheduleController extends Controller
         // Get subjects for filter dropdown
         if ($user->isAdmin()) {
             $subjects = Subject::active()->with('university:id,name')->get(['id', 'title', 'code', 'color', 'university_id']);
+            $pendingDocuments = \App\Models\Document::whereNull('subject_id')
+                ->orderBy('created_at', 'desc')
+                ->get(['id', 'title', 'file_name', 'file_size', 'file_type', 'is_view_only', 'is_downloadable']);
         } else {
-            $enrolledSubjectIds = $user->enrollments()->active()->pluck('subject_id');
-            $subjects = Subject::whereIn('id', $enrolledSubjectIds)->with('university:id,name')->get(['id', 'title', 'code', 'color', 'university_id']);
+            $subjects = $user->accessibleSubjects()->with('university:id,name')->get(['id', 'title', 'code', 'color', 'university_id']);
+            $pendingDocuments = [];
         }
 
         // User reminders
@@ -61,6 +65,7 @@ class ScheduleController extends Controller
             'events' => $schedules,
             'upcomingLectures' => $upcomingLectures,
             'subjects' => $subjects,
+            'pendingDocuments' => $pendingDocuments,
             'reminders' => $reminders,
             'isAdmin' => $user->isAdmin(),
         ]);
@@ -73,6 +78,7 @@ class ScheduleController extends Controller
     {
         $validated = $request->validate([
             'subject_id' => 'required|exists:subjects,id',
+            'document_id' => 'nullable|exists:documents,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'start_time' => 'required|date',
@@ -84,7 +90,18 @@ class ScheduleController extends Controller
 
         $schedule = LectureSchedule::create($validated);
 
-        return redirect()->back()->with('message', 'Lecture scheduled.');
+        // If a document was attached from Pending Cabinet, link it to the subject and schedule its release
+        if (! empty($validated['document_id'])) {
+            $doc = \App\Models\Document::find($validated['document_id']);
+            if ($doc) {
+                $doc->update([
+                    'subject_id' => $validated['subject_id'],
+                    'published_at' => $validated['start_time'],
+                ]);
+            }
+        }
+
+        return redirect()->back()->with('message', 'Lecture scheduled successfully.');
     }
 
     /**
@@ -93,6 +110,8 @@ class ScheduleController extends Controller
     public function update(Request $request, LectureSchedule $schedule)
     {
         $validated = $request->validate([
+            'subject_id' => 'sometimes|required|exists:subjects,id',
+            'document_id' => 'nullable|exists:documents,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'start_time' => 'required|date',
@@ -102,6 +121,16 @@ class ScheduleController extends Controller
         ]);
 
         $schedule->update($validated);
+
+        if (! empty($validated['document_id'])) {
+            $doc = \App\Models\Document::find($validated['document_id']);
+            if ($doc) {
+                $doc->update([
+                    'subject_id' => $schedule->subject_id,
+                    'published_at' => $validated['start_time'],
+                ]);
+            }
+        }
 
         return redirect()->back()->with('message', 'Schedule updated.');
     }
@@ -159,7 +188,7 @@ class ScheduleController extends Controller
         $query = LectureSchedule::with('subject:id,title,color');
 
         if ($user->isStudent()) {
-            $enrolledSubjectIds = $user->enrollments()->active()->pluck('subject_id');
+            $enrolledSubjectIds = $user->accessibleSubjects()->pluck('id');
             $query->whereIn('subject_id', $enrolledSubjectIds);
         }
 

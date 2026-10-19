@@ -257,4 +257,94 @@ class User extends Authenticatable
 
         return $initials;
     }
+
+    /**
+     * Check if user has RBAC access to a subject (admin, active enrollment, or matching university).
+     */
+    public function canAccessSubject(Subject|int|null $subject): bool
+    {
+        if (! $subject) {
+            return false;
+        }
+
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        $subjectId = $subject instanceof Subject ? $subject->id : $subject;
+        $subjectUniversityId = $subject instanceof Subject
+            ? $subject->university_id
+            : Subject::where('id', $subjectId)->value('university_id');
+
+        // 1. Explicit active enrollment
+        $isEnrolled = $this->enrollments()
+            ->where('subject_id', $subjectId)
+            ->where('status', 'active')
+            ->exists();
+
+        if ($isEnrolled) {
+            return true;
+        }
+
+        // 2. Matching university affiliation for approved student
+        if ($this->university_id && $subjectUniversityId && (int) $this->university_id === (int) $subjectUniversityId) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Query of subjects accessible to this user (active enrollments or matching university).
+     */
+    public function accessibleSubjects()
+    {
+        if ($this->isAdmin()) {
+            return Subject::query();
+        }
+
+        return Subject::active()
+            ->where(function ($query) {
+                $query->whereHas('enrollments', function ($q) {
+                    $q->where('user_id', $this->id)
+                        ->where('status', 'active');
+                });
+
+                if ($this->university_id) {
+                    $query->orWhere('university_id', $this->university_id);
+                }
+            });
+    }
+
+    /**
+     * Auto-enroll student into all active subjects for their assigned university.
+     */
+    public function autoEnrollUniversitySubjects(): int
+    {
+        if (! $this->university_id) {
+            return 0;
+        }
+
+        $subjectIds = Subject::where('university_id', $this->university_id)
+            ->active()
+            ->pluck('id');
+
+        $enrolledCount = 0;
+        foreach ($subjectIds as $subjectId) {
+            $enrollment = Enrollment::firstOrCreate([
+                'user_id' => $this->id,
+                'subject_id' => $subjectId,
+            ], [
+                'status' => 'active',
+                'enrolled_at' => now(),
+            ]);
+
+            if ($enrollment->wasRecentlyCreated) {
+                $enrolledCount++;
+            }
+        }
+
+        return $enrolledCount;
+    }
 }
+

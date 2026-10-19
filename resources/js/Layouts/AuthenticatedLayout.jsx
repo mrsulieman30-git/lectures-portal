@@ -21,14 +21,15 @@ import {
     Bot,
     Trash2,
     RotateCcw,
-    CheckCircle2
+    CheckCircle2,
+    UploadCloud
 } from 'lucide-react';
 import { useTranslation, LanguageSwitcher } from '@/Context/LanguageContext';
 import { ThemeToggle } from '@/Context/ThemeContext';
 import ChatBubble from '@/Components/ChatBubble';
 
 export default function AuthenticatedLayout({ header, children }) {
-    const { auth, flash, recycleBinCount = 0 } = usePage().props;
+    const { auth, flash, recycleBinCount = 0, pendingCabinetCount = 0 } = usePage().props;
     const user = auth?.user;
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
     const [avatarError, setAvatarError] = useState(false);
@@ -59,7 +60,8 @@ export default function AuthenticatedLayout({ header, children }) {
     const isAcademicsActive = route().current('admin.universities.*') || 
                               route().current('library.*') || 
                               route().current('schedule.*') || 
-                              route().current('notes.*');
+                              route().current('notes.*') ||
+                              route().current('admin.pending-cabinet.*');
 
     const isToolsActive = route().current('admin.agent-actions.*') || 
                           route().current('admin.analytics') ||
@@ -107,6 +109,20 @@ export default function AuthenticatedLayout({ header, children }) {
                                             active={route().current('admin.subjects.*')}
                                         >
                                             {t('courseCabinets')}
+                                        </NavLink>
+
+                                        <NavLink
+                                            href={route('admin.pending-cabinet.index')}
+                                            active={route().current('admin.pending-cabinet.*')}
+                                        >
+                                            <span className="flex items-center gap-1.5">
+                                                <span>Pending Cabinet</span>
+                                                {pendingCabinetCount > 0 && (
+                                                    <span className="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-[#ff5e36] text-white">
+                                                        {pendingCabinetCount}
+                                                    </span>
+                                                )}
+                                            </span>
                                         </NavLink>
 
                                         <NavLink
@@ -424,6 +440,24 @@ export default function AuthenticatedLayout({ header, children }) {
                                             <span>{t('courseCabinets')}</span>
                                         </div>
                                         <ChevronDown className="w-3.5 h-3.5 -rotate-90 text-slate-400" />
+                                    </ResponsiveNavLink>
+
+                                    <ResponsiveNavLink 
+                                        href={route('admin.pending-cabinet.index')} 
+                                        active={route().current('admin.pending-cabinet.*')}
+                                        className="py-3 px-4 flex items-center justify-between"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <UploadCloud className="w-4 h-4 shrink-0 text-amber-500" />
+                                            <span>Pending Cabinet</span>
+                                        </div>
+                                        {pendingCabinetCount > 0 ? (
+                                            <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-[#ff5e36] text-white">
+                                                {pendingCabinetCount}
+                                            </span>
+                                        ) : (
+                                            <ChevronDown className="w-3.5 h-3.5 -rotate-90 text-slate-400" />
+                                        )}
                                     </ResponsiveNavLink>
 
                                     <ResponsiveNavLink 
