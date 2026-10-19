@@ -62,17 +62,19 @@ class DocumentController extends Controller
     public function update(Request $request, Document $document)
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
+            'title' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',
-            'is_downloadable' => 'boolean',
-            'is_view_only' => 'boolean',
-            'is_universal' => 'boolean',
-            'sort_order' => 'integer',
+            'is_downloadable' => 'nullable|boolean',
+            'is_view_only' => 'nullable|boolean',
+            'is_universal' => 'nullable|boolean',
+            'sort_order' => 'nullable|integer',
         ]);
 
         $document->update($validated);
 
-        return redirect()->back()->with('message', 'Document updated.');
+        ActivityLog::log('document_updated', $document, $validated);
+
+        return redirect()->back()->with('message', "Document '{$document->title}' updated successfully.");
     }
 
     /**
@@ -175,6 +177,7 @@ class DocumentController extends Controller
         if (request()->wantsJson() || request()->header('Accept') === 'application/json' || request()->input('format') === 'json' || request()->isMethod('post')) {
             @ini_set('memory_limit', '1024M');
             $content = file_get_contents($fullPath);
+
             return response()->json([
                 'success' => true,
                 'id' => $document->id,
@@ -218,6 +221,7 @@ class DocumentController extends Controller
         }
 
         $stream = fopen($fullPath, 'rb');
+
         return response()->stream(function () use ($stream, $start, $end) {
             if ($start > 0) {
                 fseek($stream, $start);
@@ -291,10 +295,10 @@ class DocumentController extends Controller
             return redirect()->back()->with('error', 'No downloadable documents available in this cabinet.');
         }
 
-        $zipFileName = ($subject->code ? $subject->code . '-' : '') . str_replace(' ', '-', $subject->title) . '-Materials.zip';
+        $zipFileName = ($subject->code ? $subject->code.'-' : '').str_replace(' ', '-', $subject->title).'-Materials.zip';
         $zipPath = tempnam(sys_get_temp_dir(), 'zip_');
 
-        $zip = new \ZipArchive();
+        $zip = new \ZipArchive;
         if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
             abort(500, 'Unable to create course material archive.');
         }
@@ -313,6 +317,7 @@ class DocumentController extends Controller
 
         if ($addedCount === 0) {
             @unlink($zipPath);
+
             return redirect()->back()->with('error', 'The requested files could not be located on the server.');
         }
 

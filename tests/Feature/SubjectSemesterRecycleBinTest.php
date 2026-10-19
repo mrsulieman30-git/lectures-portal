@@ -308,4 +308,37 @@ class SubjectSemesterRecycleBinTest extends TestCase
         $this->assertEquals(1, $sharedSubject->refresh()->documents()->count());
         $this->assertEquals('documents/lab1.pdf', $sharedSubject->documents()->first()->file_path);
     }
+
+    public function test_admin_can_update_document_security_and_options(): void
+    {
+        $doc = Document::create([
+            'subject_id' => $this->subject->id,
+            'uploaded_by' => $this->admin->id,
+            'title' => 'Lecture 1 Slides',
+            'file_name' => 'slides.pdf',
+            'file_path' => 'documents/slides.pdf',
+            'file_size' => 2048,
+            'file_type' => 'pdf',
+            'mime_type' => 'application/pdf',
+            'is_downloadable' => true,
+            'is_view_only' => false,
+            'is_universal' => false,
+        ]);
+
+        // Toggle to strict view-only and universal
+        $response = $this->actingAs($this->admin)->patch(
+            route('admin.documents.update', $doc->id),
+            [
+                'is_view_only' => true,
+                'is_downloadable' => false,
+                'is_universal' => true,
+            ]
+        );
+
+        $response->assertRedirect();
+        $doc->refresh();
+        $this->assertTrue($doc->is_view_only);
+        $this->assertFalse($doc->is_downloadable);
+        $this->assertTrue($doc->is_universal);
+    }
 }
