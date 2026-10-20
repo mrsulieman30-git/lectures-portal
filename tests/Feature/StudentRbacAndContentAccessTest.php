@@ -138,6 +138,7 @@ class StudentRbacAndContentAccessTest extends TestCase
             'role' => 'student',
             'status' => 'pending',
             'university_id' => $this->universityA->id,
+            'semester' => 'Semester 7',
         ]);
 
         $this->assertEquals(0, $newStudent->enrollments()->count());
@@ -153,24 +154,85 @@ class StudentRbacAndContentAccessTest extends TestCase
         ]);
     }
 
-    public function test_creating_subject_auto_enrolls_existing_approved_students_of_that_university(): void
+    public function test_student_from_different_semester_in_same_university_cannot_access_other_semester_content(): void
     {
+        // Semester 3 in University A
+        $semester3 = Semester::create([
+            'name' => 'Semester 3',
+            'university_id' => $this->universityA->id,
+            'is_active' => true,
+            'sort_order' => 3,
+        ]);
+
+        $studentSem3 = User::factory()->create([
+            'role' => 'student',
+            'status' => 'approved',
+            'university_id' => $this->universityA->id,
+            'semester' => 'Semester 3',
+            'semester_id' => $semester3->id,
+        ]);
+
+        // 1. Dashboard does not show Semester 7 subject
+        $dashboardResponse = $this->actingAs($studentSem3)->get(route('dashboard'));
+        $dashboardResponse->assertOk();
+        $dashboardResponse->assertInertia(fn ($page) => $page
+            ->component('Dashboard')
+            ->where('enrolledSubjects', [])
+        );
+
+        // 2. Direct access to Semester 7 subject is 403 Forbidden
+        $subResponse = $this->actingAs($studentSem3)->get(route('subjects.show', $this->subjectA->id));
+        $subResponse->assertStatus(403);
+
+        // 3. Direct document view is 403 Forbidden
+        $viewDocResponse = $this->actingAs($studentSem3)->get(route('documents.view', $this->documentA->id));
+        $viewDocResponse->assertStatus(403);
+
+        // 4. Direct document download is 403 Forbidden
+        $dlDocResponse = $this->actingAs($studentSem3)->get(route('documents.download', $this->documentA->id));
+        $dlDocResponse->assertStatus(403);
+    }
+
+    public function test_creating_subject_auto_enrolls_only_students_matching_that_semester(): void
+    {
+        // Semester 3 in University A
+        $semester3 = Semester::create([
+            'name' => 'Semester 3',
+            'university_id' => $this->universityA->id,
+            'is_active' => true,
+            'sort_order' => 3,
+        ]);
+
+        $studentSem3 = User::factory()->create([
+            'role' => 'student',
+            'status' => 'approved',
+            'university_id' => $this->universityA->id,
+            'semester' => 'Semester 3',
+            'semester_id' => $semester3->id,
+        ]);
+
         $response = $this->actingAs($this->admin)->post(route('admin.subjects.store'), [
             'title' => 'Transfusion Medicine Lab',
             'code' => 'MLS-412',
             'university_id' => $this->universityA->id,
-            'semester_id' => $this->semesterA->id,
+            'semester_id' => $this->semesterA->id, // Semester 7
             'color' => '#3B82F6',
         ]);
 
         $newSubject = Subject::where('code', 'MLS-412')->first();
         $this->assertNotNull($newSubject);
 
-        // Student A (from University A) should be auto-enrolled!
+        // Student A (from University A, Semester 7) should be auto-enrolled!
         $this->assertDatabaseHas('enrollments', [
             'user_id' => $this->studentA->id,
             'subject_id' => $newSubject->id,
             'status' => 'active',
+        ]);
+
+        // Student Sem 3 (from University A, Semester 3) should NOT be enrolled!
+        $this->assertDatabaseMissing('enrollments', [
+            'user_id' => $studentSem3->id,
+            'subject_id' => $newSubject->id,
         ]);
 
         // Student B (from University B) should NOT be enrolled

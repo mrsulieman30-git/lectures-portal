@@ -23,6 +23,7 @@ class RegisteredUserController extends Controller
     {
         return Inertia::render('Auth/Register', [
             'universities' => \App\Models\University::where('is_active', true)
+                ->with(['semesters' => fn ($q) => $q->where('is_active', true)->orderBy('sort_order')])
                 ->select('id', 'name', 'slug')
                 ->orderBy('name')
                 ->get(),
@@ -43,6 +44,7 @@ class RegisteredUserController extends Controller
             'role' => 'required|in:student,university',
             'gender' => 'nullable|in:male,female',
             'university_id' => 'nullable|exists:universities,id',
+            'semester_id' => 'nullable|exists:semesters,id',
             'student_id_no' => 'nullable|string|max:255',
             'semester' => 'nullable|string|max:255',
             'year' => 'nullable|string|max:255',
@@ -56,11 +58,14 @@ class RegisteredUserController extends Controller
             'gender' => $request->gender ?? 'male',
             'status' => 'pending',
             'university_id' => $request->university_id,
+            'semester_id' => $request->semester_id,
             'student_id_no' => $request->student_id_no,
             'semester' => $request->semester,
             'year' => $request->year,
             'registration_ip_address' => $request->ip(),
         ]);
+
+        $user->resolveSemesterId();
 
         event(new Registered($user));
 

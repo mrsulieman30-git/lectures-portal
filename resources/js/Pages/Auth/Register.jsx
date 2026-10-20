@@ -24,6 +24,10 @@ export default function Register({ universities = [] }) {
     const { t } = useTranslation();
     const [showPassword, setShowPassword] = useState(false);
 
+    const firstUni = universities[0];
+    const initialSemester = firstUni?.semesters?.[0]?.name || 'Semester 5';
+    const initialSemesterId = firstUni?.semesters?.[0]?.id || '';
+
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
@@ -31,11 +35,15 @@ export default function Register({ universities = [] }) {
         password_confirmation: '',
         role: 'student',
         gender: 'male',
-        university_id: universities[0]?.id || '',
+        university_id: firstUni?.id || '',
+        semester_id: initialSemesterId,
         student_id_no: '',
-        semester: 'Semester 5',
+        semester: initialSemester,
         year: 'Year 3',
     });
+
+    const selectedUni = universities.find(u => String(u.id) === String(data.university_id));
+    const availableSemesters = selectedUni?.semesters && selectedUni.semesters.length > 0 ? selectedUni.semesters : null;
 
     const submit = (e) => {
         e.preventDefault();
@@ -207,7 +215,16 @@ export default function Register({ universities = [] }) {
                                                 value={data.university_id}
                                                 className="w-full rounded-2xl border-0 bg-transparent py-2.5 pl-10 pr-4 text-xs sm:text-sm text-slate-900 dark:text-white focus:ring-0 focus:outline-none font-medium"
                                                 required
-                                                onChange={(e) => setData('university_id', e.target.value)}
+                                                onChange={(e) => {
+                                                    const newUniId = e.target.value;
+                                                    const newUni = universities.find(u => String(u.id) === String(newUniId));
+                                                    setData(prev => ({
+                                                        ...prev,
+                                                        university_id: newUniId,
+                                                        semester: newUni?.semesters?.[0]?.name || prev.semester,
+                                                        semester_id: newUni?.semesters?.[0]?.id || '',
+                                                    }));
+                                                }}
                                             >
                                                 <option value="" disabled className="text-slate-500 dark:bg-slate-900">
                                                     {t('chooseUniversityPrompt', '-- Select University --')}
@@ -268,11 +285,34 @@ export default function Register({ universities = [] }) {
                                                 value={data.semester}
                                                 className="w-full rounded-2xl border-0 bg-transparent py-2.5 pl-9 pr-4 text-xs sm:text-sm text-slate-900 dark:text-white focus:ring-0 focus:outline-none font-medium"
                                                 required
-                                                onChange={(e) => setData('semester', e.target.value)}
+                                                onChange={(e) => {
+                                                    const semVal = e.target.value;
+                                                    const foundSem = availableSemesters?.find(s => s.name === semVal);
+                                                    setData(prev => ({
+                                                        ...prev,
+                                                        semester: semVal,
+                                                        semester_id: foundSem ? foundSem.id : '',
+                                                    }));
+                                                }}
                                             >
-                                                <option value="Semester 3" className="dark:bg-slate-900">Semester 3</option>
-                                                <option value="Semester 5" className="dark:bg-slate-900">Semester 5</option>
-                                                <option value="Semester 7" className="dark:bg-slate-900">Semester 7</option>
+                                                {availableSemesters ? (
+                                                    availableSemesters.map((sem) => (
+                                                        <option key={sem.id} value={sem.name} className="dark:bg-slate-900">
+                                                            {sem.name}
+                                                        </option>
+                                                    ))
+                                                ) : (
+                                                    <>
+                                                        <option value="Semester 1" className="dark:bg-slate-900">Semester 1</option>
+                                                        <option value="Semester 2" className="dark:bg-slate-900">Semester 2</option>
+                                                        <option value="Semester 3" className="dark:bg-slate-900">Semester 3</option>
+                                                        <option value="Semester 4" className="dark:bg-slate-900">Semester 4</option>
+                                                        <option value="Semester 5" className="dark:bg-slate-900">Semester 5</option>
+                                                        <option value="Semester 6" className="dark:bg-slate-900">Semester 6</option>
+                                                        <option value="Semester 7" className="dark:bg-slate-900">Semester 7</option>
+                                                        <option value="Semester 8" className="dark:bg-slate-900">Semester 8</option>
+                                                    </>
+                                                )}
                                             </select>
                                         </div>
                                         <InputError message={errors.semester} className="mt-1 text-xs text-rose-500" />

@@ -28,6 +28,7 @@ class User extends Authenticatable
         'gender',
         'status',
         'university_id',
+        'semester_id',
         'student_id_no',
         'semester',
         'year',
@@ -84,6 +85,11 @@ class User extends Authenticatable
     public function university(): BelongsTo
     {
         return $this->belongsTo(University::class);
+    }
+
+    public function semesterRelation(): BelongsTo
+    {
+        return $this->belongsTo(Semester::class, 'semester_id');
     }
 
     public function enrollments(): HasMany
@@ -259,7 +265,95 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if user has RBAC access to a subject (admin, active enrollment, or matching university).
+     * Resolve and synchronize the semester_id based on the string semester and university_id.
+     */
+    public function resolveSemesterId(): ?int
+    {
+        if ($this->semester_id) {
+            return (int) $this->semester_id;
+        }
+
+        if (empty($this->semester) || empty($this->university_id)) {
+            return null;
+        }
+
+        $semStr = trim((string) $this->semester);
+
+        $semesterModel = Semester::where('university_id', $this->university_id)
+            ->where(function ($q) use ($semStr) {
+                $q->whereRaw('LOWER(name) = ?', [strtolower($semStr)]);
+                if (preg_match('/\d+/', $semStr, $m)) {
+                    $num = (int) $m[0];
+                    $q->orWhere('sort_order', $num)
+                      ->orWhere('name', 'like', "%{$num}%");
+                }
+            })
+            ->first();
+
+        if ($semesterModel) {
+            $this->semester_id = $semesterModel->id;
+            $this->saveQuietly();
+            return (int) $semesterModel->id;
+        }
+
+        return null;
+    }
+
+    /**
+     * Determine if this user's assigned semester strictly matches the given subject's semester.
+     */
+    public function matchesSemesterOfSubject(Subject $subject): bool
+    {
+        // If subject has no semester assigned, consider it accessible
+        if (! $subject->semester_id) {
+            return true;
+        }
+
+        $userSemId = $this->resolveSemesterId();
+        if ($userSemId && (int) $userSemId === (int) $subject->semester_id) {
+            return true;
+        }
+
+        if (! empty($this->semester)) {
+            $userSem = trim((string) $this->semester);
+            $subjectSem = $subject->semester;
+            if ($subjectSem) {
+                // Exact name match (case-insensitive)
+                if (strtolower($userSem) === strtolower(trim((string) $subjectSem->name))) {
+                    return true;
+                }
+
+                // Match numeric component (e.g. "Semester 7" vs "7" or "Year 4 Semester 7")
+                if (preg_match('/\d+/', $userSem, $mUser) && preg_match('/\d+/', (string) $subjectSem->name, $mSub)) {
+                    if ((int) $mUser[0] === (int) $mSub[0]) {
+                        return true;
+                    }
+                }
+
+                // Match against sort_order
+                if (preg_match('/\d+/', $userSem, $mUser) && $subjectSem->sort_order) {
+                    if ((int) $mUser[0] === (int) $subjectSem->sort_order) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        // If user has no semester assigned at all, check if they have an active explicit enrollment
+        if (empty($this->semester) && empty($this->semester_id)) {
+            return $this->enrollments()
+                ->where('subject_id', $subject->id)
+                ->where('status', 'active')
+                ->exists();
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if user has RBAC access to a subject (admin, active enrollment, or matching university & semester).
      */
     public function canAccessSubject(Subject|int|null $subject): bool
     {
@@ -272,30 +366,28 @@ class User extends Authenticatable
         }
 
         $subjectId = $subject instanceof Subject ? $subject->id : $subject;
-        $subjectUniversityId = $subject instanceof Subject
-            ? $subject->university_id
-            : Subject::where('id', $subjectId)->value('university_id');
+        $subjectModel = $subject instanceof Subject ? $subject : Subject::with('semester')->find($subjectId);
 
-        // 1. Explicit active enrollment
-        $isEnrolled = $this->enrollments()
+        if (! $subjectModel) {
+            return false;
+        }
+
+        $matchesUniversity = $this->university_id && $subjectModel->university_id && (int) $this->university_id === (int) $subjectModel->university_id;
+
+        // If the subject belongs to the user's university, strictly require matching semester!
+        if ($matchesUniversity) {
+            return $this->matchesSemesterOfSubject($subjectModel);
+        }
+
+        // If from another university or unassigned, require explicit active enrollment
+        return $this->enrollments()
             ->where('subject_id', $subjectId)
             ->where('status', 'active')
             ->exists();
-
-        if ($isEnrolled) {
-            return true;
-        }
-
-        // 2. Matching university affiliation for approved student
-        if ($this->university_id && $subjectUniversityId && (int) $this->university_id === (int) $subjectUniversityId) {
-            return true;
-        }
-
-        return false;
     }
 
     /**
-     * Query of subjects accessible to this user (active enrollments or matching university).
+     * Query of subjects accessible to this user strictly isolated to their university & semester.
      */
     public function accessibleSubjects()
     {
@@ -303,21 +395,44 @@ class User extends Authenticatable
             return Subject::query();
         }
 
-        return Subject::active()
-            ->where(function ($query) {
-                $query->whereHas('enrollments', function ($q) {
-                    $q->where('user_id', $this->id)
-                        ->where('status', 'active');
-                });
+        $semId = $this->resolveSemesterId();
+        $userSem = trim((string) $this->semester);
 
+        return Subject::active()
+            ->where(function ($query) use ($semId, $userSem) {
                 if ($this->university_id) {
-                    $query->orWhere('university_id', $this->university_id);
+                    $query->where('university_id', $this->university_id)
+                        ->where(function ($semQuery) use ($semId, $userSem) {
+                            if ($semId) {
+                                $semQuery->where('semester_id', $semId);
+                            } elseif (! empty($userSem)) {
+                                $semQuery->whereHas('semester', function ($q) use ($userSem) {
+                                    $q->whereRaw('LOWER(name) = ?', [strtolower($userSem)]);
+                                    if (preg_match('/\d+/', $userSem, $m)) {
+                                        $num = (int) $m[0];
+                                        $q->orWhere('sort_order', $num)
+                                          ->orWhere('name', 'like', "%{$num}%");
+                                    }
+                                });
+                            } else {
+                                $semQuery->whereHas('enrollments', function ($eq) {
+                                    $eq->where('user_id', $this->id)
+                                       ->where('status', 'active');
+                                });
+                            }
+                        });
+                } else {
+                    $query->whereHas('enrollments', function ($eq) {
+                        $eq->where('user_id', $this->id)
+                           ->where('status', 'active');
+                    });
                 }
             });
     }
 
     /**
-     * Auto-enroll student into all active subjects for their assigned university.
+     * Auto-enroll student strictly into active subjects of their assigned university and semester.
+     * Prunes any outdated enrollments from different semesters in the same university.
      */
     public function autoEnrollUniversitySubjects(): int
     {
@@ -325,12 +440,37 @@ class User extends Authenticatable
             return 0;
         }
 
-        $subjectIds = Subject::where('university_id', $this->university_id)
+        $this->resolveSemesterId();
+
+        if (! $this->semester_id && empty($this->semester)) {
+            return 0;
+        }
+
+        $allUniSubjects = Subject::where('university_id', $this->university_id)
             ->active()
-            ->pluck('id');
+            ->with('semester')
+            ->get();
+
+        $validSubjectIds = [];
+        $invalidSubjectIds = [];
+
+        foreach ($allUniSubjects as $sub) {
+            if ($this->matchesSemesterOfSubject($sub)) {
+                $validSubjectIds[] = $sub->id;
+            } else {
+                $invalidSubjectIds[] = $sub->id;
+            }
+        }
+
+        // Clean up any cross-semester enrollments for this university
+        if (! empty($invalidSubjectIds)) {
+            Enrollment::where('user_id', $this->id)
+                ->whereIn('subject_id', $invalidSubjectIds)
+                ->delete();
+        }
 
         $enrolledCount = 0;
-        foreach ($subjectIds as $subjectId) {
+        foreach ($validSubjectIds as $subjectId) {
             $enrollment = Enrollment::firstOrCreate([
                 'user_id' => $this->id,
                 'subject_id' => $subjectId,

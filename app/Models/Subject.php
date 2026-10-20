@@ -117,7 +117,7 @@ class Subject extends Model
     }
 
     /**
-     * Auto-enroll all approved students belonging to this subject's university.
+     * Auto-enroll all approved students belonging to this subject's university AND matching semester.
      */
     public function enrollUniversityStudents(): int
     {
@@ -125,23 +125,30 @@ class Subject extends Model
             return 0;
         }
 
-        $studentIds = User::where('role', 'student')
+        $students = User::where('role', 'student')
             ->where('status', 'approved')
             ->where('university_id', $this->university_id)
-            ->pluck('id');
+            ->get();
 
         $count = 0;
-        foreach ($studentIds as $studentId) {
-            $enrollment = Enrollment::firstOrCreate([
-                'user_id' => $studentId,
-                'subject_id' => $this->id,
-            ], [
-                'status' => 'active',
-                'enrolled_at' => now(),
-            ]);
+        foreach ($students as $student) {
+            if ($student->matchesSemesterOfSubject($this)) {
+                $enrollment = Enrollment::firstOrCreate([
+                    'user_id' => $student->id,
+                    'subject_id' => $this->id,
+                ], [
+                    'status' => 'active',
+                    'enrolled_at' => now(),
+                ]);
 
-            if ($enrollment->wasRecentlyCreated) {
-                $count++;
+                if ($enrollment->wasRecentlyCreated) {
+                    $count++;
+                }
+            } else {
+                // Prune any mismatched enrollment
+                Enrollment::where('user_id', $student->id)
+                    ->where('subject_id', $this->id)
+                    ->delete();
             }
         }
 
