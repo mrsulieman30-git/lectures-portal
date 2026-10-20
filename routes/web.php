@@ -49,6 +49,15 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
             return redirect()->route('admin.dashboard');
         }
 
+        // Automatically check and upgrade students whose semester end_date has elapsed
+        if ($user->semester_id) {
+            $studentSem = \App\Models\Semester::find($user->semester_id);
+            if ($studentSem && $studentSem->auto_promote && $studentSem->end_date && $studentSem->end_date->isPast() && ! $studentSem->promoted_at) {
+                $studentSem->promoteStudents();
+                $user->refresh();
+            }
+        }
+
         // Auto-enroll student into university subjects if not enrolled yet
         if ($user->university_id && $user->enrollments()->count() === 0) {
             $user->autoEnrollUniversitySubjects();
@@ -166,6 +175,7 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
         Route::post('/universities/{university}/semesters', [UniversityController::class, 'addSemester'])->name('universities.semesters.store');
         Route::put('/universities/{university}/semesters/{semester}', [UniversityController::class, 'updateSemester'])->name('universities.semesters.update');
         Route::delete('/universities/{university}/semesters/{semester}', [UniversityController::class, 'deleteSemester'])->name('universities.semesters.destroy');
+        Route::post('/universities/{university}/semesters/{semester}/promote', [UniversityController::class, 'promoteSemester'])->name('universities.semesters.promote');
         Route::resource('semesters', SemesterController::class)->only(['store', 'update', 'destroy']);
 
         // Subject Management

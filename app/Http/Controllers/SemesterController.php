@@ -20,9 +20,12 @@ class SemesterController extends Controller
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'is_active' => 'nullable|boolean',
             'sort_order' => 'nullable|integer',
+            'auto_promote' => 'nullable|boolean',
+            'next_semester_id' => 'nullable|exists:semesters,id',
         ]);
 
         $validated['is_active'] = $request->boolean('is_active', true);
+        $validated['auto_promote'] = $request->boolean('auto_promote', true);
         $validated['sort_order'] = $validated['sort_order'] ?? 0;
 
         $semester = Semester::create($validated);
@@ -42,10 +45,15 @@ class SemesterController extends Controller
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'is_active' => 'nullable|boolean',
             'sort_order' => 'nullable|integer',
+            'auto_promote' => 'nullable|boolean',
+            'next_semester_id' => 'nullable|exists:semesters,id',
         ]);
 
         if ($request->has('is_active')) {
             $validated['is_active'] = $request->boolean('is_active');
+        }
+        if ($request->has('auto_promote')) {
+            $validated['auto_promote'] = $request->boolean('auto_promote');
         }
 
         $semester->update($validated);

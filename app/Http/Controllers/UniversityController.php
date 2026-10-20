@@ -57,8 +57,14 @@ class UniversityController extends Controller
 
     public function show(University $university)
     {
+        // Opportunistically run promotion on any ended semesters
+        Semester::checkAndPromoteEndedSemesters();
+
         $university->load([
-            'semesters' => fn ($q) => $q->withCount('subjects'),
+            'semesters' => fn ($q) => $q->withCount('subjects', 'students')
+                ->with('nextSemester:id,name')
+                ->orderBy('sort_order', 'asc')
+                ->orderBy('id', 'asc'),
             'semesters.subjects' => fn ($q) => $q->withCount('documents', 'assignments'),
         ]);
         $university->loadCount('students', 'subjects');
@@ -132,9 +138,12 @@ class UniversityController extends Controller
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'is_active' => 'nullable|boolean',
             'sort_order' => 'nullable|integer',
+            'auto_promote' => 'nullable|boolean',
+            'next_semester_id' => 'nullable|exists:semesters,id',
         ]);
 
         $validated['is_active'] = $request->boolean('is_active', true);
+        $validated['auto_promote'] = $request->boolean('auto_promote', true);
         $validated['sort_order'] = $validated['sort_order'] ?? 0;
 
         $semester = $university->semesters()->create($validated);
@@ -154,16 +163,37 @@ class UniversityController extends Controller
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'is_active' => 'nullable|boolean',
             'sort_order' => 'nullable|integer',
+            'auto_promote' => 'nullable|boolean',
+            'next_semester_id' => 'nullable|exists:semesters,id',
         ]);
 
         if ($request->has('is_active')) {
             $validated['is_active'] = $request->boolean('is_active');
+        }
+        if ($request->has('auto_promote')) {
+            $validated['auto_promote'] = $request->boolean('auto_promote');
         }
 
         $semester->update($validated);
         ActivityLog::log('semester_updated', $semester);
 
         return redirect()->back()->with('message', "Semester '{$semester->name}' updated.");
+    }
+
+    /**
+     * Manually trigger promotion of all students in a semester to the next semester.
+     */
+    public function promoteSemester(University $university, Semester $semester)
+    {
+        $nextSemester = $semester->resolveNextSemester();
+
+        if (! $nextSemester) {
+            return redirect()->back()->with('error', "No target next semester could be resolved for '{$semester->name}'. Please create or select a next semester in settings.");
+        }
+
+        $count = $semester->promoteStudents(force: true);
+
+        return redirect()->back()->with('message', "Successfully upgraded {$count} students from '{$semester->name}' to '{$nextSemester->name}'. Course cabinets and enrollments were refreshed.");
     }
 
     /**

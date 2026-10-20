@@ -16,7 +16,8 @@ import {
     Edit3,
     X,
     CheckCircle2,
-    Clock
+    Clock,
+    Sparkles
 } from 'lucide-react';
 
 export default function UniversityShow({ university = {} }) {
@@ -37,6 +38,8 @@ export default function UniversityShow({ university = {} }) {
         end_date: '',
         is_active: true,
         sort_order: 0,
+        auto_promote: true,
+        next_semester_id: '',
     });
 
     // Edit Semester Form
@@ -46,6 +49,8 @@ export default function UniversityShow({ university = {} }) {
         end_date: '',
         is_active: true,
         sort_order: 0,
+        auto_promote: true,
+        next_semester_id: '',
     });
     const [editProcessing, setEditProcessing] = useState(false);
     const [editErrors, setEditErrors] = useState({});
@@ -77,6 +82,18 @@ export default function UniversityShow({ university = {} }) {
         return clean;
     };
 
+    const getDaysRemaining = (endDateStr) => {
+        if (!endDateStr) return null;
+        const clean = String(endDateStr).split('T')[0];
+        const parts = clean.split('-');
+        if (parts.length !== 3) return null;
+        const [y, m, d] = parts;
+        const end = new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10), 23, 59, 59);
+        const now = new Date();
+        const diffMs = end - now;
+        return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    };
+
     const openEditSemester = (sem) => {
         setEditingSemester(sem);
         setEditData({
@@ -85,6 +102,8 @@ export default function UniversityShow({ university = {} }) {
             end_date: sem.end_date ? String(sem.end_date).split('T')[0] : '',
             is_active: Boolean(sem.is_active),
             sort_order: sem.sort_order || 0,
+            auto_promote: sem.auto_promote !== undefined ? Boolean(sem.auto_promote) : true,
+            next_semester_id: sem.next_semester_id ? String(sem.next_semester_id) : '',
         });
         setEditErrors({});
     };
@@ -106,6 +125,17 @@ export default function UniversityShow({ university = {} }) {
                 }
             }
         );
+    };
+
+    const handlePromoteSemester = (sem) => {
+        const studentCount = sem.students_count || 0;
+        const targetDesc = sem.next_semester?.name 
+            ? `to '${sem.next_semester.name}'` 
+            : 'to the next sequential semester in the curriculum';
+
+        if (confirm(`Are you sure you want to upgrade ${studentCount} students in '${sem.name}' ${targetDesc} now?\n\n- Advances student semester and academic year\n- Resets active course cabinets to the new semester\n- Sends in-app promotion notifications to enrolled students`)) {
+            router.post(route('admin.universities.semesters.promote', [university.id, sem.id]));
+        }
     };
 
     const handleDeleteSemester = (semesterId, semesterName) => {
@@ -191,7 +221,7 @@ export default function UniversityShow({ university = {} }) {
                                     <input
                                         type="text"
                                         required
-                                        placeholder="e.g. Fall 2026 or Term 1"
+                                        placeholder="e.g. Semester 1, Semester 2, or Fall 2026"
                                         value={semData.name}
                                         onChange={(e) => setSemData('name', e.target.value)}
                                         className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-800 dark:text-white rounded-xl focus:ring-2 focus:ring-[#ff5e36]/20 focus:border-[#ff5e36]"
@@ -211,7 +241,7 @@ export default function UniversityShow({ university = {} }) {
                                 </div>
                                 <div>
                                     <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                                        End Date
+                                        End Date (Term Finish)
                                     </label>
                                     <input
                                         type="date"
@@ -219,6 +249,47 @@ export default function UniversityShow({ university = {} }) {
                                         onChange={(e) => setSemData('end_date', e.target.value)}
                                         className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-800 dark:text-white rounded-xl"
                                     />
+                                </div>
+
+                                <div className="sm:col-span-4">
+                                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                                        Target Next Semester for Student Progression
+                                    </label>
+                                    <select
+                                        value={semData.next_semester_id}
+                                        onChange={(e) => setSemData('next_semester_id', e.target.value)}
+                                        className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-800 dark:text-white rounded-xl"
+                                    >
+                                        <option value="">Auto-Detect Curriculum Sequence (e.g. Semester 1 &rarr; 2, 3 &rarr; 4)</option>
+                                        {(university.semesters || []).map((s) => (
+                                            <option key={s.id} value={s.id}>
+                                                {s.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <p className="text-[11px] text-slate-400 mt-1">
+                                        When students are promoted, they will automatically shift to this semester and auto-enroll in its course cabinets.
+                                    </p>
+                                </div>
+
+                                <div className="sm:col-span-4 p-3.5 bg-gradient-to-r from-amber-500/10 to-orange-500/5 dark:from-white/5 dark:to-white/5 border border-amber-500/20 dark:border-white/10 rounded-xl">
+                                    <label className="flex items-start gap-2.5 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={semData.auto_promote}
+                                            onChange={(e) => setSemData('auto_promote', e.target.checked)}
+                                            className="mt-0.5 rounded border-slate-300 text-[#ff5e36] focus:ring-[#ff5e36]"
+                                        />
+                                        <div>
+                                            <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                                                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                                                Automatic Student Upgrades upon Semester End
+                                            </span>
+                                            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                                                When the End Date is reached, the system will automatically elevate all enrolled students to the next semester, update their academic year, and refresh active course modules.
+                                            </p>
+                                        </div>
+                                    </label>
                                 </div>
 
                                 <div className="sm:col-span-4 flex items-center justify-between pt-2 border-t border-slate-100 dark:border-white/5">
@@ -318,6 +389,49 @@ export default function UniversityShow({ university = {} }) {
                                         </div>
                                     </div>
 
+                                    <div>
+                                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                                            Target Next Semester for Student Progression
+                                        </label>
+                                        <select
+                                            value={editData.next_semester_id || ''}
+                                            onChange={(e) => setEditData({ ...editData, next_semester_id: e.target.value })}
+                                            className="w-full px-3.5 py-2.5 text-sm border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-800 dark:text-white rounded-xl"
+                                        >
+                                            <option value="">Auto-Detect Curriculum Sequence (e.g. Semester 1 &rarr; 2, 3 &rarr; 4)</option>
+                                            {(university.semesters || [])
+                                                .filter((s) => s.id !== editingSemester.id)
+                                                .map((s) => (
+                                                    <option key={s.id} value={s.id}>
+                                                        {s.name}
+                                                    </option>
+                                                ))}
+                                        </select>
+                                        <p className="text-[11px] text-slate-400 mt-1">
+                                            When promoted, students in this semester advance directly to this target semester.
+                                        </p>
+                                    </div>
+
+                                    <div className="p-3.5 bg-gradient-to-r from-amber-500/10 to-orange-500/5 dark:from-white/5 dark:to-white/5 border border-amber-500/20 dark:border-white/10 rounded-xl">
+                                        <label className="flex items-start gap-2.5 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={editData.auto_promote}
+                                                onChange={(e) => setEditData({ ...editData, auto_promote: e.target.checked })}
+                                                className="mt-0.5 rounded border-slate-300 text-[#ff5e36] focus:ring-[#ff5e36]"
+                                            />
+                                            <div>
+                                                <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                                                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                                                    Automatic Student Progression upon Semester End
+                                                </span>
+                                                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                                                    When the End Date is reached, the system will automatically elevate all enrolled students to the next semester and refresh active course modules.
+                                                </p>
+                                            </div>
+                                        </label>
+                                    </div>
+
                                     <div className="p-3 bg-slate-50 dark:bg-white/5 rounded-xl">
                                         <label className="flex items-center gap-2.5 cursor-pointer">
                                             <input
@@ -370,35 +484,86 @@ export default function UniversityShow({ university = {} }) {
                         ) : (
                             university.semesters.map((sem) => (
                                 <div key={sem.id} className="bg-white dark:bg-[#0c1017] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-sm overflow-hidden">
-                                    <div className="p-5 bg-slate-50/70 dark:bg-white/5 border-b border-slate-100 dark:border-white/5 flex items-center justify-between">
-                                        <div className="flex items-center gap-2.5">
-                                            <div className="w-8 h-8 rounded-lg bg-[#ff5e36]/10 text-[#ff5e36] flex items-center justify-center">
-                                                <Calendar className="w-4 h-4" />
+                                    <div className="p-5 bg-slate-50/70 dark:bg-white/5 border-b border-slate-100 dark:border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                        <div className="flex items-start gap-3">
+                                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#ff5e36]/10 to-amber-500/10 border border-[#ff5e36]/20 text-[#ff5e36] flex items-center justify-center shrink-0 mt-0.5">
+                                                <Calendar className="w-5 h-5" />
                                             </div>
                                             <div>
-                                                <div className="flex items-center gap-2">
-                                                    <h3 className="font-bold text-slate-900 dark:text-white text-base">{sem.name}</h3>
+                                                <div className="flex flex-wrap items-center gap-2 mb-1">
+                                                    <h3 className="font-bold text-slate-900 dark:text-white text-base tracking-tight">{sem.name}</h3>
+                                                    
                                                     {sem.is_active ? (
-                                                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                                                             Active
                                                         </span>
                                                     ) : (
-                                                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-white/10 text-slate-500">
+                                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-white/10 text-slate-500">
                                                             Archived
                                                         </span>
                                                     )}
+
+                                                    {sem.promoted_at ? (
+                                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+                                                            <CheckCircle2 className="w-3 h-3" /> Promoted ({formatDate(sem.promoted_at)})
+                                                        </span>
+                                                    ) : sem.auto_promote ? (
+                                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 flex items-center gap-1">
+                                                            <Sparkles className="w-3 h-3 text-indigo-500" /> Auto-Upgrade: {sem.next_semester?.name || 'Curriculum Next'}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 dark:bg-white/10 text-slate-400">
+                                                            Manual Upgrade Only
+                                                        </span>
+                                                    )}
+
+                                                    {sem.end_date && (() => {
+                                                        const diff = getDaysRemaining(sem.end_date);
+                                                        if (diff === null) return null;
+                                                        if (diff > 0) {
+                                                            return (
+                                                                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center gap-1">
+                                                                    <Clock className="w-3 h-3" /> {diff} {diff === 1 ? 'day' : 'days'} left
+                                                                </span>
+                                                            );
+                                                        }
+                                                        return (
+                                                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 flex items-center gap-1">
+                                                                <Clock className="w-3 h-3" /> Term Ended
+                                                            </span>
+                                                        );
+                                                    })()}
                                                 </div>
-                                                <span className="text-xs text-slate-400">
-                                                    {(sem.subjects || []).length} Course Module(s)
-                                                    {sem.start_date && ` • ${formatDate(sem.start_date)} to ${sem.end_date ? formatDate(sem.end_date) : 'Ongoing'}`}
-                                                </span>
+
+                                                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
+                                                    <span className="flex items-center gap-1 font-semibold text-slate-800 dark:text-slate-200">
+                                                        <Users className="w-3.5 h-3.5 text-[#ff5e36]" />
+                                                        {sem.students_count || 0} Students Enrolled
+                                                    </span>
+                                                    <span>•</span>
+                                                    <span>{(sem.subjects || []).length} Course Module(s)</span>
+                                                    <span>•</span>
+                                                    <span>
+                                                        {sem.start_date ? formatDate(sem.start_date) : 'Start Date unset'} &rarr; {sem.end_date ? formatDate(sem.end_date) : 'Ongoing'}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-2">
+
+                                        <div className="flex items-center gap-2 self-end md:self-center shrink-0">
+                                            <button
+                                                onClick={() => handlePromoteSemester(sem)}
+                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-[#ff5e36] hover:from-amber-600 hover:to-[#e04822] text-white text-xs font-bold shadow-sm shadow-orange-500/20 transition-all hover:scale-105 active:scale-95"
+                                                title="Promote students in this semester immediately to the next academic term"
+                                            >
+                                                <GraduationCap className="w-3.5 h-3.5" />
+                                                Promote Students ({sem.students_count || 0})
+                                            </button>
+
                                             <button
                                                 onClick={() => openEditSemester(sem)}
                                                 className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
-                                                title="Edit Semester"
+                                                title="Edit Semester Settings & Timeline"
                                             >
                                                 <Edit3 className="w-4 h-4" />
                                             </button>
