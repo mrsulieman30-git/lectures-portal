@@ -157,6 +157,9 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
 
         // User Management
         Route::get('/users', [AdminController::class, 'users'])->name('users');
+        Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('users.update');
+        Route::post('/users/{user}/reset-password', [AdminController::class, 'resetPassword'])->name('users.reset-password');
+        Route::delete('/users/{user}', [AdminController::class, 'destroyUser'])->name('users.destroy');
         Route::post('/users/{user}/approve', [AdminController::class, 'approveUser'])->name('users.approve');
         Route::post('/users/{user}/reject', [AdminController::class, 'rejectUser'])->name('users.reject');
         Route::post('/users/{user}/approve-name', [AdminController::class, 'approveNameChange'])->name('users.approve-name');

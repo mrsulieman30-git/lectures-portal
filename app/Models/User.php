@@ -496,12 +496,10 @@ class User extends Authenticatable
             }
         }
 
-        // Clean up any cross-semester enrollments for this university
-        if (! empty($invalidSubjectIds)) {
-            Enrollment::where('user_id', $this->id)
-                ->whereIn('subject_id', $invalidSubjectIds)
-                ->delete();
-        }
+        // Clean up any cross-semester or cross-university enrollments
+        Enrollment::where('user_id', $this->id)
+            ->whereNotIn('subject_id', $validSubjectIds)
+            ->delete();
 
         $enrolledCount = 0;
         foreach ($validSubjectIds as $subjectId) {

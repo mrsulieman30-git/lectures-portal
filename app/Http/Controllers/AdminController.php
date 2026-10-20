@@ -8,11 +8,13 @@ use App\Models\Document;
 use App\Models\DownloadLog;
 use App\Models\Enrollment;
 use App\Models\Notification;
+use App\Models\Semester;
 use App\Models\Subject;
 use App\Models\Submission;
 use App\Models\University;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 
 class AdminController extends Controller
@@ -131,14 +133,15 @@ class AdminController extends Controller
      */
     public function users(Request $request)
     {
-        $query = User::with('university');
+        $query = User::with(['university', 'semesterRelation']);
 
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('student_id_no', 'like', "%{$search}%");
+                    ->orWhere('student_id_no', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
             });
         }
 
@@ -154,14 +157,143 @@ class AdminController extends Controller
             $query->where('university_id', $request->university_id);
         }
 
-        $users = $query->latest()->paginate(20)->withQueryString();
-        $universities = University::active()->get(['id', 'name']);
+        if ($request->filled('semester_id')) {
+            $query->where('semester_id', $request->semester_id);
+        }
+
+        $users = $query->latest()->paginate(25)->withQueryString();
+        $universities = University::active()
+            ->with(['semesters' => fn ($q) => $q->orderBy('sort_order', 'asc')->orderBy('name', 'asc')])
+            ->get(['id', 'name']);
 
         return Inertia::render('Admin/Users', [
             'users' => $users,
             'universities' => $universities,
-            'filters' => $request->only(['search', 'role', 'status', 'university_id']),
+            'filters' => $request->only(['search', 'role', 'status', 'university_id', 'semester_id']),
         ]);
+    }
+
+    /**
+     * Update user profile information.
+     * Note: Email and Password are intentionally non-editable via this endpoint for user security.
+     */
+    public function updateUser(Request $request, User $user)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'university_id' => 'nullable|exists:universities,id',
+            'semester_id' => 'nullable|exists:semesters,id',
+            'semester' => 'nullable|string|max:100',
+            'year' => 'nullable|string|max:50',
+            'student_id_no' => 'nullable|string|max:100',
+            'phone' => 'nullable|string|max:50',
+            'gender' => 'nullable|in:male,female',
+            'role' => 'required|in:admin,student,university',
+            'status' => 'required|in:approved,pending,rejected',
+            'bio' => 'nullable|string|max:1000',
+        ]);
+
+        // Strict security rule: Email and password cannot be modified via admin profile editing
+        unset($validated['email'], $validated['password']);
+
+        // Synchronize semester name if semester_id is chosen
+        if (! empty($validated['semester_id'])) {
+            $semester = Semester::find($validated['semester_id']);
+            if ($semester) {
+                $validated['semester'] = $semester->name;
+                // Auto-infer academic year if missing
+                if (empty($validated['year']) && preg_match('/\d+/', $semester->name, $matches)) {
+                    $num = (int) $matches[0];
+                    if ($num <= 2) {
+                        $validated['year'] = 'Year 1';
+                    } elseif ($num <= 4) {
+                        $validated['year'] = 'Year 2';
+                    } elseif ($num <= 6) {
+                        $validated['year'] = 'Year 3';
+                    } else {
+                        $validated['year'] = 'Year 4';
+                    }
+                }
+            }
+        } elseif (empty($validated['semester_id']) && ! empty($validated['university_id']) && ! empty($validated['semester'])) {
+            // Attempt to resolve semester_id by name within the selected university
+            $matchedSem = Semester::where('university_id', $validated['university_id'])
+                ->where('name', $validated['semester'])
+                ->first();
+            if ($matchedSem) {
+                $validated['semester_id'] = $matchedSem->id;
+            }
+        }
+
+        $oldUniversityId = $user->university_id;
+        $oldSemesterId = $user->semester_id;
+        $oldSemester = $user->semester;
+
+        $user->update($validated);
+
+        // Auto-re-sync subject enrollments if university or semester changed for a student
+        if ($user->role === 'student' && ($oldUniversityId !== $user->university_id || $oldSemesterId !== $user->semester_id || $oldSemester !== $user->semester)) {
+            $user->autoEnrollUniversitySubjects();
+        }
+
+        ActivityLog::log('user_profile_updated_by_admin', $user, [
+            'updated_by' => auth()->id(),
+            'updated_fields' => array_keys($validated),
+        ]);
+
+        Notification::notify(
+            $user->id,
+            'profile_updated',
+            'Profile Information Updated',
+            'Your profile and academic enrollment information were updated by the administrator.',
+            route('dashboard')
+        );
+
+        return redirect()->back()->with('message', "User '{$user->name}' updated successfully.");
+    }
+
+    /**
+     * Reset user password to default temporary password '11111111'.
+     */
+    public function resetPassword(User $user)
+    {
+        $user->update([
+            'password' => Hash::make('11111111'),
+        ]);
+
+        ActivityLog::log('user_password_reset_to_default', $user, [
+            'reset_by' => auth()->id(),
+            'default_password' => '11111111',
+        ]);
+
+        Notification::notify(
+            $user->id,
+            'password_reset',
+            'Password Reset to Default',
+            'Your account password has been reset by the administrator to default: 11111111. Please sign in with 11111111 and update your password in Profile Settings.',
+            route('profile.edit')
+        );
+
+        return redirect()->back()->with('message', "Password for '{$user->name}' reset to default: 11111111. They can now log in using 11111111 and update it.");
+    }
+
+    /**
+     * Delete user account (soft delete).
+     */
+    public function destroyUser(User $user)
+    {
+        if ($user->id === auth()->id()) {
+            return redirect()->back()->with('error', 'You cannot delete your own administrative account.');
+        }
+
+        $name = $user->name;
+        $user->delete();
+
+        ActivityLog::log('user_deleted_by_admin', $user, [
+            'deleted_by' => auth()->id(),
+        ]);
+
+        return redirect()->back()->with('message', "User '{$name}' has been deleted.");
     }
 
     /**
