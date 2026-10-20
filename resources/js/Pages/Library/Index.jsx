@@ -285,15 +285,13 @@ export default function LibraryIndex({ documents = { data: [] }, filters = {}, s
                                             </div>
 
                                             <div className="flex items-center gap-2">
-                                                <a
+                                                <Link
                                                     href={route('documents.view', doc.id)}
-                                                    target="_blank"
-                                                    rel="noreferrer"
                                                     className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#ff5e36] hover:bg-[#e04822] text-white text-xs font-bold shadow-sm shadow-[#ff5e36]/25 transition-all hover:scale-105 active:scale-95"
                                                 >
                                                     <Eye className="w-3.5 h-3.5 text-white" />
                                                     <span>{t('readOnline', 'Read')}</span>
-                                                </a>
+                                                </Link>
 
                                                 {!doc.is_view_only && (
                                                     <a

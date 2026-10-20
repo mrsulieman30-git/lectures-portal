@@ -353,6 +353,40 @@ class User extends Authenticatable
     }
 
     /**
+     * Determine if this student and another student share the exact same university and semester.
+     */
+    public function matchesSemesterOfUser(User $otherUser): bool
+    {
+        if (! $this->university_id || ! $otherUser->university_id) {
+            return false;
+        }
+
+        if ((int) $this->university_id !== (int) $otherUser->university_id) {
+            return false;
+        }
+
+        $mySemId = $this->resolveSemesterId();
+        $otherSemId = $otherUser->resolveSemesterId();
+
+        if ($mySemId && $otherSemId) {
+            return (int) $mySemId === (int) $otherSemId;
+        }
+
+        if (! empty($this->semester) && ! empty($otherUser->semester)) {
+            $mySem = strtolower(trim((string) $this->semester));
+            $otherSem = strtolower(trim((string) $otherUser->semester));
+            if ($mySem === $otherSem) {
+                return true;
+            }
+            if (preg_match('/\d+/', $mySem, $m1) && preg_match('/\d+/', $otherSem, $m2)) {
+                return (int) $m1[0] === (int) $m2[0];
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Check if user has RBAC access to a subject (admin, active enrollment, or matching university & semester).
      */
     public function canAccessSubject(Subject|int|null $subject): bool

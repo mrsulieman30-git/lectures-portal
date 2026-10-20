@@ -1,5 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { useState, useMemo } from 'react';
 import { 
     Calendar as CalendarIcon, 
@@ -632,15 +632,13 @@ export default function ScheduleIndex({
                                                                     </span>
                                                                 </div>
                                                             </div>
-                                                            <a
+                                                            <Link
                                                                 href={route('documents.view', evt.extendedProps.document.id)}
-                                                                target="_blank"
-                                                                rel="noreferrer"
                                                                 className="px-2.5 py-1 rounded-lg bg-[#ff5e36] hover:bg-[#e04822] text-white text-[11px] font-bold shrink-0 shadow-xs flex items-center gap-1 transition-all"
                                                             >
                                                                 <Eye className="w-3 h-3" />
                                                                 <span>Open</span>
-                                                            </a>
+                                                            </Link>
                                                         </div>
                                                     )}
 

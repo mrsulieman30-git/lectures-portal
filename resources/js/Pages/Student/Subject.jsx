@@ -257,11 +257,9 @@ export default function StudentSubject({ subject = {}, enrolled = false, submiss
                                             </div>
 
                                             <div className="flex items-center gap-2.5 shrink-0">
-                                                {/* Fully Highlighted View / Read Button */}
-                                                <a
+                                                {/* Fully Highlighted View / Read Button - Same Page Navigation */}
+                                                <Link
                                                     href={route('documents.view', doc.id)}
-                                                    target="_blank"
-                                                    rel="noreferrer"
                                                     className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold shadow-sm transition-all hover:scale-105 active:scale-95 ${
                                                         isFemale
                                                             ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-rose-500/25 hover:brightness-105'
@@ -270,7 +268,7 @@ export default function StudentSubject({ subject = {}, enrolled = false, submiss
                                                 >
                                                     <Eye className="w-3.5 h-3.5" />
                                                     <span>{t('viewOnline')}</span>
-                                                </a>
+                                                </Link>
                                                 {doc.is_downloadable && !doc.is_view_only && (
                                                     <a
                                                         href={route('documents.download', doc.id)}

@@ -8,6 +8,7 @@ import {
     Lock, 
     Download, 
     Calendar, 
+    Shield,
     ShieldCheck, 
     ArrowRight, 
     Sparkles,

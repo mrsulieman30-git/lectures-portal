@@ -12,6 +12,7 @@ class Message extends Model
 
     protected $fillable = [
         'subject_id',
+        'semester_id',
         'user_id',
         'recipient_id',
         'content',
@@ -33,6 +34,11 @@ class Message extends Model
     public function subject(): BelongsTo
     {
         return $this->belongsTo(Subject::class);
+    }
+
+    public function semester(): BelongsTo
+    {
+        return $this->belongsTo(Semester::class);
     }
 
     public function user(): BelongsTo

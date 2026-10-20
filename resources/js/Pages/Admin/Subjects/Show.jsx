@@ -570,15 +570,13 @@ export default function SubjectShow({ subject = {}, sharedCampuses = [], allUniv
                                                                     {doc.is_universal ? 'Universal: ON' : 'Make Universal'}
                                                                 </button>
                                                                 {/* Highlighted Preview Pill Button */}
-                                                                <a
+                                                                <Link
                                                                     href={route('documents.view', doc.id)}
-                                                                    target="_blank"
-                                                                    rel="noreferrer"
                                                                     className="px-3 py-1.5 rounded-xl bg-[#ff5e36] hover:bg-[#e04822] text-white text-xs font-bold inline-flex items-center gap-1 shadow-sm shadow-[#ff5e36]/25 transition-all hover:scale-105 active:scale-95"
                                                                 >
                                                                     <Eye className="w-3.5 h-3.5" />
                                                                     Preview
-                                                                </a>
+                                                                </Link>
                                                                 <button
                                                                     onClick={() => handleDeleteDocument(doc.id, doc.title)}
                                                                     className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-rose-500 transition-colors shadow-xs"

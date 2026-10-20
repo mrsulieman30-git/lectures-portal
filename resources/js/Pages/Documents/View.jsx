@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.js?url';
@@ -391,6 +391,37 @@ export default function DocumentView({
         return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
     };
 
+    const handleBack = (e) => {
+        e?.preventDefault();
+
+        // 1. If user came from a page within the same domain, use browser history back
+        if (typeof window !== 'undefined' && window.document.referrer && window.document.referrer.includes(window.location.host)) {
+            window.history.back();
+            return;
+        }
+
+        // 2. If history stack exists, attempt back with a fast fallback
+        if (typeof window !== 'undefined' && window.history.length > 1) {
+            window.history.back();
+            setTimeout(() => {
+                // If history.back didn't unload the page, navigate directly
+                if (document.subject_id) {
+                    router.visit(route('subjects.show', document.subject_id));
+                } else {
+                    router.visit(route('dashboard'));
+                }
+            }, 250);
+            return;
+        }
+
+        // 3. Fallback: navigate directly to subject or student dashboard
+        if (document.subject_id) {
+            router.visit(route('subjects.show', document.subject_id));
+        } else {
+            router.visit(route('dashboard'));
+        }
+    };
+
     return (
         <div 
             ref={containerRef}
@@ -403,8 +434,9 @@ export default function DocumentView({
             <header className="h-14 bg-slate-900/90 backdrop-blur-md border-b border-white/10 px-4 sm:px-6 flex items-center justify-between shrink-0 z-30 shadow-md">
                 <div className="flex items-center gap-3 min-w-0">
                     <button
-                        onClick={() => window.history.back()}
-                        className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 transition-all hover:scale-105 active:scale-95 shrink-0"
+                        type="button"
+                        onClick={handleBack}
+                        className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 transition-all hover:scale-105 active:scale-95 shrink-0 cursor-pointer"
                         title={t('back', 'Back')}
                     >
                         <ArrowLeft className="w-4 h-4" />

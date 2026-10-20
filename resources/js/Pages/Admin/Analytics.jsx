@@ -260,15 +260,13 @@ export default function Analytics({
                                                     <DownloadCloud className="w-3.5 h-3.5" />
                                                     {doc.download_count}
                                                 </span>
-                                                <a
+                                                <Link
                                                     href={route('documents.view', doc.id)}
-                                                    target="_blank"
-                                                    rel="noreferrer"
                                                     className="p-1.5 rounded-lg bg-white hover:bg-slate-200/80 text-slate-600 border border-slate-200 transition-colors"
                                                     title="View Document Online"
                                                 >
                                                     <Eye className="w-3.5 h-3.5" />
-                                                </a>
+                                                </Link>
                                             </div>
                                         </div>
                                     ))

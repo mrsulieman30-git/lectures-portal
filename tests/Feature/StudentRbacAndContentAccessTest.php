@@ -241,4 +241,102 @@ class StudentRbacAndContentAccessTest extends TestCase
             'subject_id' => $newSubject->id,
         ]);
     }
+
+    public function test_student_chat_channels_only_include_classmates_from_same_semester(): void
+    {
+        // Another student in Semester 7 (same university)
+        $studentA2 = User::factory()->create([
+            'role' => 'student',
+            'status' => 'approved',
+            'university_id' => $this->universityA->id,
+            'semester' => 'Semester 7',
+            'semester_id' => $this->semesterA->id,
+        ]);
+
+        // Student in Semester 3 (same university)
+        $semester3 = Semester::create([
+            'name' => 'Semester 3',
+            'university_id' => $this->universityA->id,
+            'is_active' => true,
+        ]);
+
+        $studentSem3 = User::factory()->create([
+            'role' => 'student',
+            'status' => 'approved',
+            'university_id' => $this->universityA->id,
+            'semester' => 'Semester 3',
+            'semester_id' => $semester3->id,
+        ]);
+
+        $response = $this->actingAs($this->studentA)->get(route('chat.channels'));
+        $response->assertOk();
+
+        $data = $response->json();
+        $this->assertFalse($data['is_admin']);
+        $this->assertNotEmpty($data['professor']);
+        $this->assertEmpty($data['universities']); // Hidden for students
+        $this->assertEmpty($data['semesters']);    // Hidden for students
+
+        $classmateIds = collect($data['classmates'])->pluck('id')->all();
+        // Should include studentA2 (same semester 7)
+        $this->assertContains($studentA2->id, $classmateIds);
+        // Must NOT include studentSem3 (different semester 3)
+        $this->assertNotContains($studentSem3->id, $classmateIds);
+        // Must NOT include studentB (different university)
+        $this->assertNotContains($this->studentB->id, $classmateIds);
+    }
+
+    public function test_student_cannot_direct_message_student_from_different_semester(): void
+    {
+        $semester3 = Semester::create([
+            'name' => 'Semester 3',
+            'university_id' => $this->universityA->id,
+            'is_active' => true,
+        ]);
+
+        $studentSem3 = User::factory()->create([
+            'role' => 'student',
+            'status' => 'approved',
+            'university_id' => $this->universityA->id,
+            'semester' => 'Semester 3',
+            'semester_id' => $semester3->id,
+        ]);
+
+        // Student A (Sem 7) tries to message Student Sem 3 -> 403 Forbidden
+        $response = $this->actingAs($this->studentA)->postJson(route('chat.send'), [
+            'type' => 'direct',
+            'target_id' => $studentSem3->id,
+            'content' => 'Hello from another semester',
+        ]);
+
+        $response->assertStatus(403);
+    }
+
+    public function test_student_can_direct_message_classmate_in_same_semester_and_professor(): void
+    {
+        $studentA2 = User::factory()->create([
+            'role' => 'student',
+            'status' => 'approved',
+            'university_id' => $this->universityA->id,
+            'semester' => 'Semester 7',
+            'semester_id' => $this->semesterA->id,
+        ]);
+
+        // 1. Message classmate in same semester -> 201 Created
+        $response1 = $this->actingAs($this->studentA)->postJson(route('chat.send'), [
+            'type' => 'direct',
+            'target_id' => $studentA2->id,
+            'content' => 'Hey classmate, see you in lab!',
+        ]);
+        $response1->assertStatus(201);
+
+        // 2. Message Professor -> 201 Created
+        $response2 = $this->actingAs($this->studentA)->postJson(route('chat.send'), [
+            'type' => 'direct',
+            'target_id' => $this->admin->id,
+            'content' => 'Dr. Sulieman, I have a question about the blood banking test.',
+        ]);
+        $response2->assertStatus(201);
+    }
 }
+

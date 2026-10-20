@@ -1,5 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, useForm, router } from '@inertiajs/react';
+import { Head, Link, useForm, router } from '@inertiajs/react';
 import { useState, useMemo, useRef } from 'react';
 import {
     UploadCloud,
@@ -733,15 +733,13 @@ export default function PendingCabinetIndex({
                                                             </button>
 
                                                             {/* Preview */}
-                                                            <a
+                                                            <Link
                                                                 href={route('documents.view', doc.id)}
-                                                                target="_blank"
-                                                                rel="noreferrer"
                                                                 className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-slate-800 transition-colors"
                                                                 title="Preview Document"
                                                             >
                                                                 <Eye className="w-3.5 h-3.5" />
-                                                            </a>
+                                                            </Link>
 
                                                             {/* Delete */}
                                                             <button
