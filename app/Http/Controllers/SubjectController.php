@@ -403,6 +403,7 @@ class SubjectController extends Controller
         return Inertia::render('Student/Subject', [
             'subject' => $subject,
             'submissions' => $submissionsByAssignment,
+            'submissionMap' => $submissionsByAssignment,
             'isEnrolled' => $isEnrolled,
         ]);
     }

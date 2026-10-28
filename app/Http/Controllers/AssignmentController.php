@@ -22,7 +22,7 @@ class AssignmentController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'deadline' => 'required|date|after:now',
+            'deadline' => 'required|date',
             'max_grade' => 'required|integer|min:1|max:1000',
             'allow_late' => 'boolean',
             'late_penalty_percent' => 'integer|min:0|max:100',
@@ -71,11 +71,32 @@ class AssignmentController extends Controller
             'allow_resubmit' => 'boolean',
             'rubric' => 'nullable|string',
             'is_published' => 'boolean',
+            'attachment' => 'nullable|file|max:10240',
         ]);
+
+        if ($request->hasFile('attachment')) {
+            if ($assignment->attachment_path) {
+                Storage::disk('public')->delete($assignment->attachment_path);
+            }
+            $validated['attachment_path'] = $request->file('attachment')
+                ->store("assignments/{$assignment->subject_id}", 'public');
+        }
+        $originalDeadline = $assignment->deadline;
 
         $assignment->update($validated);
 
-        return redirect()->back()->with('message', 'Assignment updated.');
+        if ($originalDeadline && $assignment->deadline && $originalDeadline->ne($assignment->deadline)) {
+            // Re-evaluate late status for all submissions against the new deadline
+            foreach ($assignment->submissions as $sub) {
+                if ($sub->submitted_at) {
+                    $sub->update([
+                        'is_late' => $sub->submitted_at->gt($assignment->deadline),
+                    ]);
+                }
+            }
+        }
+
+        return redirect()->back()->with('message', 'Assignment updated successfully.');
     }
 
     /**
@@ -173,6 +194,7 @@ class AssignmentController extends Controller
 
         return Inertia::render('Admin/Assignments/Submissions', [
             'assignment' => $assignment,
+            'submissions' => $assignment->submissions,
             'missingStudents' => $missingStudents,
         ]);
     }

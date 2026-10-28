@@ -31,14 +31,21 @@ import {
     RefreshCw,
     RotateCcw,
     CheckSquare,
-    Square
+    Square,
+    Paperclip,
+    ChevronDown,
+    ChevronUp
 } from 'lucide-react';
 import FileUploadZone from '@/Components/FileUploadZone';
+import RichTextEditor from '@/Components/RichTextEditor';
+import RichTextRenderer from '@/Components/RichTextRenderer';
 
 export default function SubjectShow({ subject = {}, sharedCampuses = [], allUniversities = [] }) {
     const [activeTab, setActiveTab] = useState('documents');
     const [showUploadModal, setShowUploadModal] = useState(false);
     const [showAssignmentModal, setShowAssignmentModal] = useState(false);
+    const [editingAssignment, setEditingAssignment] = useState(null);
+    const [expandedAssignmentDesc, setExpandedAssignmentDesc] = useState({});
     const [showNoticeModal, setShowNoticeModal] = useState(false);
     const [showTransferModal, setShowTransferModal] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
@@ -112,6 +119,25 @@ export default function SubjectShow({ subject = {}, sharedCampuses = [], allUniv
         allow_late: true,
         allow_resubmit: true,
         rubric: '',
+        attachment: null,
+    });
+
+    // Assignment Edit Form
+    const { 
+        data: editAssignData, 
+        setData: setEditAssignData, 
+        processing: editAssignProcessing, 
+        reset: resetEditAssign, 
+        errors: editAssignErrors 
+    } = useForm({
+        title: '',
+        description: '',
+        deadline: '',
+        max_grade: 100,
+        allow_late: true,
+        allow_resubmit: true,
+        rubric: '',
+        attachment: null,
     });
 
     // Bulletin Update Form
@@ -205,14 +231,77 @@ export default function SubjectShow({ subject = {}, sharedCampuses = [], allUniv
         setDocSchedules(newSched);
     };
 
+    const toggleAssignmentDesc = (assignId) => {
+        setExpandedAssignmentDesc(prev => ({ ...prev, [assignId]: !prev[assignId] }));
+    };
+
+    const addDaysToDeadline = (days, isEdit = false) => {
+        const d = new Date();
+        d.setDate(d.getDate() + days);
+        d.setHours(23, 59, 0, 0);
+        const localIso = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+        if (isEdit) {
+            setEditAssignData('deadline', localIso);
+        } else {
+            setAssignData('deadline', localIso);
+        }
+    };
+
     const handleCreateAssignment = (e) => {
         e.preventDefault();
         postAssign(route('admin.assignments.store', subject.id), {
+            forceFormData: true,
             onSuccess: () => {
                 resetAssign();
                 setShowAssignmentModal(false);
             }
         });
+    };
+
+    const openEditAssignment = (assign) => {
+        setEditingAssignment(assign);
+        const d = assign.deadline ? new Date(assign.deadline) : new Date();
+        const localIso = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+
+        setEditAssignData({
+            title: assign.title || '',
+            description: assign.description || '',
+            deadline: localIso,
+            max_grade: assign.max_grade || 100,
+            allow_late: assign.allow_late ?? true,
+            allow_resubmit: assign.allow_resubmit ?? true,
+            rubric: assign.rubric || '',
+            attachment: null,
+        });
+    };
+
+    const handleUpdateAssignment = (e) => {
+        e.preventDefault();
+        if (editAssignData.attachment) {
+            router.post(route('admin.assignments.update', editingAssignment.id), {
+                _method: 'PATCH',
+                ...editAssignData,
+            }, {
+                forceFormData: true,
+                onSuccess: () => {
+                    setEditingAssignment(null);
+                    resetEditAssign();
+                }
+            });
+        } else {
+            router.patch(route('admin.assignments.update', editingAssignment.id), editAssignData, {
+                onSuccess: () => {
+                    setEditingAssignment(null);
+                    resetEditAssign();
+                }
+            });
+        }
+    };
+
+    const handleDeleteAssignment = (assign) => {
+        if (confirm(`Are you sure you want to delete assignment '${assign.title}'? This will also remove any student submissions.`)) {
+            router.delete(route('admin.assignments.destroy', assign.id));
+        }
     };
 
     const handlePostNotice = (e) => {
@@ -599,46 +688,151 @@ export default function SubjectShow({ subject = {}, sharedCampuses = [], allUniv
                     {/* TAB 2: Assignments & Tasks */}
                     {activeTab === 'assignments' && (
                         <div className="space-y-4">
+                            <div className="flex justify-between items-center">
+                                <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                                    Course Assignments ({(subject.assignments || []).length})
+                                </h3>
+                                <button
+                                    onClick={() => setShowAssignmentModal(true)}
+                                    className="px-4 py-2 rounded-xl bg-[#ff5e36] hover:bg-[#e04822] text-white text-xs font-bold shadow-sm shadow-[#ff5e36]/25 transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5"
+                                >
+                                    <Plus className="w-3.5 h-3.5" />
+                                    <span>Create Assignment</span>
+                                </button>
+                            </div>
+
                             {(subject.assignments || []).length === 0 ? (
-                                <div className="bg-white rounded-2xl border border-slate-200/80 p-12 text-center">
-                                    <GraduationCap className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-                                    <h3 className="text-base font-bold text-slate-900">No Assignments Created</h3>
-                                    <p className="text-xs text-slate-500 mt-1 mb-4">Set deadlines, rubrics, and track student submissions.</p>
+                                <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-white/10 p-12 text-center space-y-3">
+                                    <div className="w-12 h-12 rounded-2xl bg-orange-500/10 text-[#ff5e36] flex items-center justify-center mx-auto">
+                                        <GraduationCap className="w-6 h-6" />
+                                    </div>
+                                    <h3 className="text-base font-bold text-slate-900 dark:text-white font-display">No Assignments Created</h3>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
+                                        Create styled tasks, specify rubrics, attach reference materials, and track student submissions.
+                                    </p>
                                     <button
                                         onClick={() => setShowAssignmentModal(true)}
-                                        className="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-semibold"
+                                        className="px-5 py-2.5 rounded-xl bg-[#ff5e36] hover:bg-[#e04822] text-white text-xs font-bold shadow-md shadow-[#ff5e36]/25 transition-all inline-flex items-center gap-1.5"
                                     >
-                                        + New Assignment
+                                        <Plus className="w-3.5 h-3.5" />
+                                        <span>Create First Assignment</span>
                                     </button>
                                 </div>
                             ) : (
-                                subject.assignments.map((assign) => (
-                                    <div key={assign.id} className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                                        <div className="space-y-1">
-                                            <div className="flex items-center gap-2">
-                                                <h4 className="font-bold text-slate-900 text-base">{assign.title}</h4>
-                                                <span className="px-2 py-0.5 rounded text-xs font-semibold bg-indigo-50 text-indigo-700">
-                                                    Max: {assign.max_grade} pts
-                                                </span>
+                                subject.assignments.map((assign) => {
+                                    const isExpanded = expandedAssignmentDesc[assign.id];
+                                    const hasLongDesc = (assign.description || '').length > 250;
+
+                                    return (
+                                        <div 
+                                            key={assign.id} 
+                                            className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-white/10 p-6 shadow-sm hover:shadow-md transition-all space-y-4"
+                                        >
+                                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                                                <div className="space-y-1">
+                                                    <div className="flex flex-wrap items-center gap-2">
+                                                        <h4 className="font-bold text-slate-900 dark:text-white text-base font-display">
+                                                            {assign.title}
+                                                        </h4>
+                                                        <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-900/60 text-[#ff5e36]">
+                                                            Max: {assign.max_grade} pts
+                                                        </span>
+                                                        {assign.allow_late && (
+                                                            <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500">
+                                                                Late Allowed
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400 pt-0.5">
+                                                        <span className="flex items-center gap-1 text-rose-600 dark:text-rose-400 font-medium">
+                                                            <Clock className="w-3.5 h-3.5" />
+                                                            Due: {new Date(assign.deadline).toLocaleString()}
+                                                        </span>
+                                                        <span>•</span>
+                                                        <span className="font-medium text-slate-600 dark:text-slate-300">
+                                                            {assign.submissions_count || 0} student submission(s)
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Attachment Link if present */}
+                                                {assign.attachment_path && (
+                                                    <a
+                                                        href={`/storage/${assign.attachment_path}`}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-200 dark:border-white/10 shrink-0 transition-colors"
+                                                    >
+                                                        <Paperclip className="w-3.5 h-3.5 text-[#ff5e36]" />
+                                                        <span>Attached Material</span>
+                                                    </a>
+                                                )}
                                             </div>
-                                            <p className="text-xs text-slate-500 line-clamp-2 max-w-2xl">{assign.description}</p>
-                                            <div className="flex items-center gap-3 text-xs text-slate-400 pt-1">
-                                                <span className="flex items-center gap-1 text-rose-600 font-medium">
-                                                    <Clock className="w-3.5 h-3.5" />
-                                                    Due: {new Date(assign.deadline).toLocaleString()}
-                                                </span>
-                                                <span>•</span>
-                                                <span>{assign.submissions_count || 0} student submission(s)</span>
+
+                                            {/* Formatted Assignment Description */}
+                                            {assign.description && (
+                                                <div className="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-100 dark:border-white/5">
+                                                    <div className={!isExpanded && hasLongDesc ? 'max-h-24 overflow-hidden relative' : ''}>
+                                                        <RichTextRenderer content={assign.description} />
+                                                        {!isExpanded && hasLongDesc && (
+                                                            <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-slate-50 dark:from-slate-800/90 to-transparent pointer-events-none" />
+                                                        )}
+                                                    </div>
+                                                    {hasLongDesc && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => toggleAssignmentDesc(assign.id)}
+                                                            className="mt-2 text-xs font-bold text-[#ff5e36] hover:underline inline-flex items-center gap-1"
+                                                        >
+                                                            {isExpanded ? (
+                                                                <>
+                                                                    <ChevronUp className="w-3 h-3" />
+                                                                    <span>Show less</span>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <ChevronDown className="w-3 h-3" />
+                                                                    <span>Read full instructions</span>
+                                                                </>
+                                                            )}
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {/* Action Bar */}
+                                            <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-white/10">
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => openEditAssignment(assign)}
+                                                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                                                    >
+                                                        <Edit3 className="w-3.5 h-3.5" />
+                                                        <span>Edit Assignment</span>
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleDeleteAssignment(assign)}
+                                                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                                                    >
+                                                        <Trash2 className="w-3.5 h-3.5" />
+                                                        <span>Delete</span>
+                                                    </button>
+                                                </div>
+
+                                                <Link
+                                                    href={route('admin.assignments.submissions', assign.id)}
+                                                    className="px-4 py-2 rounded-xl bg-[#ff5e36] hover:bg-[#e04822] text-white text-xs font-bold shadow-sm shadow-[#ff5e36]/25 text-center shrink-0 transition-all hover:scale-105 active:scale-95 inline-flex items-center gap-1.5"
+                                                >
+                                                    <span>View & Grade Submissions ({assign.submissions_count || 0})</span>
+                                                    <span>&rarr;</span>
+                                                </Link>
                                             </div>
                                         </div>
-                                        <Link
-                                            href={route('admin.assignments.submissions', assign.id)}
-                                            className="px-4 py-2 rounded-xl bg-[#ff5e36] hover:bg-[#e04822] text-white text-xs font-bold shadow-sm shadow-[#ff5e36]/25 text-center shrink-0 transition-all hover:scale-105 active:scale-95"
-                                        >
-                                            View & Grade Submissions &rarr;
-                                        </Link>
-                                    </div>
-                                ))
+                                    );
+                                })
                             )}
                         </div>
                     )}
@@ -1166,80 +1360,354 @@ export default function SubjectShow({ subject = {}, sharedCampuses = [], allUniv
 
             {/* Create Assignment Modal */}
             {showAssignmentModal && (
-                <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div className="bg-white rounded-2xl border border-slate-200 max-w-lg w-full p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
-                        <h3 className="text-lg font-bold text-slate-900 mb-1">Create Course Assignment</h3>
-                        <p className="text-xs text-slate-500 mb-4">Set tasks, deadlines, and scoring criteria.</p>
+                <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-white/10 max-w-2xl w-full p-6 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto space-y-4">
+                        <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/10">
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-900 dark:text-white font-display">
+                                    Create Course Assignment
+                                </h3>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                    Write styled instructions, set deadlines, and configure scoring criteria.
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setShowAssignmentModal(false)}
+                                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
 
                         <form onSubmit={handleCreateAssignment} className="space-y-4">
                             <div>
-                                <label className="block text-xs font-bold uppercase text-slate-700 mb-1">Title *</label>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
+                                    Assignment Title *
+                                </label>
                                 <input
                                     type="text"
                                     required
+                                    placeholder="e.g., Clinical Case Study: Peripheral Blood Smear Examination"
                                     value={assignData.title}
                                     onChange={(e) => setAssignData('title', e.target.value)}
-                                    className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl"
+                                    className="w-full px-3.5 py-2.5 text-sm border border-slate-200 dark:border-white/10 rounded-2xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#ff5e36]/20 focus:border-[#ff5e36] outline-none"
                                 />
+                                {assignErrors.title && <p className="text-xs text-rose-600 mt-1">{assignErrors.title}</p>}
                             </div>
 
-                            <div>
-                                <label className="block text-xs font-bold uppercase text-slate-700 mb-1">Description</label>
-                                <textarea
-                                    rows={3}
-                                    value={assignData.description}
-                                    onChange={(e) => setAssignData('description', e.target.value)}
-                                    className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl"
-                                />
-                            </div>
+                            {/* Rich Styled Description Editor */}
+                            <RichTextEditor
+                                label="Assignment Instructions & Guidelines (Rich Text & Formatting) *"
+                                value={assignData.description}
+                                onChange={(val) => setAssignData('description', val)}
+                                placeholder="Write clear assignment objectives, step-by-step requirements, submission format, and criteria..."
+                                minRows={7}
+                                error={assignErrors.description}
+                            />
 
-                            <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">Deadline *</label>
+                            {/* Deadline with Quick Shortcuts */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="space-y-1.5">
+                                    <div className="flex items-center justify-between">
+                                        <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                                            Submission Deadline *
+                                        </label>
+                                        <div className="flex items-center gap-1">
+                                            <button
+                                                type="button"
+                                                onClick={() => addDaysToDeadline(3)}
+                                                className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300"
+                                            >
+                                                +3d
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => addDaysToDeadline(7)}
+                                                className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300"
+                                            >
+                                                +1w
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => addDaysToDeadline(14)}
+                                                className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300"
+                                            >
+                                                +2w
+                                            </button>
+                                        </div>
+                                    </div>
                                     <input
                                         type="datetime-local"
                                         required
                                         value={assignData.deadline}
                                         onChange={(e) => setAssignData('deadline', e.target.value)}
-                                        className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl"
+                                        className="w-full px-3.5 py-2.5 text-sm border border-slate-200 dark:border-white/10 rounded-2xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#ff5e36]/20 focus:border-[#ff5e36] outline-none"
                                     />
+                                    {assignErrors.deadline && <p className="text-xs text-rose-600">{assignErrors.deadline}</p>}
                                 </div>
-                                <div>
-                                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">Max Grade</label>
+
+                                <div className="space-y-1.5">
+                                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                                        Max Grade (Score Base) *
+                                    </label>
                                     <input
                                         type="number"
+                                        required
+                                        min="1"
+                                        max="1000"
                                         value={assignData.max_grade}
                                         onChange={(e) => setAssignData('max_grade', e.target.value)}
-                                        className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl"
+                                        className="w-full px-3.5 py-2.5 text-sm border border-slate-200 dark:border-white/10 rounded-2xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#ff5e36]/20 focus:border-[#ff5e36] outline-none"
                                     />
+                                    {assignErrors.max_grade && <p className="text-xs text-rose-600">{assignErrors.max_grade}</p>}
                                 </div>
                             </div>
 
+                            {/* Optional Reference Attachment */}
                             <div>
-                                <label className="block text-xs font-bold uppercase text-slate-700 mb-1">Rubric Criteria</label>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
+                                    Assignment Sheet / Reference Document (Optional PDF or Word)
+                                </label>
+                                <input
+                                    type="file"
+                                    onChange={(e) => setAssignData('attachment', e.target.files[0] || null)}
+                                    className="w-full text-xs text-slate-600 dark:text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#ff5e36]/10 file:text-[#ff5e36] hover:file:bg-[#ff5e36]/20 cursor-pointer"
+                                />
+                                {assignErrors.attachment && <p className="text-xs text-rose-600 mt-1">{assignErrors.attachment}</p>}
+                            </div>
+
+                            {/* Rubric Breakdown */}
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
+                                    Rubric & Scoring Breakdown (Optional)
+                                </label>
                                 <textarea
                                     rows={2}
-                                    placeholder="Scoring breakdown..."
+                                    placeholder="e.g. Diagnostic Accuracy (40pts), Morphology Description (30pts), Citations (30pts)"
                                     value={assignData.rubric}
                                     onChange={(e) => setAssignData('rubric', e.target.value)}
-                                    className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl font-mono text-xs"
+                                    className="w-full px-3.5 py-2 text-xs font-mono border border-slate-200 dark:border-white/10 rounded-2xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#ff5e36]/20 focus:border-[#ff5e36] outline-none"
                                 />
                             </div>
 
-                            <div className="flex justify-end gap-2 pt-4">
+                            {/* Toggles */}
+                            <div className="flex flex-wrap items-center gap-6 pt-1">
+                                <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                    <input
+                                        type="checkbox"
+                                        checked={assignData.allow_late}
+                                        onChange={(e) => setAssignData('allow_late', e.target.checked)}
+                                        className="rounded border-slate-300 text-[#ff5e36] focus:ring-[#ff5e36]"
+                                    />
+                                    <span>Allow Late Submissions</span>
+                                </label>
+
+                                <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                    <input
+                                        type="checkbox"
+                                        checked={assignData.allow_resubmit}
+                                        onChange={(e) => setAssignData('allow_resubmit', e.target.checked)}
+                                        className="rounded border-slate-300 text-[#ff5e36] focus:ring-[#ff5e36]"
+                                    />
+                                    <span>Allow Resubmissions</span>
+                                </label>
+                            </div>
+
+                            <div className="flex justify-end gap-2.5 pt-4 border-t border-slate-100 dark:border-white/10">
                                 <button
                                     type="button"
                                     onClick={() => setShowAssignmentModal(false)}
-                                    className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900"
+                                    className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-xl transition-colors"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={assignProcessing}
-                                    className="px-5 py-2 text-xs font-bold bg-[#ff5e36] text-white rounded-xl hover:bg-[#e04822] shadow-md shadow-[#ff5e36]/20 transition-all"
+                                    className="px-6 py-2.5 text-xs font-bold bg-[#ff5e36] hover:bg-[#e04822] text-white rounded-xl shadow-md shadow-[#ff5e36]/25 hover:scale-105 active:scale-95 transition-all"
                                 >
-                                    Publish Assignment
+                                    {assignProcessing ? 'Creating...' : 'Publish Assignment'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Assignment Modal */}
+            {editingAssignment && (
+                <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-white/10 max-w-2xl w-full p-6 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto space-y-4">
+                        <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/10">
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-900 dark:text-white font-display">
+                                    Edit Course Assignment
+                                </h3>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                    Update instructions, formatting, deadline, or attached sheet.
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setEditingAssignment(null)}
+                                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleUpdateAssignment} className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
+                                    Assignment Title *
+                                </label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={editAssignData.title}
+                                    onChange={(e) => setEditAssignData('title', e.target.value)}
+                                    className="w-full px-3.5 py-2.5 text-sm border border-slate-200 dark:border-white/10 rounded-2xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#ff5e36]/20 focus:border-[#ff5e36] outline-none"
+                                />
+                                {editAssignErrors.title && <p className="text-xs text-rose-600 mt-1">{editAssignErrors.title}</p>}
+                            </div>
+
+                            {/* Rich Styled Description Editor */}
+                            <RichTextEditor
+                                label="Assignment Instructions & Guidelines (Rich Text & Formatting) *"
+                                value={editAssignData.description}
+                                onChange={(val) => setEditAssignData('description', val)}
+                                placeholder="Write clear assignment objectives, step-by-step requirements, submission format, and criteria..."
+                                minRows={7}
+                                error={editAssignErrors.description}
+                            />
+
+                            {/* Deadline with Quick Shortcuts */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="space-y-1.5">
+                                    <div className="flex items-center justify-between">
+                                        <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                                            Submission Deadline *
+                                        </label>
+                                        <div className="flex items-center gap-1">
+                                            <button
+                                                type="button"
+                                                onClick={() => addDaysToDeadline(3, true)}
+                                                className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300"
+                                            >
+                                                +3d
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => addDaysToDeadline(7, true)}
+                                                className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300"
+                                            >
+                                                +1w
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => addDaysToDeadline(14, true)}
+                                                className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-300"
+                                            >
+                                                +2w
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <input
+                                        type="datetime-local"
+                                        required
+                                        value={editAssignData.deadline}
+                                        onChange={(e) => setEditAssignData('deadline', e.target.value)}
+                                        className="w-full px-3.5 py-2.5 text-sm border border-slate-200 dark:border-white/10 rounded-2xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#ff5e36]/20 focus:border-[#ff5e36] outline-none"
+                                    />
+                                    {editAssignErrors.deadline && <p className="text-xs text-rose-600">{editAssignErrors.deadline}</p>}
+                                </div>
+
+                                <div className="space-y-1.5">
+                                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                                        Max Grade (Score Base) *
+                                    </label>
+                                    <input
+                                        type="number"
+                                        required
+                                        min="1"
+                                        max="1000"
+                                        value={editAssignData.max_grade}
+                                        onChange={(e) => setEditAssignData('max_grade', e.target.value)}
+                                        className="w-full px-3.5 py-2.5 text-sm border border-slate-200 dark:border-white/10 rounded-2xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#ff5e36]/20 focus:border-[#ff5e36] outline-none"
+                                    />
+                                    {editAssignErrors.max_grade && <p className="text-xs text-rose-600">{editAssignErrors.max_grade}</p>}
+                                </div>
+                            </div>
+
+                            {/* Replace Attachment */}
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
+                                    Replace Assignment Document (Optional)
+                                </label>
+                                {editingAssignment.attachment_path && (
+                                    <p className="text-xs text-slate-400 mb-1">
+                                        Current file attached: <span className="font-mono text-indigo-500">{editingAssignment.attachment_path}</span>
+                                    </p>
+                                )}
+                                <input
+                                    type="file"
+                                    onChange={(e) => setEditAssignData('attachment', e.target.files[0] || null)}
+                                    className="w-full text-xs text-slate-600 dark:text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#ff5e36]/10 file:text-[#ff5e36] hover:file:bg-[#ff5e36]/20 cursor-pointer"
+                                />
+                            </div>
+
+                            {/* Rubric Breakdown */}
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
+                                    Rubric & Scoring Breakdown (Optional)
+                                </label>
+                                <textarea
+                                    rows={2}
+                                    placeholder="e.g. Diagnostic Accuracy (40pts), Morphology Description (30pts), Citations (30pts)"
+                                    value={editAssignData.rubric}
+                                    onChange={(e) => setEditAssignData('rubric', e.target.value)}
+                                    className="w-full px-3.5 py-2 text-xs font-mono border border-slate-200 dark:border-white/10 rounded-2xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-[#ff5e36]/20 focus:border-[#ff5e36] outline-none"
+                                />
+                            </div>
+
+                            {/* Toggles */}
+                            <div className="flex flex-wrap items-center gap-6 pt-1">
+                                <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                    <input
+                                        type="checkbox"
+                                        checked={editAssignData.allow_late}
+                                        onChange={(e) => setEditAssignData('allow_late', e.target.checked)}
+                                        className="rounded border-slate-300 text-[#ff5e36] focus:ring-[#ff5e36]"
+                                    />
+                                    <span>Allow Late Submissions</span>
+                                </label>
+
+                                <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                    <input
+                                        type="checkbox"
+                                        checked={editAssignData.allow_resubmit}
+                                        onChange={(e) => setEditAssignData('allow_resubmit', e.target.checked)}
+                                        className="rounded border-slate-300 text-[#ff5e36] focus:ring-[#ff5e36]"
+                                    />
+                                    <span>Allow Resubmissions</span>
+                                </label>
+                            </div>
+
+                            <div className="flex justify-end gap-2.5 pt-4 border-t border-slate-100 dark:border-white/10">
+                                <button
+                                    type="button"
+                                    onClick={() => setEditingAssignment(null)}
+                                    className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-xl transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={editAssignProcessing}
+                                    className="px-6 py-2.5 text-xs font-bold bg-[#ff5e36] hover:bg-[#e04822] text-white rounded-xl shadow-md shadow-[#ff5e36]/25 hover:scale-105 active:scale-95 transition-all"
+                                >
+                                    {editAssignProcessing ? 'Updating...' : 'Save Changes'}
                                 </button>
                             </div>
                         </form>
