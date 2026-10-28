@@ -260,4 +260,141 @@ class AssignmentController extends Controller
 
         return redirect()->back()->with('message', 'Assignment deleted.');
     }
+
+    /**
+     * View or download a student's uploaded submission file.
+     */
+    public function file(Submission $submission)
+    {
+        $user = auth()->user();
+
+        // Students can only view their own submission file; Admins can view any submission
+        if (! $user->isAdmin() && $submission->user_id !== $user->id) {
+            abort(403, 'Unauthorized access to submission file.');
+        }
+
+        if (! $submission->file_path) {
+            abort(404, 'No file was uploaded for this submission.');
+        }
+
+        $cleanPath = ltrim(str_replace('\\', '/', $submission->file_path), '/');
+        $cleanPath = preg_replace('#^/?(public/|storage/)?#', '', $cleanPath);
+
+        $candidates = [
+            storage_path('app/public/'.$cleanPath),
+            public_path('storage/'.$cleanPath),
+            storage_path('app/'.$cleanPath),
+            public_path($cleanPath),
+        ];
+
+        $filePath = null;
+        foreach ($candidates as $cand) {
+            if (file_exists($cand) && ! is_dir($cand)) {
+                $filePath = $cand;
+                break;
+            }
+        }
+
+        if (! $filePath) {
+            abort(404, 'File not found on storage.');
+        }
+
+        $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+        $mimeTypes = [
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+            'svg' => 'image/svg+xml',
+            'bmp' => 'image/bmp',
+            'heic' => 'image/heic',
+            'tiff' => 'image/tiff',
+            'tif' => 'image/tiff',
+            'pdf' => 'application/pdf',
+            'txt' => 'text/plain',
+            'doc' => 'application/msword',
+            'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'zip' => 'application/zip',
+        ];
+
+        $mime = $mimeTypes[$extension] ?? (@mime_content_type($filePath) ?: 'application/octet-stream');
+        $fileName = $submission->file_name ?: basename($filePath);
+        $isDownload = request()->boolean('download');
+        $disposition = $isDownload ? 'attachment' : 'inline';
+
+        return response()->file($filePath, [
+            'Content-Type' => $mime,
+            'Content-Disposition' => "{$disposition}; filename=\"{$fileName}\"",
+            'Cache-Control' => 'public, max-age=86400',
+        ]);
+    }
+
+    /**
+     * View or download an assignment reference attachment.
+     */
+    public function attachment(Assignment $assignment)
+    {
+        $user = auth()->user();
+
+        if (! $user->isAdmin() && ! $user->canAccessSubject($assignment->subject)) {
+            abort(403, 'Unauthorized access to assignment attachment.');
+        }
+
+        if (! $assignment->attachment_path) {
+            abort(404, 'No attachment associated with this assignment.');
+        }
+
+        $cleanPath = ltrim(str_replace('\\', '/', $assignment->attachment_path), '/');
+        $cleanPath = preg_replace('#^/?(public/|storage/)?#', '', $cleanPath);
+
+        $candidates = [
+            storage_path('app/public/'.$cleanPath),
+            public_path('storage/'.$cleanPath),
+            storage_path('app/'.$cleanPath),
+            public_path($cleanPath),
+        ];
+
+        $filePath = null;
+        foreach ($candidates as $cand) {
+            if (file_exists($cand) && ! is_dir($cand)) {
+                $filePath = $cand;
+                break;
+            }
+        }
+
+        if (! $filePath) {
+            abort(404, 'Attachment file not found on storage.');
+        }
+
+        $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+        $mimeTypes = [
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+            'svg' => 'image/svg+xml',
+            'bmp' => 'image/bmp',
+            'heic' => 'image/heic',
+            'tiff' => 'image/tiff',
+            'tif' => 'image/tiff',
+            'pdf' => 'application/pdf',
+            'txt' => 'text/plain',
+            'doc' => 'application/msword',
+            'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'zip' => 'application/zip',
+        ];
+
+        $mime = $mimeTypes[$extension] ?? (@mime_content_type($filePath) ?: 'application/octet-stream');
+        $fileName = basename($filePath);
+        $isDownload = request()->boolean('download');
+        $disposition = $isDownload ? 'attachment' : 'inline';
+
+        return response()->file($filePath, [
+            'Content-Type' => $mime,
+            'Content-Disposition' => "{$disposition}; filename=\"{$fileName}\"",
+            'Cache-Control' => 'public, max-age=86400',
+        ]);
+    }
 }

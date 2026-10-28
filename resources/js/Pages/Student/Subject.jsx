@@ -30,7 +30,8 @@ import {
     ChevronDown,
     ChevronUp,
     ChevronRight,
-    X
+    X,
+    ExternalLink
 } from 'lucide-react';
 import { useTranslation } from '@/Context/LanguageContext';
 import CountdownTimer from '@/Components/CountdownTimer';
@@ -581,7 +582,7 @@ export default function StudentSubject({
                                                 {assign.attachment_path && (
                                                     <div className="pt-1">
                                                         <a
-                                                            href={`/storage/${assign.attachment_path}`}
+                                                            href={assign.attachment_url || `/assignments/${assign.id}/attachment`}
                                                             target="_blank"
                                                             rel="noreferrer"
                                                             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-[#ff5e36] hover:bg-orange-100 text-xs font-semibold border border-orange-200 dark:border-orange-900/60 transition-colors"
@@ -617,6 +618,18 @@ export default function StudentSubject({
                                                                     "{submission.feedback}"
                                                                 </div>
                                                             )}
+                                                            {submission.file_path && (
+                                                                <a
+                                                                    href={submission.file_url || `/submissions/${submission.id}/file`}
+                                                                    target="_blank"
+                                                                    rel="noreferrer"
+                                                                    className="inline-flex items-center gap-1.5 text-[11px] text-slate-500 hover:text-[#ff5e36] dark:text-slate-400 hover:underline pt-0.5"
+                                                                >
+                                                                    <Paperclip className="w-3 h-3 text-[#ff5e36]" />
+                                                                    <span className="truncate max-w-[140px]">{submission.file_name || 'My Uploaded Work'}</span>
+                                                                    <ExternalLink className="w-3 h-3 text-slate-400" />
+                                                                </a>
+                                                            )}
                                                         </div>
                                                     ) : (
                                                         <div className="flex flex-col sm:items-end gap-1">
@@ -625,6 +638,18 @@ export default function StudentSubject({
                                                                 {t('submittedPending')}
                                                             </span>
                                                             <span className="text-[10px] text-slate-400">Under review by Dr. Mohammad Sulieman</span>
+                                                            {submission.file_path && (
+                                                                <a
+                                                                    href={submission.file_url || `/submissions/${submission.id}/file`}
+                                                                    target="_blank"
+                                                                    rel="noreferrer"
+                                                                    className="inline-flex items-center gap-1.5 text-[11px] text-slate-500 hover:text-[#ff5e36] dark:text-slate-400 hover:underline pt-0.5"
+                                                                >
+                                                                    <Paperclip className="w-3 h-3 text-[#ff5e36]" />
+                                                                    <span className="truncate max-w-[140px]">{submission.file_name || 'My Uploaded Work'}</span>
+                                                                    <ExternalLink className="w-3 h-3 text-slate-400" />
+                                                                </a>
+                                                            )}
                                                         </div>
                                                     )
                                                 ) : isDue && !assign.allow_late ? (

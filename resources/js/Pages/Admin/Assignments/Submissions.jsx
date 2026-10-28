@@ -178,11 +178,39 @@ export default function SubmissionsIndex({
     };
 
     const isImageFile = (filePath = '') => {
-        return /\.(png|jpe?g|webp|gif|bmp|svg)$/i.test(filePath);
+        if (!filePath) return false;
+        return /\.(png|jpe?g|webp|gif|bmp|svg|heic|tiff?)$/i.test(filePath);
     };
 
     const isPdfFile = (filePath = '') => {
+        if (!filePath) return false;
         return /\.pdf$/i.test(filePath);
+    };
+
+    const getSubmissionFileUrl = (item, download = false) => {
+        if (!item) return '';
+        let url = item.file_url || (item.id ? route('submissions.file', item.id) : '');
+        if (!url && item.file_path) {
+            const clean = item.file_path.replace(/^(\/?storage\/|\/?public\/)/, '');
+            url = `/storage/${clean}`;
+        }
+        if (download && url) {
+            return url.includes('?') ? `${url}&download=1` : `${url}?download=1`;
+        }
+        return url;
+    };
+
+    const getAssignmentAttachmentUrl = (assign, download = false) => {
+        if (!assign) return '';
+        let url = assign.attachment_url || (assign.id ? route('assignments.attachment', assign.id) : '');
+        if (!url && assign.attachment_path) {
+            const clean = assign.attachment_path.replace(/^(\/?storage\/|\/?public\/)/, '');
+            url = `/storage/${clean}`;
+        }
+        if (download && url) {
+            return url.includes('?') ? `${url}&download=1` : `${url}?download=1`;
+        }
+        return url;
     };
 
     // Filter submissions
@@ -246,7 +274,7 @@ export default function SubmissionsIndex({
 
                         {assignment.attachment_path && (
                             <a
-                                href={`/storage/${assignment.attachment_path}`}
+                                href={getAssignmentAttachmentUrl(assignment)}
                                 target="_blank"
                                 rel="noreferrer"
                                 className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold border border-slate-200 dark:border-white/10 transition-colors"
@@ -460,6 +488,17 @@ export default function SubmissionsIndex({
                                                                 <div className="space-y-1.5">
                                                                     {sub.file_path && (
                                                                         <div className="flex items-center gap-2">
+                                                                            {/* Mini thumbnail if image */}
+                                                                            {isImageFile(sub.file_name || sub.file_path) && (
+                                                                                <img
+                                                                                    src={getSubmissionFileUrl(sub)}
+                                                                                    alt=""
+                                                                                    className="w-7 h-7 object-cover rounded-md border border-slate-200 dark:border-white/10 shrink-0 cursor-pointer hover:opacity-80"
+                                                                                    onClick={() => setPreviewFile(sub)}
+                                                                                    onError={(e) => { e.target.style.display = 'none'; }}
+                                                                                />
+                                                                            )}
+
                                                                             <button
                                                                                 type="button"
                                                                                 onClick={() => setPreviewFile(sub)}
@@ -473,8 +512,8 @@ export default function SubmissionsIndex({
                                                                             </button>
 
                                                                             <a
-                                                                                href={`/storage/${sub.file_path}`}
-                                                                                download
+                                                                                href={getSubmissionFileUrl(sub, true)}
+                                                                                download={sub.file_name || 'submission'}
                                                                                 target="_blank"
                                                                                 rel="noreferrer"
                                                                                 className="p-1 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
@@ -723,8 +762,8 @@ export default function SubmissionsIndex({
                                                 <span>Preview</span>
                                             </button>
                                             <a
-                                                href={`/storage/${gradingSubmission.file_path}`}
-                                                download
+                                                href={getSubmissionFileUrl(gradingSubmission, true)}
+                                                download={gradingSubmission.file_name || 'submission'}
                                                 target="_blank"
                                                 rel="noreferrer"
                                                 className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-200 dark:border-white/10 transition-colors"
@@ -736,14 +775,24 @@ export default function SubmissionsIndex({
                                     </div>
 
                                     {/* Inline image thumbnail if image file */}
-                                    {isImageFile(gradingSubmission.file_path) && (
-                                        <div className="relative rounded-xl overflow-hidden border border-slate-200 dark:border-white/10 bg-black/5 max-h-56 flex items-center justify-center">
+                                    {isImageFile(gradingSubmission.file_name || gradingSubmission.file_path) && (
+                                        <div className="relative rounded-xl overflow-hidden border border-slate-200 dark:border-white/10 bg-black/5 dark:bg-black/30 max-h-60 p-2 flex flex-col items-center justify-center">
                                             <img
-                                                src={`/storage/${gradingSubmission.file_path}`}
+                                                src={getSubmissionFileUrl(gradingSubmission)}
                                                 alt="Submission Preview"
-                                                className="max-h-56 object-contain rounded-lg cursor-pointer hover:opacity-95 transition-opacity"
+                                                className="max-h-56 max-w-full object-contain rounded-lg cursor-pointer hover:opacity-95 transition-opacity"
                                                 onClick={() => setPreviewFile(gradingSubmission)}
+                                                onError={(e) => {
+                                                    if (gradingSubmission.file_path && !e.target.dataset.triedFallback) {
+                                                        e.target.dataset.triedFallback = 'true';
+                                                        const clean = gradingSubmission.file_path.replace(/^(\/?storage\/|\/?public\/)/, '');
+                                                        e.target.src = `/storage/${clean}`;
+                                                    }
+                                                }}
                                             />
+                                            <span className="text-[10px] text-slate-400 mt-1 cursor-pointer hover:underline" onClick={() => setPreviewFile(gradingSubmission)}>
+                                                Click to preview full size
+                                            </span>
                                         </div>
                                     )}
                                 </div>
@@ -922,8 +971,8 @@ export default function SubmissionsIndex({
                             </div>
                             <div className="flex items-center gap-2">
                                 <a
-                                    href={`/storage/${previewFile.file_path}`}
-                                    download
+                                    href={getSubmissionFileUrl(previewFile, true)}
+                                    download={previewFile.file_name || 'submission'}
                                     target="_blank"
                                     rel="noreferrer"
                                     className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-xs font-semibold"
@@ -942,15 +991,22 @@ export default function SubmissionsIndex({
                         </div>
 
                         <div className="flex-1 overflow-auto rounded-2xl bg-slate-950/5 dark:bg-black/40 flex items-center justify-center min-h-[300px]">
-                            {isImageFile(previewFile.file_path) ? (
+                            {isImageFile(previewFile.file_name || previewFile.file_path) ? (
                                 <img
-                                    src={`/storage/${previewFile.file_path}`}
-                                    alt="Submission"
-                                    className="max-h-[75vh] w-auto object-contain rounded-xl shadow-lg"
+                                    src={getSubmissionFileUrl(previewFile)}
+                                    alt={previewFile.file_name || "Submission"}
+                                    className="max-h-[75vh] w-auto max-w-full object-contain rounded-xl shadow-lg"
+                                    onError={(e) => {
+                                        if (previewFile.file_path && !e.target.dataset.triedFallback) {
+                                            e.target.dataset.triedFallback = 'true';
+                                            const clean = previewFile.file_path.replace(/^(\/?storage\/|\/?public\/)/, '');
+                                            e.target.src = `/storage/${clean}`;
+                                        }
+                                    }}
                                 />
-                            ) : isPdfFile(previewFile.file_path) ? (
+                            ) : isPdfFile(previewFile.file_name || previewFile.file_path) ? (
                                 <iframe
-                                    src={`/storage/${previewFile.file_path}#toolbar=1`}
+                                    src={`${getSubmissionFileUrl(previewFile)}#toolbar=1`}
                                     title="PDF Preview"
                                     className="w-full h-[70vh] rounded-xl border border-slate-200 dark:border-white/10"
                                 />
@@ -961,8 +1017,8 @@ export default function SubmissionsIndex({
                                         This file type cannot be previewed directly in the browser.
                                     </p>
                                     <a
-                                        href={`/storage/${previewFile.file_path}`}
-                                        download
+                                        href={getSubmissionFileUrl(previewFile, true)}
+                                        download={previewFile.file_name || 'submission'}
                                         target="_blank"
                                         rel="noreferrer"
                                         className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#ff5e36] text-white text-xs font-bold shadow-md shadow-[#ff5e36]/25"

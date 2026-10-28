@@ -23,9 +23,15 @@ use Inertia\Inertia;
 
 // ─── Public Routes ─────────────────────────────────────────────
 Route::get('/', function () {
+    if (auth()->check()) {
+        return redirect()->route(auth()->user()->isAdmin() ? 'admin.dashboard' : 'dashboard');
+    }
+
     return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
+        'canResetPassword' => Route::has('password.request'),
+        'status' => session('status'),
+        'info' => session('info'),
+        'deviceBlocked' => session('device_blocked'),
     ]);
 })->name('welcome');
 
@@ -121,6 +127,8 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
 
     // ─── Assignment Submissions ────────────────────────────────
     Route::post('/assignments/{assignment}/submit', [AssignmentController::class, 'submit'])->name('assignments.submit');
+    Route::get('/submissions/{submission}/file', [AssignmentController::class, 'file'])->name('submissions.file');
+    Route::get('/assignments/{assignment}/attachment', [AssignmentController::class, 'attachment'])->name('assignments.attachment');
 
     // ─── Schedule & Calendar ───────────────────────────────────
     Route::get('/schedule', [ScheduleController::class, 'index'])->name('schedule.index');

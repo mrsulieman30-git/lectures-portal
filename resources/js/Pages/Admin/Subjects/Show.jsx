@@ -759,7 +759,7 @@ export default function SubjectShow({ subject = {}, sharedCampuses = [], allUniv
                                                 {/* Attachment Link if present */}
                                                 {assign.attachment_path && (
                                                     <a
-                                                        href={`/storage/${assign.attachment_path}`}
+                                                        href={assign.attachment_url || `/assignments/${assign.id}/attachment`}
                                                         target="_blank"
                                                         rel="noreferrer"
                                                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-200 dark:border-white/10 shrink-0 transition-colors"

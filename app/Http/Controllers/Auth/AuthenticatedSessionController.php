@@ -48,6 +48,15 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('admin.login')->with('info', 'Faculty and administrator accounts must sign in using the dedicated Faculty & Staff Portal.');
         }
 
+        // If student registration is not yet approved by admin, log out and notify them
+        if ($user->status !== 'approved') {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')->with('status', 'Your account registration is currently waiting for confirmation and approval from the administrator (Dr. Mohammad Sulieman). You will be able to log in once approved.');
+        }
+
         $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard', absolute: false));

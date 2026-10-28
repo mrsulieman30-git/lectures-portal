@@ -69,8 +69,6 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        Auth::login($user);
-
-        return redirect(route('dashboard', absolute: false));
+        return redirect()->route('login')->with('status', 'Registration submitted successfully! Your account is waiting for confirmation and approval from the administrator (Dr. Mohammad Sulieman). You can sign in once your account has been approved.');
     }
 }

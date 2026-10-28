@@ -32,6 +32,10 @@ class Assignment extends Model
         'is_published' => 'boolean',
     ];
 
+    protected $appends = [
+        'attachment_url',
+    ];
+
     // ─── Relationships ─────────────────────────────────────────
 
     public function subject(): BelongsTo
@@ -93,5 +97,14 @@ class Assignment extends Model
         }
 
         return round(($this->submission_count / $enrolledCount) * 100, 1);
+    }
+
+    public function getAttachmentUrlAttribute(): ?string
+    {
+        if ($this->attachment_path && $this->id) {
+            return route('assignments.attachment', $this->id);
+        }
+
+        return null;
     }
 }

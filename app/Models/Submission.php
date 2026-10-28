@@ -34,6 +34,11 @@ class Submission extends Model
         'ai_probability' => 'float',
     ];
 
+    protected $appends = [
+        'file_url',
+        'grade_percentage',
+    ];
+
     // ─── Relationships ─────────────────────────────────────────
 
     public function assignment(): BelongsTo
@@ -94,8 +99,8 @@ class Submission extends Model
 
     public function getFileUrlAttribute(): ?string
     {
-        if ($this->file_path) {
-            return asset('storage/'.$this->file_path);
+        if ($this->file_path && $this->id) {
+            return route('submissions.file', $this->id);
         }
 
         return null;

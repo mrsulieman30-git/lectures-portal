@@ -219,18 +219,42 @@ class ProfileController extends Controller
      */
     public function serveStorage(string $path): \Symfony\Component\HttpFoundation\Response
     {
-        $cleanPath = ltrim($path, '/');
+        $cleanPath = ltrim(urldecode($path), '/');
+        $cleanPath = str_replace('\\', '/', $cleanPath);
+        $cleanPath = preg_replace('#^/?(public/|storage/)?#', '', $cleanPath);
+
         $candidates = [
             storage_path('app/public/'.$cleanPath),
             public_path('storage/'.$cleanPath),
             storage_path('app/'.$cleanPath),
+            public_path($cleanPath),
         ];
 
         foreach ($candidates as $file) {
             if (file_exists($file) && ! is_dir($file)) {
-                $mime = @mime_content_type($file) ?: 'application/octet-stream';
+                $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+                $mimeTypes = [
+                    'jpg' => 'image/jpeg',
+                    'jpeg' => 'image/jpeg',
+                    'png' => 'image/png',
+                    'gif' => 'image/gif',
+                    'webp' => 'image/webp',
+                    'svg' => 'image/svg+xml',
+                    'bmp' => 'image/bmp',
+                    'heic' => 'image/heic',
+                    'tiff' => 'image/tiff',
+                    'pdf' => 'application/pdf',
+                    'txt' => 'text/plain',
+                ];
+
+                $mime = $mimeTypes[$ext] ?? (@mime_content_type($file) ?: 'application/octet-stream');
+                $isDownload = request()->boolean('download');
+                $disposition = $isDownload ? 'attachment' : 'inline';
+                $filename = basename($file);
+
                 return response()->file($file, [
                     'Content-Type' => $mime,
+                    'Content-Disposition' => "{$disposition}; filename=\"{$filename}\"",
                     'Cache-Control' => 'public, max-age=604800',
                 ]);
             }
